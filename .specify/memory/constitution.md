@@ -1,16 +1,16 @@
 <!--
 Sync Impact Report
-Version change: unversioned template -> 1.0.0
-Modified principles: placeholder principles -> 24 enforceable project principles
-Added sections: Scope Boundaries; Compliance Verification Checklist
-Removed sections: placeholder Additional Constraints and Development Workflow sections
+Version change: 1.0.0 -> 1.1.0
+Modified principles: added XXV. Modern Financial Dashboard UI
+Added sections: none
+Removed sections: none
 Templates requiring updates:
 - updated: .specify/templates/plan-template.md
 - updated: .specify/templates/spec-template.md
 - updated: .specify/templates/tasks-template.md
 - updated: .specify/templates/checklist-template.md
 - not applicable: .specify/templates/commands/*.md (directory absent)
-- updated: AGENTS.md
+- reviewed: AGENTS.md (no change required)
 Follow-up TODOs: none
 -->
 
@@ -418,6 +418,32 @@ Non-negotiable rules:
 Rationale: MVP discipline keeps the first build coherent and prevents advanced
 analytics from arriving before the data foundation exists.
 
+### XXV. Modern Financial Dashboard UI
+
+Non-negotiable rules:
+- The application UI MUST follow a modern, tech-focused financial dashboard
+  style inspired by stock broker, Wall Street, trading, and portfolio analytics
+  applications.
+- The UI MUST feel like a serious collectibles investment platform and MUST NOT
+  feel like a childish Pokemon fan app.
+- The default visual direction MUST be dark mode first.
+- Primary layouts MUST use modern dashboard patterns, including portfolio
+  summary cards, market movement indicators, price graphs, watchlists, alert
+  panels, trade analysis panels, grading opportunity panels, green/red gain-loss
+  indicators, clean typography, compact financial tables, and high information
+  density without clutter.
+- Pokemon card images and set symbols MAY be used, but the surrounding styling
+  MUST remain professional, analytical, and investment-focused.
+- UI designs MUST avoid childish Pokemon-themed presentation, overly bright
+  toy-like colors, cartoon-heavy layouts, unnecessary animations, and cluttered
+  card grids without analytics context.
+- Future specifications, plans, tasks, and implementation work that touch UI MUST
+  preserve this visual direction.
+
+Rationale: The product treats collectibles as portfolio assets. A disciplined
+financial dashboard interface reinforces analytical decision-making and prevents
+the app from drifting into decorative fandom styling.
+
 ## Scope Boundaries
 
 In scope for v1:
@@ -432,6 +458,8 @@ In scope for v1:
 - Price movement alerts using the default thresholds.
 - Trade analyzer for cards and sealed products.
 - Manually triggered PSA grading analyzer.
+- Dark-mode-first financial dashboard UI for portfolio, pricing, alerts, trades,
+  grading opportunities, watchlists, and market movement views.
 - Java 21 Spring Boot 3 modular monolith backed by PostgreSQL and Flyway.
 
 Later-phase scope:
@@ -454,6 +482,7 @@ Out of scope for v1:
 - Tests that require live external APIs.
 - Provider-specific business logic embedded directly in services or controllers.
 - Scraping-first ingestion designs when safer permitted alternatives exist.
+- Childish, toy-like, cartoon-heavy, or analytics-free Pokemon-themed UI.
 
 ## Compliance Verification Checklist
 
@@ -479,6 +508,8 @@ implementation:
   protected admin actions?
 - Are all business rules covered by automated tests without live external API
   dependencies?
+- Does any UI work preserve the dark-mode-first, professional financial
+  dashboard direction with compact, analytical, non-childish presentation?
 
 ## Governance
 
@@ -488,8 +519,8 @@ Constitution wins unless it is formally amended.
 
 Future specifications MUST include constitution alignment notes covering scope,
 market/language handling, pricing history, currency, security, auditability,
-testing, and any external data source assumptions. Scope expansions MUST be
-called out explicitly.
+testing, UI/UX direction, and any external data source assumptions. Scope
+expansions MUST be called out explicitly.
 
 Implementation plans MUST pass a Constitution Check before Phase 0 research and
 again after Phase 1 design. Any violation MUST be listed in Complexity Tracking
@@ -498,7 +529,8 @@ with a justification and a simpler alternative that was considered.
 Task lists MUST include automated tests for constitution-governed business rules.
 Tasks that touch financial data MUST include persistence, auditability, and
 historical snapshot work where applicable. Tasks that touch provider data MUST
-include provider adapter and mock/test-double work.
+include provider adapter and mock/test-double work. Tasks that touch UI MUST
+include work to preserve the Modern Financial Dashboard UI direction.
 
 Implementation MUST keep controllers thin, keep business logic in services, keep
 repositories persistence-only, and preserve the modular monolith package
@@ -516,4 +548,4 @@ list, or code change. For this personal project, the authenticated owner may be
 the reviewer, but the review MUST still check the Compliance Verification
 Checklist.
 
-**Version**: 1.0.0 | **Ratified**: 2026-06-02 | **Last Amended**: 2026-06-02
+**Version**: 1.1.0 | **Ratified**: 2026-06-02 | **Last Amended**: 2026-06-02

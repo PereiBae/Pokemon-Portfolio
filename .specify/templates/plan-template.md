@@ -32,11 +32,17 @@ repository/integration tests that do not depend on live external APIs
 
 **Project Type**: Modular monolith Spring Boot web application
 
+**UI Direction**: Dark-mode-first modern financial dashboard with compact
+tables, portfolio summary cards, market movement indicators, price graphs,
+watchlists, alert panels, trade analysis panels, grading opportunity panels, and
+professional green/red gain-loss indicators
+
 **Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]
 
 **Constraints**: One authenticated personal user first; all user-facing monetary
 values in SGD; append-only price and portfolio valuation snapshots; provider
-adapters required for external data
+adapters required for external data; UI must remain professional, analytical,
+investment-focused, and non-childish
 
 **Scale/Scope**: v1 English cards and sealed products, manual search, portfolio
 tracking, pricing snapshots, calculated market value, confidence ratings, basic
@@ -79,6 +85,11 @@ Market Signal Engine, alerts, trade analyzer, and manual PSA grading analyzer
   grading, trade, forecasting, auth, and config.
 - **Testing**: Business rules have automated tests and provider interactions are
   mockable without live external APIs.
+- **Modern financial dashboard UI**: Any UI work preserves dark-mode-first,
+  professional, analytical dashboard styling with high information density
+  without clutter, and avoids childish Pokemon-themed presentation, toy-like
+  colors, cartoon-heavy layouts, unnecessary animation, and card grids without
+  analytics context.
 
 ## Project Structure
 

@@ -25,6 +25,9 @@
   - Source-specific prices, provider hierarchy, and HIGH/MEDIUM/LOW confidence
   - Provider adapters and no live external API dependency in automated tests
   - Market Price vs Expected Price separation and signal explanations
+  - Dark-mode-first modern financial dashboard UI direction
+  - Professional, analytical, investment-focused styling instead of childish
+    Pokemon-themed presentation
   - Alert, grading, trade, forecast, and portfolio rules where applicable
   - Spring Security, hashed passwords, secure configuration, and admin protection
   - Business-rule automated test coverage

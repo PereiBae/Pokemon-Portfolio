@@ -30,6 +30,8 @@ fixtures, or test doubles for external providers rather than live APIs.
 - **Database migrations**: `src/main/resources/db/migration/`
 - **Configuration**: `src/main/resources/application.yml` and secure environment
   configuration
+- **UI assets/templates**: [document concrete paths chosen in plan.md, such as
+  server-rendered templates or frontend assets]
 - Use constitution package boundaries: `catalog`, `portfolio`, `pricing`,
   `market_signal`, `alerts`, `grading`, `trade`, `forecasting`, `auth`, and
   `config`
@@ -61,6 +63,9 @@ fixtures, or test doubles for external providers rather than live APIs.
 - [ ] T002 Initialize Java 21 Spring Boot 3 project with Spring Web, Spring Data
   JPA, Spring Security, PostgreSQL, Flyway, Spring Scheduler, and WebClient
 - [ ] T003 [P] Configure formatting, test, and build tooling
+- [ ] T004 [P] Establish dark-mode-first financial dashboard UI foundation,
+  including typography, compact tables, gain/loss color semantics, panels, and
+  analytics-first layout patterns
 
 ---
 
@@ -72,15 +77,15 @@ fixtures, or test doubles for external providers rather than live APIs.
 
 Examples of foundational tasks (adjust based on your project):
 
-- [ ] T004 Setup PostgreSQL schema and Flyway migrations
-- [ ] T005 [P] Implement Spring Security authentication, password hashing, and
+- [ ] T005 Setup PostgreSQL schema and Flyway migrations
+- [ ] T006 [P] Implement Spring Security authentication, password hashing, and
   admin authorization
-- [ ] T006 [P] Create package boundaries for catalog, portfolio, pricing,
+- [ ] T007 [P] Create package boundaries for catalog, portfolio, pricing,
   market_signal, alerts, grading, trade, forecasting, auth, and config
-- [ ] T007 Create base entities for catalog items, owned portfolio records,
+- [ ] T008 Create base entities for catalog items, owned portfolio records,
   source prices, price snapshots, currency conversion, and audit metadata
-- [ ] T008 Define provider interfaces/adapters and provider test doubles
-- [ ] T009 Configure error handling, scheduling, WebClient timeouts, and secure
+- [ ] T009 Define provider interfaces/adapters and provider test doubles
+- [ ] T010 Configure error handling, scheduling, WebClient timeouts, and secure
   environment-based configuration
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
@@ -97,25 +102,28 @@ Examples of foundational tasks (adjust based on your project):
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T010 [P] [US1] Service/business-rule test for [rule] in
+- [ ] T011 [P] [US1] Service/business-rule test for [rule] in
   src/test/java/[base_package]/[package]/[Name]ServiceTest.java
-- [ ] T011 [P] [US1] Web/API integration test for [user journey] in
+- [ ] T012 [P] [US1] Web/API integration test for [user journey] in
   src/test/java/[base_package]/[package]/[Name]ControllerTest.java
 
 ### Implementation for User Story 1
 
-- [ ] T012 [P] [US1] Create [Entity1] entity in
+- [ ] T013 [P] [US1] Create [Entity1] entity in
   src/main/java/[base_package]/[package]/[Entity1].java
-- [ ] T013 [P] [US1] Create [Entity2] entity in
+- [ ] T014 [P] [US1] Create [Entity2] entity in
   src/main/java/[base_package]/[package]/[Entity2].java
-- [ ] T014 [US1] Implement [Service] in
-  src/main/java/[base_package]/[package]/[Name]Service.java (depends on T012,
-  T013)
-- [ ] T015 [US1] Implement thin controller or scheduled entry point in
+- [ ] T015 [US1] Implement [Service] in
+  src/main/java/[base_package]/[package]/[Name]Service.java (depends on T013,
+  T014)
+- [ ] T016 [US1] Implement thin controller or scheduled entry point in
   src/main/java/[base_package]/[package]/[Name]Controller.java
-- [ ] T016 [US1] Add validation and error handling
-- [ ] T017 [US1] Add audit/explanation fields or snapshot persistence where
+- [ ] T017 [US1] Add validation and error handling
+- [ ] T018 [US1] Add audit/explanation fields or snapshot persistence where
   constitution rules require it
+- [ ] T019 [US1] Apply Modern Financial Dashboard UI direction to any user
+  interface for this story, avoiding childish, toy-like, cartoon-heavy, or
+  analytics-free presentation
 
 **Checkpoint**: At this point, User Story 1 is expected to be fully functional and testable independently
 
@@ -129,20 +137,23 @@ Examples of foundational tasks (adjust based on your project):
 
 ### Tests for User Story 2
 
-- [ ] T018 [P] [US2] Service/business-rule test for [rule] in
+- [ ] T020 [P] [US2] Service/business-rule test for [rule] in
   src/test/java/[base_package]/[package]/[Name]ServiceTest.java
-- [ ] T019 [P] [US2] Web/API integration test for [user journey] in
+- [ ] T021 [P] [US2] Web/API integration test for [user journey] in
   src/test/java/[base_package]/[package]/[Name]ControllerTest.java
 
 ### Implementation for User Story 2
 
-- [ ] T020 [P] [US2] Create [Entity] entity in
+- [ ] T022 [P] [US2] Create [Entity] entity in
   src/main/java/[base_package]/[package]/[Entity].java
-- [ ] T021 [US2] Implement [Service] in
+- [ ] T023 [US2] Implement [Service] in
   src/main/java/[base_package]/[package]/[Name]Service.java
-- [ ] T022 [US2] Implement thin controller or scheduled entry point in
+- [ ] T024 [US2] Implement thin controller or scheduled entry point in
   src/main/java/[base_package]/[package]/[Name]Controller.java
-- [ ] T023 [US2] Integrate with User Story 1 components (if needed)
+- [ ] T025 [US2] Integrate with User Story 1 components (if needed)
+- [ ] T026 [US2] Apply Modern Financial Dashboard UI direction to any user
+  interface for this story, avoiding childish, toy-like, cartoon-heavy, or
+  analytics-free presentation
 
 **Checkpoint**: At this point, User Stories 1 AND 2 are expected to work independently
 
@@ -156,19 +167,22 @@ Examples of foundational tasks (adjust based on your project):
 
 ### Tests for User Story 3
 
-- [ ] T024 [P] [US3] Service/business-rule test for [rule] in
+- [ ] T027 [P] [US3] Service/business-rule test for [rule] in
   src/test/java/[base_package]/[package]/[Name]ServiceTest.java
-- [ ] T025 [P] [US3] Web/API integration test for [user journey] in
+- [ ] T028 [P] [US3] Web/API integration test for [user journey] in
   src/test/java/[base_package]/[package]/[Name]ControllerTest.java
 
 ### Implementation for User Story 3
 
-- [ ] T026 [P] [US3] Create [Entity] entity in
+- [ ] T029 [P] [US3] Create [Entity] entity in
   src/main/java/[base_package]/[package]/[Entity].java
-- [ ] T027 [US3] Implement [Service] in
+- [ ] T030 [US3] Implement [Service] in
   src/main/java/[base_package]/[package]/[Name]Service.java
-- [ ] T028 [US3] Implement thin controller or scheduled entry point in
+- [ ] T031 [US3] Implement thin controller or scheduled entry point in
   src/main/java/[base_package]/[package]/[Name]Controller.java
+- [ ] T032 [US3] Apply Modern Financial Dashboard UI direction to any user
+  interface for this story, avoiding childish, toy-like, cartoon-heavy, or
+  analytics-free presentation
 
 **Checkpoint**: All user stories are expected to be independently functional
 
@@ -188,6 +202,9 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] TXXX [P] Additional unit and integration tests for uncovered constitution
   rules in src/test/java/[base_package]/
 - [ ] TXXX Security hardening
+- [ ] TXXX Verify UI preserves dark-mode-first modern financial dashboard style,
+  compact financial tables, green/red gain-loss indicators, high information
+  density without clutter, and analytics context for card imagery
 - [ ] TXXX Run quickstart.md validation
 
 ---
@@ -211,7 +228,8 @@ Examples of foundational tasks (adjust based on your project):
 
 ### Within Each User Story
 
-- Tests (if included) MUST be written and FAIL before implementation
+- Tests MUST be written and FAIL before implementation when they cover
+  constitution-governed business rules
 - Models before services
 - Services before endpoints
 - Core implementation before integration

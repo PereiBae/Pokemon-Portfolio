@@ -28,6 +28,8 @@
   calculated market value, confidence rating, or N/A]
 - **Market Signal Engine**: [Market Price vs Expected Price, signal explanation,
   or N/A]
+- **UI/UX direction**: [How any UI work preserves the dark-mode-first modern
+  financial dashboard style, or N/A]
 - **Security and authentication**: [Spring Security/auth/admin protection impact]
 - **External data legality/reliability**: [Provider/API/import assumptions and
   graceful degradation, or N/A]
@@ -120,11 +122,13 @@
 - **FR-005**: System MUST [behavior, e.g., "log all security events"]
 - **FR-006**: System MUST [constitution requirement, e.g., "store source currency,
   exchange rate, and SGD converted value for each price snapshot"]
+- **FR-007**: System MUST [UI constitution requirement, e.g., "present portfolio
+  gains and losses using compact financial dashboard indicators"]
 
 *Example of marking unclear requirements:*
 
-- **FR-007**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
-- **FR-008**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
+- **FR-008**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
+- **FR-009**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
 
 ### Key Entities *(include if feature involves data)*
 
