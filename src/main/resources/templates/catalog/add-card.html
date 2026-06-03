@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Add Card')}"></head>
+<body>
+<div class="app-shell">
+    <header th:replace="~{fragments/layout :: topbar}"></header>
+    <main class="page">
+        <div class="page-header">
+            <div>
+                <h1>Add Card</h1>
+                <p class="subtle">Create an English card record before adding a specific owned copy.</p>
+            </div>
+        </div>
+        <section class="card">
+            <form th:action="@{/cards}" th:object="${cardForm}" method="post" class="form-grid">
+                <label>
+                    Card Name
+                    <input th:field="*{name}" required>
+                </label>
+                <label>
+                    Set Name
+                    <input th:field="*{setName}" required>
+                </label>
+                <label>
+                    Card Number
+                    <input th:field="*{cardNumber}" required>
+                </label>
+                <label>
+                    Language / Market
+                    <select th:field="*{languageMarket}">
+                        <option th:each="market : ${markets}" th:value="${market}" th:text="${market}">ENGLISH</option>
+                    </select>
+                </label>
+                <label>
+                    Variant
+                    <select th:field="*{variant}">
+                        <option th:each="variant : ${variants}" th:value="${variant}" th:text="${variant.label}">Standard</option>
+                    </select>
+                </label>
+                <div class="actions">
+                    <button class="primary" type="submit">Save Card</button>
+                    <a class="button" th:href="@{/dashboard}">Cancel</a>
+                </div>
+            </form>
+        </section>
+    </main>
+</div>
+</body>
+</html>
+

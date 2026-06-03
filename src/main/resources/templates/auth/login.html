@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Login')}"></head>
+<body>
+<main class="login-page">
+    <section class="card login-panel">
+        <p class="metric-label">Secure owner access</p>
+        <h1>Portfolio Login</h1>
+        <p class="subtle">Dark financial dashboard for personal card valuation.</p>
+        <p class="error" th:if="${param.error}">Invalid username or password.</p>
+        <form th:action="@{/login}" method="post" class="form-grid">
+            <label>
+                Username
+                <input name="username" type="text" autocomplete="username" required>
+            </label>
+            <label>
+                Password
+                <input name="password" type="password" autocomplete="current-password" required>
+            </label>
+            <button class="primary" type="submit">Log In</button>
+        </form>
+    </section>
+</main>
+</body>
+</html>
+

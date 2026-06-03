@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Dashboard')}"></head>
+<body>
+<div class="app-shell">
+    <header th:replace="~{fragments/layout :: topbar}"></header>
+    <main class="page">
+        <div class="page-header">
+            <div>
+                <h1>Portfolio Dashboard</h1>
+                <p class="subtle">Current valuation from latest append-only mock price snapshots.</p>
+            </div>
+            <a class="button primary" th:href="@{/cards/new}">Add Card</a>
+        </div>
+
+        <section class="grid summary-grid">
+            <div class="card">
+                <div class="metric-label">Total Value</div>
+                <div class="metric-value" th:text="|SGD ${#numbers.formatDecimal(summary.totalValueSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">Cost Basis</div>
+                <div class="metric-value" th:text="|SGD ${#numbers.formatDecimal(summary.totalCostBasisSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">Unrealised Gain/Loss</div>
+                <div class="metric-value" th:classappend="${summary.gainIsNonNegative()} ? ' positive' : ' negative'"
+                     th:text="|SGD ${#numbers.formatDecimal(summary.unrealizedGainLossSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">Gain/Loss Percent</div>
+                <div class="metric-value" th:classappend="${summary.gainIsNonNegative()} ? ' positive' : ' negative'"
+                     th:text="|${#numbers.formatDecimal(summary.unrealizedGainLossPercent, 1, 'COMMA', 2, 'POINT')}%|">0.00%</div>
+            </div>
+        </section>
+
+        <section class="card" style="margin-top: 16px;">
+            <div class="page-header">
+                <div>
+                    <h1 style="font-size: 20px;">Holdings</h1>
+                    <p class="subtle" th:text="|${summary.itemCount} owned card records|">0 owned card records</p>
+                </div>
+            </div>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Card</th>
+                    <th>Set</th>
+                    <th>Condition</th>
+                    <th>Cost</th>
+                    <th>Market</th>
+                    <th>Gain/Loss</th>
+                    <th>Confidence</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${summary.items.isEmpty()}">
+                    <td colspan="7" class="subtle">No holdings yet.</td>
+                </tr>
+                <tr th:each="item : ${summary.items}">
+                    <td th:text="|${item.cardName} #${item.cardNumber}|">Card</td>
+                    <td th:text="${item.setName}">Set</td>
+                    <td th:text="${item.condition}">Condition</td>
+                    <td th:text="|SGD ${#numbers.formatDecimal(item.purchasePriceSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
+                    <td th:text="|SGD ${#numbers.formatDecimal(item.marketValueSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
+                    <td th:classappend="${item.gainIsNonNegative()} ? ' positive' : ' negative'"
+                        th:text="|SGD ${#numbers.formatDecimal(item.gainLossSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
+                    <td th:text="${item.confidenceRating}">MEDIUM</td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</div>
+</body>
+</html>
+

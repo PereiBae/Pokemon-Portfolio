@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: pokemon-portfolio
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/pokemon_portfolio}
+    username: ${DATABASE_USERNAME:pokemon_portfolio}
+    password: ${DATABASE_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+  thymeleaf:
+    cache: false
+
+app:
+  owner:
+    username: ${APP_OWNER_USERNAME:owner@example.com}
+    display-name: ${APP_OWNER_DISPLAY_NAME:Portfolio Owner}
+    bootstrap-password: ${APP_OWNER_BOOTSTRAP_PASSWORD:}
+  pricing:
+    providers:
+      mock-enabled: true
+  jobs:
+    price-refresh-cron: "0 0 2 * * *"
+    portfolio-valuation-cron: "0 15 2 * * *"
+

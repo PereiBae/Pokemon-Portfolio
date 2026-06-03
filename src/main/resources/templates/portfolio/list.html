@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Portfolio')}"></head>
+<body>
+<div class="app-shell">
+    <header th:replace="~{fragments/layout :: topbar}"></header>
+    <main class="page">
+        <div class="page-header">
+            <div>
+                <h1>Portfolio</h1>
+                <p class="subtle">Owned card copies are listed independently.</p>
+            </div>
+            <a class="button primary" th:href="@{/cards/new}">Add Card</a>
+        </div>
+        <section class="card">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Card</th>
+                    <th>Set</th>
+                    <th>Condition</th>
+                    <th>Purchase</th>
+                    <th>Market</th>
+                    <th>Gain/Loss</th>
+                    <th>Confidence</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${summary.items.isEmpty()}">
+                    <td colspan="7" class="subtle">No portfolio records yet.</td>
+                </tr>
+                <tr th:each="item : ${summary.items}">
+                    <td th:text="|${item.cardName} #${item.cardNumber}|">Card</td>
+                    <td th:text="${item.setName}">Set</td>
+                    <td th:text="${item.condition}">Condition</td>
+                    <td th:text="|SGD ${#numbers.formatDecimal(item.purchasePriceSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
+                    <td th:text="|SGD ${#numbers.formatDecimal(item.marketValueSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
+                    <td th:classappend="${item.gainIsNonNegative()} ? ' positive' : ' negative'"
+                        th:text="|SGD ${#numbers.formatDecimal(item.gainLossSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
+                    <td th:text="${item.confidenceRating}">MEDIUM</td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</div>
+</body>
+</html>
+

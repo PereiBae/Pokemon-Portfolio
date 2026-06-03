@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${title}">Portfolio</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<header th:fragment="topbar" class="topbar">
+    <div class="brand">Pokemon Portfolio Analytics</div>
+    <nav class="nav">
+        <a th:href="@{/dashboard}">Dashboard</a>
+        <a th:href="@{/cards/new}">Add Card</a>
+        <a th:href="@{/portfolio}">Portfolio</a>
+        <form th:action="@{/logout}" method="post">
+            <button type="submit">Logout</button>
+        </form>
+    </nav>
+</header>
+</body>
+</html>
+

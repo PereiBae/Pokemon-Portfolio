@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Add Portfolio Item')}"></head>
+<body>
+<div class="app-shell">
+    <header th:replace="~{fragments/layout :: topbar}"></header>
+    <main class="page">
+        <div class="page-header">
+            <div>
+                <h1>Add To Portfolio</h1>
+                <p class="subtle">Each owned copy is stored as a separate record.</p>
+            </div>
+        </div>
+        <section class="card">
+            <form th:action="@{/portfolio/items}" th:object="${ownedItemForm}" method="post" class="form-grid">
+                <label>
+                    Card
+	                    <select th:field="*{cardId}" required>
+	                        <option value="">Select a card</option>
+	                        <option th:each="card : ${cardOptions}" th:value="${card.id}"
+	                                th:text="${card.displayLabel}">Card</option>
+	                    </select>
+	                </label>
+                <label>
+                    Condition
+                    <select th:field="*{condition}">
+                        <option th:each="condition : ${conditions}" th:value="${condition}" th:text="${condition.label}">Near Mint</option>
+                    </select>
+                </label>
+                <label>
+                    Purchase Price (SGD)
+                    <input th:field="*{purchasePriceSgd}" type="number" min="0" step="0.01" required>
+                </label>
+                <label>
+                    Purchase Date
+                    <input th:field="*{purchaseDate}" type="date" required>
+                </label>
+                <label>
+                    Graded Status
+                    <select th:field="*{gradedStatus}">
+                        <option th:each="status : ${gradedStatuses}" th:value="${status}" th:text="${status.label}">Ungraded</option>
+                    </select>
+                </label>
+                <label>
+                    PSA Grade
+                    <input th:field="*{psaGrade}" type="number" min="1" max="10">
+                </label>
+                <label>
+                    PSA Certification Number
+                    <input th:field="*{psaCertificationNumber}">
+                </label>
+                <label>
+                    Notes
+                    <textarea th:field="*{notes}" rows="3"></textarea>
+                </label>
+                <div class="actions">
+                    <button class="primary" type="submit">Add Holding</button>
+                    <a class="button" th:href="@{/cards/new}">Create Another Card</a>
+                </div>
+            </form>
+        </section>
+    </main>
+</div>
+</body>
+</html>

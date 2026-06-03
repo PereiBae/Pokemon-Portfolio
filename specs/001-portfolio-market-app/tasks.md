@@ -10,37 +10,37 @@
 
 ## Phase 1: Project Setup
 
-- [ ] T001 Initialize Maven Spring Boot project with Java 21 dependencies in `pom.xml`
+- [X] T001 Initialize Maven Spring Boot project with Java 21 dependencies in `pom.xml`
   - Dependencies: None
   - Verification: Run `./mvnw -version` or `mvn -version` and confirm Java 21 plus Spring Boot dependencies resolve
   - Related: NFR-017
   - Status: MVP-critical
 
-- [ ] T002 Create Spring Boot source/resource/test directory structure in `src/main/java/com/pokemonportfolio/`
+- [X] T002 Create Spring Boot source/resource/test directory structure in `src/main/java/com/pokemonportfolio/`
   - Dependencies: T001
   - Verification: Confirm package folders exist for catalog, portfolio, pricing, market_signal, alerts, grading, trade, forecasting, auth, and config
   - Related: NFR-014, NFR-015
   - Status: MVP-critical
 
-- [ ] T003 [P] Add default application configuration in `src/main/resources/application.yml`
+- [X] T003 [P] Add default application configuration in `src/main/resources/application.yml`
   - Dependencies: T001
   - Verification: Confirm database, Thymeleaf, scheduler, and provider toggles are configurable without secrets
   - Related: NFR-003, NFR-017
   - Status: MVP-critical
 
-- [ ] T004 [P] Add test profile configuration in `src/test/resources/application-test.yml`
+- [X] T004 [P] Add test profile configuration in `src/test/resources/application-test.yml`
   - Dependencies: T001
   - Verification: Confirm tests can run against an isolated test database/profile with mock providers enabled
   - Related: NFR-007, NFR-008
   - Status: MVP-critical
 
-- [ ] T005 Create application entry point in `src/main/java/com/pokemonportfolio/PokemonPortfolioApplication.java`
+- [X] T005 Create application entry point in `src/main/java/com/pokemonportfolio/PokemonPortfolioApplication.java`
   - Dependencies: T002
   - Verification: Run application context smoke test after T006
   - Related: NFR-017
   - Status: MVP-critical
 
-- [ ] T006 [P] Add application context smoke test in `src/test/java/com/pokemonportfolio/PokemonPortfolioApplicationTests.java`
+- [X] T006 [P] Add application context smoke test in `src/test/java/com/pokemonportfolio/PokemonPortfolioApplicationTests.java`
   - Dependencies: T004, T005
   - Verification: Run `./mvnw test` or `mvn test` and confirm the context loads with test profile
   - Related: NFR-006
@@ -48,7 +48,7 @@
 
 ## Phase 2: Database and Flyway Setup
 
-- [ ] T007 Create initial auth and enum migration in `src/main/resources/db/migration/V1__auth_and_reference_data.sql`
+- [X] T007 Create initial auth and enum migration in `src/main/resources/db/migration/V1__auth_and_reference_data.sql`
   - Dependencies: T003
   - Verification: Flyway applies migration and creates `app_user` plus reference/check constraints
   - Related: FR-001, NFR-001, NFR-002
@@ -78,7 +78,7 @@
   - Related: PF-012, MS-007, PA-005, TA-001, GA-005, FC-007
   - Status: MVP-critical for portfolio snapshot and alerts; later-v1 for trade/grading/forecast
 
-- [ ] T012 Add Flyway repository schema test in `src/test/java/com/pokemonportfolio/config/FlywayMigrationTest.java`
+- [X] T012 Add Flyway repository schema test in `src/test/java/com/pokemonportfolio/config/FlywayMigrationTest.java`
   - Dependencies: T007, T008, T009, T010, T011
   - Verification: Run migration test and confirm all required tables exist
   - Related: NFR-011, NFR-019
@@ -86,37 +86,37 @@
 
 ## Phase 3: Authentication and Security
 
-- [ ] T013 [US1] Create `AppUser` entity and repository in `src/main/java/com/pokemonportfolio/auth/entity/AppUser.java`
+- [X] T013 [US1] Create `AppUser` entity and repository in `src/main/java/com/pokemonportfolio/auth/entity/AppUser.java`
   - Dependencies: T007
   - Verification: Repository test can persist and load a hashed-password owner account
   - Related: FR-001, NFR-001, NFR-002
   - Status: MVP-critical
 
-- [ ] T014 [US1] Implement owner user details service in `src/main/java/com/pokemonportfolio/auth/service/AppUserDetailsService.java`
+- [X] T014 [US1] Implement owner user details service in `src/main/java/com/pokemonportfolio/auth/service/AppUserDetailsService.java`
   - Dependencies: T013
   - Verification: Service test loads enabled owner and rejects missing/disabled users
   - Related: FR-001, FR-002
   - Status: MVP-critical
 
-- [ ] T015 [US1] Configure Spring Security in `src/main/java/com/pokemonportfolio/config/SecurityConfig.java`
+- [X] T015 [US1] Configure Spring Security in `src/main/java/com/pokemonportfolio/config/SecurityConfig.java`
   - Dependencies: T014
   - Verification: Controller/security test confirms `/login` is public and app routes require authentication
   - Related: FR-002, NFR-001, NFR-004
   - Status: MVP-critical
 
-- [ ] T016 [US1] Add login controller and template in `src/main/java/com/pokemonportfolio/auth/controller/AuthController.java`
+- [X] T016 [US1] Add login controller and template in `src/main/java/com/pokemonportfolio/auth/controller/AuthController.java`
   - Dependencies: T015
   - Verification: `GET /login` renders the dark login page and login redirects to dashboard
   - Related: UI-002, UI-003, FR-001
   - Status: MVP-critical
 
-- [ ] T017 [US1] Add owner bootstrap workflow in `src/main/java/com/pokemonportfolio/auth/service/OwnerBootstrapService.java`
+- [X] T017 [US1] Add owner bootstrap workflow in `src/main/java/com/pokemonportfolio/auth/service/OwnerBootstrapService.java`
   - Dependencies: T013, T015
   - Verification: Application can create or seed one owner without committing plaintext secrets
   - Related: NFR-002, NFR-003
   - Status: MVP-critical
 
-- [ ] T018 [US1] Add authentication and authorization tests in `src/test/java/com/pokemonportfolio/auth/AuthSecurityTest.java`
+- [X] T018 [US1] Add authentication and authorization tests in `src/test/java/com/pokemonportfolio/auth/AuthSecurityTest.java`
   - Dependencies: T014, T015, T016, T017
   - Verification: Tests prove valid login works, invalid login fails, protected routes require auth, and password hash is used
   - Related: FR-001, FR-002, NFR-001, NFR-002
@@ -124,25 +124,25 @@
 
 ## Phase 4: Core Domain Model
 
-- [ ] T019 Create shared domain enums in `src/main/java/com/pokemonportfolio/config/domain/DomainEnums.java`
+- [X] T019 Create shared domain enums in `src/main/java/com/pokemonportfolio/config/domain/DomainEnums.java`
   - Dependencies: T002
   - Verification: Enums include language market, item type, variants, condition, graded status, confidence, signal classification, alert status, trade side, and forecast horizon
   - Related: DR-001, DR-002, DR-003
   - Status: MVP-critical
 
-- [ ] T020 [P] Create auditable base entity support in `src/main/java/com/pokemonportfolio/config/entity/AuditableEntity.java`
+- [X] T020 [P] Create auditable base entity support in `src/main/java/com/pokemonportfolio/config/entity/AuditableEntity.java`
   - Dependencies: T002
   - Verification: Entity tests can use created/updated timestamp fields consistently
   - Related: NFR-019
   - Status: MVP-critical
 
-- [ ] T021 [P] Create currency and money value helpers in `src/main/java/com/pokemonportfolio/pricing/service/MoneyCalculationSupport.java`
+- [X] T021 [P] Create currency and money value helpers in `src/main/java/com/pokemonportfolio/pricing/service/MoneyCalculationSupport.java`
   - Dependencies: T019
   - Verification: Unit tests can represent SGD and source-currency decimal values without floating point
   - Related: FR-016, DR-018, PR-007
   - Status: MVP-critical
 
-- [ ] T022 Add core domain unit tests in `src/test/java/com/pokemonportfolio/config/domain/DomainModelTest.java`
+- [X] T022 Add core domain unit tests in `src/test/java/com/pokemonportfolio/config/domain/DomainModelTest.java`
   - Dependencies: T019, T020, T021
   - Verification: Tests cover enum values, money rounding expectations, and audit timestamp behavior
   - Related: NFR-006
@@ -188,37 +188,37 @@
 
 ## Phase 6: Portfolio Module
 
-- [ ] T029 [US2] Create `OwnedItem` entity and repository in `src/main/java/com/pokemonportfolio/portfolio/entity/OwnedItem.java`
+- [X] T029 [US2] Create `OwnedItem` entity and repository in `src/main/java/com/pokemonportfolio/portfolio/entity/OwnedItem.java`
   - Dependencies: T009, T013, T023
   - Verification: Repository test persists separate owned copies for the same card with different purchase details
   - Related: FR-005, FR-006, DR-006, DR-009
   - Status: MVP-critical
 
-- [ ] T030 [US2] Create owned item form/view models in `src/main/java/com/pokemonportfolio/portfolio/service/OwnedItemForm.java`
+- [X] T030 [US2] Create owned item form/view models in `src/main/java/com/pokemonportfolio/portfolio/service/OwnedItemForm.java`
   - Dependencies: T029
   - Verification: Validation test rejects missing item type, purchase price, condition, purchase date, and catalog reference
   - Related: DR-006, DR-007
   - Status: MVP-critical
 
-- [ ] T031 [US2] Implement owned item service in `src/main/java/com/pokemonportfolio/portfolio/service/OwnedItemService.java`
+- [X] T031 [US2] Implement owned item service in `src/main/java/com/pokemonportfolio/portfolio/service/OwnedItemService.java`
   - Dependencies: T029, T030
   - Verification: Service test creates two separate portfolio rows for two copies and never aggregates quantity
   - Related: FR-005, FR-006, PF-010
   - Status: MVP-critical
 
-- [ ] T032 [US2] Add portfolio controller for create/edit/archive in `src/main/java/com/pokemonportfolio/portfolio/controller/PortfolioController.java`
+- [X] T032 [US2] Add portfolio controller for create/edit/archive in `src/main/java/com/pokemonportfolio/portfolio/controller/PortfolioController.java`
   - Dependencies: T031, T026
   - Verification: Controller test creates an owned item from a catalog card and redirects to portfolio detail
   - Related: FR-005, FR-006, FR-002
   - Status: MVP-critical
 
-- [ ] T033 [US2] Add portfolio service tests in `src/test/java/com/pokemonportfolio/portfolio/OwnedItemServiceTest.java`
+- [X] T033 [US2] Add portfolio service tests in `src/test/java/com/pokemonportfolio/portfolio/OwnedItemServiceTest.java`
   - Dependencies: T031
   - Verification: Tests cover card item, sealed product item, graded PSA fields, optional notes, and no storage location requirement
   - Related: DR-006, DR-007, DR-008, DR-009
   - Status: MVP-critical
 
-- [ ] T034 [US3] Create dashboard summary model skeleton in `src/main/java/com/pokemonportfolio/portfolio/service/PortfolioDashboardView.java`
+- [X] T034 [US3] Create dashboard summary model skeleton in `src/main/java/com/pokemonportfolio/portfolio/service/PortfolioDashboardView.java`
   - Dependencies: T029
   - Verification: Unit test can assemble empty dashboard summary for authenticated owner
   - Related: FR-017, PF-001, PF-002
@@ -232,13 +232,13 @@
   - Related: PR-002, PR-007, DR-010
   - Status: MVP-critical
 
-- [ ] T036 [US4] Define pricing provider adapter contract in `src/main/java/com/pokemonportfolio/pricing/provider/PricingProviderAdapter.java`
+- [X] T036 [US4] Define pricing provider adapter contract in `src/main/java/com/pokemonportfolio/pricing/provider/PricingProviderAdapter.java`
   - Dependencies: T019, T035
   - Verification: Contract exposes provider name, supported contexts, and normalized fetch result without calculating final market value
   - Related: PR-012, NFR-007
   - Status: MVP-critical
 
-- [ ] T037 [US4] Implement provider orchestration service in `src/main/java/com/pokemonportfolio/pricing/service/PricingProviderService.java`
+- [X] T037 [US4] Implement provider orchestration service in `src/main/java/com/pokemonportfolio/pricing/service/PricingProviderService.java`
   - Dependencies: T036
   - Verification: Service test invokes enabled adapters, stores usable results, records unavailable sources, and does not crash when one adapter fails
   - Related: PR-013, NFR-009, NFR-010
@@ -264,7 +264,7 @@
 
 ## Phase 8: Mock Pricing Provider
 
-- [ ] T041 [US4] Implement deterministic mock pricing provider in `src/main/java/com/pokemonportfolio/pricing/provider/MockPricingProviderAdapter.java`
+- [X] T041 [US4] Implement deterministic mock pricing provider in `src/main/java/com/pokemonportfolio/pricing/provider/MockPricingProviderAdapter.java`
   - Dependencies: T036
   - Verification: Mock provider returns stable source prices for seeded card and sealed product catalog records
   - Related: PR-012, NFR-007, NFR-008
@@ -276,13 +276,13 @@
   - Related: DR-010, PR-007
   - Status: MVP-critical
 
-- [ ] T043 [US4] Add mock provider tests in `src/test/java/com/pokemonportfolio/pricing/provider/MockPricingProviderAdapterTest.java`
+- [X] T043 [US4] Add mock provider tests in `src/test/java/com/pokemonportfolio/pricing/provider/MockPricingProviderAdapterTest.java`
   - Dependencies: T041, T042
   - Verification: Tests prove local pricing works with no external network or live provider API
   - Related: NFR-007, NFR-008
   - Status: MVP-critical
 
-- [ ] T044 [US4] Add provider enablement configuration in `src/main/java/com/pokemonportfolio/pricing/provider/PricingProviderProperties.java`
+- [X] T044 [US4] Add provider enablement configuration in `src/main/java/com/pokemonportfolio/pricing/provider/PricingProviderProperties.java`
   - Dependencies: T041
   - Verification: Test profile enables mock provider and disables real provider adapters by default
   - Related: NFR-003, NFR-008
@@ -290,13 +290,13 @@
 
 ## Phase 9: Price Snapshot and Valuation Engine
 
-- [ ] T045 [US4] Create price snapshot entity and repository in `src/main/java/com/pokemonportfolio/pricing/entity/PriceSnapshot.java`
+- [X] T045 [US4] Create price snapshot entity and repository in `src/main/java/com/pokemonportfolio/pricing/entity/PriceSnapshot.java`
   - Dependencies: T010, T035
   - Verification: Repository test inserts multiple snapshots for the same item and confirms previous rows remain
   - Related: PR-010, PR-011, DR-012
   - Status: MVP-critical
 
-- [ ] T046 [US4] Implement append-only price snapshot service in `src/main/java/com/pokemonportfolio/pricing/service/PriceSnapshotService.java`
+- [X] T046 [US4] Implement append-only price snapshot service in `src/main/java/com/pokemonportfolio/pricing/service/PriceSnapshotService.java`
   - Dependencies: T045
   - Verification: Service test creates new snapshots on repeated refreshes and never updates prior snapshot values
   - Related: PR-010, PR-011, AC-007
@@ -314,9 +314,9 @@
   - Related: PR-008, PR-009, SC-004
   - Status: MVP-critical
 
-- [ ] T049 [US4] Implement market valuation service in `src/main/java/com/pokemonportfolio/pricing/service/MarketValuationService.java`
+- [X] T049 [US4] Implement market valuation service in `src/main/java/com/pokemonportfolio/pricing/service/MarketValuationService.java`
   - Dependencies: T037, T046, T047, T048
-  - Verification: Service test calculates SGD market price from mock provider results and stores auditable explanation
+  - Verification: Service test calculates SGD market price from SGD-only mock provider results for Vertical Slice 1 and stores auditable explanation; non-SGD provider conversion is integrated by T127
   - Related: PR-001, PR-002, PR-007, PR-014, PR-015, MS-001
   - Status: MVP-critical
 
@@ -358,27 +358,33 @@
   - Related: FR-016, SC-003, SC-004
   - Status: MVP-critical
 
+- [ ] T127 [US4] Integrate full currency conversion into market valuation service in `src/main/java/com/pokemonportfolio/pricing/service/MarketValuationService.java`
+  - Dependencies: T049, T054, T055
+  - Verification: Service tests convert USD/non-SGD provider results to SGD, preserve source currency and exchange-rate audit fields on valuation inputs/snapshots, and reduce confidence or reject display when an auditable rate is missing
+  - Related: FR-016, PR-007, PR-015, DR-018, SC-003
+  - Status: MVP-critical before non-SGD providers; Vertical Slice 1 uses SGD-only mock pricing data
+
 ## Phase 11: Portfolio Valuation Snapshots
 
-- [ ] T056 [US3] Create portfolio valuation snapshot entity and repository in `src/main/java/com/pokemonportfolio/portfolio/entity/PortfolioValuationSnapshot.java`
+- [X] T056 [US3] Create portfolio valuation snapshot entity and repository in `src/main/java/com/pokemonportfolio/portfolio/entity/PortfolioValuationSnapshot.java`
   - Dependencies: T011, T029, T045
   - Verification: Repository test stores multiple daily snapshots for the owner without overwriting history
   - Related: FR-008, PF-012, DR-013
   - Status: MVP-critical
 
-- [ ] T057 [US3] Implement portfolio valuation service in `src/main/java/com/pokemonportfolio/portfolio/service/PortfolioValuationService.java`
+- [X] T057 [US3] Implement portfolio valuation service in `src/main/java/com/pokemonportfolio/portfolio/service/PortfolioValuationService.java`
   - Dependencies: T029, T045, T056
   - Verification: Service test calculates total value, cost basis, unrealized gain/loss, percent, item count, and low-confidence count
   - Related: PF-001, PF-002, PF-003, PF-004, PF-008, PF-014
   - Status: MVP-critical
 
-- [ ] T058 [US3] Implement dashboard summary service in `src/main/java/com/pokemonportfolio/portfolio/service/PortfolioDashboardService.java`
+- [X] T058 [US3] Implement dashboard summary service in `src/main/java/com/pokemonportfolio/portfolio/service/PortfolioDashboardService.java`
   - Dependencies: T034, T057
   - Verification: Service test returns total value, cost basis, gain/loss, top gainers, top losers, low-confidence valuations, and alerts placeholders
   - Related: FR-017, PF-001, PF-006, PF-007, PF-008, PF-009
   - Status: MVP-critical
 
-- [ ] T059 [US3] Add portfolio valuation tests in `src/test/java/com/pokemonportfolio/portfolio/service/PortfolioValuationServiceTest.java`
+- [X] T059 [US3] Add portfolio valuation tests in `src/test/java/com/pokemonportfolio/portfolio/service/PortfolioValuationServiceTest.java`
   - Dependencies: T057, T058
   - Verification: Tests cover current market value use, SGD totals, low-confidence count, and historical snapshot preservation
   - Related: PR-014, PF-012, SC-002, SC-005
@@ -546,13 +552,13 @@
   - Related: FR-024, NFR-018
   - Status: MVP-critical
 
-- [ ] T085 [US4] Implement daily price refresh job in `src/main/java/com/pokemonportfolio/pricing/scheduler/PriceRefreshJob.java`
-  - Dependencies: T037, T049, T084
-  - Verification: Scheduled job test runs twice and confirms new snapshots are appended without overwriting prior rows
-  - Related: FR-019, FR-024, PR-010, PR-011
+- [X] T085 [US4] Implement daily price refresh job in `src/main/java/com/pokemonportfolio/pricing/scheduler/PriceRefreshJob.java`
+  - Dependencies: T036, T037, T041, T044, T049, T084
+  - Verification: Scheduled job test runs twice with enabled SGD-only MockPricingProvider data and confirms new snapshots are appended without overwriting prior rows; non-SGD refresh behavior is covered after T127
+  - Related: FR-019, FR-024, PR-010, PR-011, PR-012, NFR-018
   - Status: MVP-critical
 
-- [ ] T086 [US3] Implement daily portfolio valuation job in `src/main/java/com/pokemonportfolio/portfolio/scheduler/PortfolioValuationJob.java`
+- [X] T086 [US3] Implement daily portfolio valuation job in `src/main/java/com/pokemonportfolio/portfolio/scheduler/PortfolioValuationJob.java`
   - Dependencies: T057, T084
   - Verification: Scheduled job test creates portfolio valuation snapshot and preserves previous snapshots on rerun
   - Related: FR-020, PF-012, NFR-018
@@ -564,27 +570,39 @@
   - Related: FR-021, PA-009, NFR-018
   - Status: Later-v1
 
-- [ ] T088 Implement exchange rate and PSA fee scheduled jobs in `src/main/java/com/pokemonportfolio/pricing/scheduler/ExchangeRateRefreshJob.java`
-  - Dependencies: T054, T076, T084
-  - Verification: Scheduled job tests store exchange-rate snapshots and updateable PSA fee data without live external APIs
-  - Related: FR-022, FR-023, GA-012, NFR-008
+- [ ] T088 Implement exchange rate refresh job in `src/main/java/com/pokemonportfolio/pricing/scheduler/ExchangeRateRefreshJob.java`
+  - Dependencies: T054, T084
+  - Verification: Scheduled job test stores exchange-rate snapshots, is safe to rerun, and requires no live external API when mock exchange rates are enabled
+  - Related: FR-022, DR-018, NFR-008, NFR-018
   - Status: Later-v1
 
-- [ ] T089 Add scheduled job tests in `src/test/java/com/pokemonportfolio/config/scheduler/ScheduledJobRerunSafetyTest.java`
-  - Dependencies: T085, T086, T087, T088
-  - Verification: Tests cover rerunnable price refresh, portfolio valuation, alerts, exchange rates, PSA fee jobs, and provider failure handling
-  - Related: FR-024, EC-007, NFR-018
-  - Status: MVP-critical for price/portfolio; later-v1 for alerts/PSA
+- [ ] T129 Implement grading fee refresh job in `src/main/java/com/pokemonportfolio/grading/scheduler/GradingFeeRefreshJob.java`
+  - Dependencies: T076, T084
+  - Verification: Scheduled job test refreshes or updates PSA fee/turnaround data, is safe to rerun, and keeps grading concerns separate from pricing refresh concerns
+  - Related: FR-023, GA-012, GA-013, NFR-008, NFR-018
+  - Status: Later-v1
+
+- [ ] T089 Add MVP scheduled job rerun-safety tests in `src/test/java/com/pokemonportfolio/config/scheduler/ScheduledJobRerunSafetyTest.java`
+  - Dependencies: T085, T086
+  - Verification: Tests cover rerunnable price refresh and portfolio valuation jobs with SGD-only mock pricing data, append-only price snapshots, append-only portfolio valuation snapshots, and provider failure handling
+  - Related: FR-019, FR-020, FR-024, EC-007, NFR-018
+  - Status: MVP-critical
+
+- [ ] T130 Add later-v1 scheduled job regression tests in `src/test/java/com/pokemonportfolio/config/scheduler/ScheduledJobRegressionTest.java`
+  - Dependencies: T087, T088, T129
+  - Verification: Tests cover alert checks, exchange-rate refresh, grading-fee refresh, rerun safety, dedupe behavior, and no live external API dependency
+  - Related: FR-021, FR-022, FR-023, FR-024, PA-009, NFR-018
+  - Status: Later-v1
 
 ## Phase 18: UI Layout and Styling
 
-- [ ] T090 Create Thymeleaf base layout in `src/main/resources/templates/fragments/layout.html`
+- [X] T090 Create Thymeleaf base layout in `src/main/resources/templates/fragments/layout.html`
   - Dependencies: T016
   - Verification: Login and dashboard pages can extend shared dark layout with navigation placeholder
   - Related: UI-001, UI-002, UI-003
   - Status: MVP-critical
 
-- [ ] T091 Create dark financial dashboard stylesheet in `src/main/resources/static/css/app.css`
+- [X] T091 Create dark financial dashboard stylesheet in `src/main/resources/static/css/app.css`
   - Dependencies: T090
   - Verification: CSS defines dark surfaces, compact tables, cards, badges, green/red gain/loss indicators, and avoids toy-like colors
   - Related: UI-001, UI-002, UI-004, UI-008, UI-009, UI-021
@@ -610,23 +628,29 @@
 
 ## Phase 19: Dashboard UI
 
-- [ ] T095 [US3] Add dashboard controller in `src/main/java/com/pokemonportfolio/portfolio/controller/DashboardController.java`
+- [X] T095 [US3] Add dashboard controller in `src/main/java/com/pokemonportfolio/portfolio/controller/DashboardController.java`
   - Dependencies: T058, T015
   - Verification: Controller test returns dashboard view model for authenticated owner
   - Related: FR-017, PF-001, PF-002, PF-003, PF-004
   - Status: MVP-critical
 
-- [ ] T096 [US3] Create dashboard template in `src/main/resources/templates/dashboard/index.html`
+- [X] T096 [US3] Create dashboard template in `src/main/resources/templates/dashboard/index.html`
   - Dependencies: T090, T091, T092, T093, T095
   - Verification: Page shows total value, cost basis, gain/loss, value chart, top gainers/losers, low-confidence valuations, and alerts in SGD
   - Related: UI-005, UI-006, UI-007, UI-009, PF-001, PF-009
   - Status: MVP-critical
 
-- [ ] T097 [US3] Add dashboard controller/UI tests in `src/test/java/com/pokemonportfolio/portfolio/controller/DashboardControllerTest.java`
+- [X] T097 [US3] Add dashboard controller/UI tests in `src/test/java/com/pokemonportfolio/portfolio/controller/DashboardControllerTest.java`
   - Dependencies: T095, T096
   - Verification: Tests confirm dashboard renders all MVP cards, SGD labels, confidence badges, and dark dashboard layout
   - Related: AC-005, SC-002, UI-023
   - Status: MVP-critical
+
+- [ ] T128 [US3] Compute and display item-level portfolio contribution to growth in `src/main/java/com/pokemonportfolio/portfolio/service/PortfolioDashboardService.java`
+  - Dependencies: T057, T058, T096, T097
+  - Verification: Service/UI tests compute each owned item's contribution to portfolio growth from stored valuation snapshots and display contribution data on the dashboard without recalculating destructively from current prices only
+  - Related: PF-013, FR-017, DR-013, UI-006
+  - Status: Later-v1 after Vertical Slice 1 valuation snapshots
 
 ## Phase 20: Catalogue and Portfolio UI
 
@@ -636,7 +660,7 @@
   - Related: FR-003, FR-004, FR-005, CA-011, UI-015
   - Status: MVP-critical
 
-- [ ] T099 [US2] Create portfolio list and detail templates in `src/main/resources/templates/portfolio/list.html`
+- [X] T099 [US2] Create portfolio list and detail templates in `src/main/resources/templates/portfolio/list.html`
   - Dependencies: T032, T058, T090, T091, T092
   - Verification: Portfolio table shows owned copies separately with condition, purchase price, market value placeholder, gain/loss, confidence, and SGD labels
   - Related: FR-005, FR-006, PF-010, PF-011, UI-008, UI-023
@@ -651,22 +675,34 @@
 ## Phase 21: Price History UI
 
 - [ ] T101 [US4] Add pricing controller for history and manual price entry in `src/main/java/com/pokemonportfolio/pricing/controller/PricingController.java`
-  - Dependencies: T038, T045, T049, T015
-  - Verification: Controller test renders price history and manual price entry only for authenticated owner
-  - Related: FR-009, PR-015, UI-016
-  - Status: MVP-critical for vertical slice history; later-v1 for richer history
+  - Dependencies: T038, T046, T127, T015
+  - Verification: Controller test renders price history and exposes GET/POST manual price entry endpoints only for authenticated owner; POST delegates to append-only snapshot creation
+  - Related: FR-009, PR-013, PR-015, UI-016
+  - Status: MVP-critical after Vertical Slice 1 for price history/manual fallback; later-v1 for richer history
 
 - [ ] T102 [US4] Create price history template in `src/main/resources/templates/pricing/history.html`
   - Dependencies: T090, T091, T092, T093, T101
   - Verification: Page shows line chart, snapshot table, source currency, exchange rate summary, confidence, Market Price, Expected Price placeholders, and SGD labels
   - Related: FR-009, FR-010, UI-007, UI-011, UI-023, AC-006
-  - Status: MVP-critical
+  - Status: MVP-critical after Vertical Slice 1
+
+- [ ] T131 [US4] Create manual price entry template in `src/main/resources/templates/pricing/manual-entry.html`
+  - Dependencies: T090, T091, T092, T101
+  - Verification: Page supports source price, source currency, exchange-rate audit fields, source note, confidence metadata, and local fallback submission when external providers are unavailable
+  - Related: PR-002, PR-007, PR-013, DR-018, DR-019, UI-016
+  - Status: MVP-critical local fallback
 
 - [ ] T103 [US4] Add price history UI tests in `src/test/java/com/pokemonportfolio/pricing/controller/PricingControllerTest.java`
   - Dependencies: T101, T102
   - Verification: Tests confirm historical snapshots render from stored rows and old snapshots remain visible after new snapshot
   - Related: PR-010, PR-011, AC-006, AC-007
-  - Status: MVP-critical
+  - Status: MVP-critical after Vertical Slice 1
+
+- [ ] T132 [US4] Add manual price entry service/controller tests in `src/test/java/com/pokemonportfolio/pricing/service/ManualPriceEntryServiceTest.java` and `src/test/java/com/pokemonportfolio/pricing/controller/ManualPriceEntryControllerTest.java`
+  - Dependencies: T038, T046, T054, T101, T131
+  - Verification: Tests cover GET and POST manual price entry, append-only price snapshot creation, preserved source currency, preserved exchange-rate audit fields, default LOW confidence when appropriate, and local fallback behavior when external providers are unavailable
+  - Related: PR-002, PR-007, PR-010, PR-011, PR-013, DR-018, DR-019
+  - Status: MVP-critical local fallback
 
 ## Phase 22: Alerts UI
 
@@ -738,6 +774,12 @@
   - Related: PR-012, NFR-003, NFR-020
   - Status: Later-v1
 
+- [ ] T133 Add provider settings service and POST toggle controller tests in `src/main/java/com/pokemonportfolio/config/service/ProviderSettingsService.java`
+  - Dependencies: T044, T112, T113
+  - Verification: Service/controller tests confirm MockPricingProvider is enabled for local development, real providers are disabled by default, POST toggle behavior updates provider enablement, and no secret values are rendered or persisted in plaintext
+  - Related: PR-012, NFR-003, NFR-008, NFR-020
+  - Status: Later-v1
+
 - [ ] T114 Create grading fee settings template in `src/main/resources/templates/settings/grading-fees.html`
   - Dependencies: T112, T076, T090, T091
   - Verification: Page allows owner/admin to create or update PSA fee and turnaround records
@@ -745,18 +787,18 @@
   - Status: Later-v1
 
 - [ ] T115 Add settings UI tests in `src/test/java/com/pokemonportfolio/config/controller/SettingsControllerTest.java`
-  - Dependencies: T112, T113, T114
-  - Verification: Tests confirm settings pages are protected and secret values are not rendered
+  - Dependencies: T112, T113, T114, T133
+  - Verification: Tests confirm settings pages are protected, provider toggles require authorization, and secret values are not rendered
   - Related: NFR-003, NFR-004
   - Status: Later-v1
 
 ## Phase 27: Testing
 
-- [ ] T116 Add consolidated business rule unit test suite in `src/test/java/com/pokemonportfolio/businessrules/BusinessRuleRegressionTest.java`
+- [ ] T116 Add final cross-module smoke/regression suite in `src/test/java/com/pokemonportfolio/businessrules/BusinessRuleRegressionTest.java`
   - Dependencies: T050, T055, T059, T065, T070, T074, T079, T083
-  - Verification: Suite covers price calculation, confidence, currency conversion, snapshot preservation, portfolio valuation, alerts, trade, grading, signal classification, and forecast output
+  - Verification: Suite samples critical cross-module regressions for price calculation, confidence, currency conversion, snapshot preservation, portfolio valuation, alerts, trade, grading, signal classification, and forecast output without duplicating every module-specific business-rule test deeply
   - Related: NFR-006, XXIII-Testing
-  - Status: MVP-critical for completed modules
+  - Status: Later-v1 final regression; MVP-critical only when limited to completed Vertical Slice 1 modules
 
 - [ ] T117 Add repository integration test suite in `src/test/java/com/pokemonportfolio/repository/RepositoryIntegrityTest.java`
   - Dependencies: T012, T023, T029, T035, T045, T051, T056, T060, T066, T071, T075, T080, T084
@@ -770,11 +812,11 @@
   - Related: FR-002, NFR-001, NFR-004
   - Status: MVP-critical for completed routes
 
-- [ ] T119 Add scheduled job integration tests in `src/test/java/com/pokemonportfolio/scheduler/ScheduledJobIntegrationTest.java`
-  - Dependencies: T089
+- [ ] T119 Add full scheduled job integration tests in `src/test/java/com/pokemonportfolio/scheduler/ScheduledJobIntegrationTest.java`
+  - Dependencies: T089, T130
   - Verification: Tests run jobs with mock providers and confirm rerun safety, append-only history, dedupe, and failure resilience
   - Related: FR-019, FR-020, FR-021, FR-022, FR-024, NFR-018
-  - Status: MVP-critical for price/portfolio jobs; later-v1 for full suite
+  - Status: Later-v1 final regression; MVP price/portfolio job coverage is handled by T089
 
 - [ ] T120 Add provider adapter mock contract suite in `src/test/java/com/pokemonportfolio/pricing/provider/ProviderAdapterMockContractTest.java`
   - Dependencies: T039, T043, T053
@@ -782,15 +824,15 @@
   - Related: PR-012, NFR-007, NFR-008
   - Status: MVP-critical
 
-- [ ] T121 Add vertical slice integration test in `src/test/java/com/pokemonportfolio/VerticalSliceOneIntegrationTest.java`
-  - Dependencies: T018, T028, T033, T043, T050, T055, T059, T085, T086, T096, T100, T103
-  - Verification: Test logs in, adds a card, adds it to portfolio, creates mock price snapshot, displays dashboard value in SGD, and confirms historical snapshot exists
+- [X] T121 Add vertical slice integration test in `src/test/java/com/pokemonportfolio/VerticalSliceOneIntegrationTest.java`
+  - Dependencies: T018, T028, T033, T043, T050, T059, T085, T086, T096, T100
+  - Verification: Test logs in, creates or selects an English card through the manual catalogue flow, adds it to portfolio, creates an SGD-only mock price snapshot, displays dashboard value in SGD, and confirms a historical portfolio valuation snapshot exists
   - Related: Vertical Slice 1, AC-001, AC-003, AC-004, AC-005, AC-007, AC-015
   - Status: MVP-critical
 
 ## Phase 28: Documentation and Final Validation
 
-- [ ] T122 Document local setup in `README.md`
+- [X] T122 Document local setup in `README.md`
   - Dependencies: T001, T003, T017
   - Verification: README explains Java 21, PostgreSQL, secure env vars, mock providers, and no live API requirement
   - Related: NFR-003, NFR-008
@@ -798,14 +840,14 @@
 
 - [ ] T123 Update implementation quickstart in `specs/001-portfolio-market-app/quickstart.md`
   - Dependencies: T121
-  - Verification: Quickstart matches implemented commands, login flow, mock price refresh, dashboard, alerts, trade, grading, and forecast validation
-  - Related: AC-001 through AC-017
+  - Verification: Quickstart matches Vertical Slice 1 commands, login flow, manual card/add-to-portfolio flow, SGD-only mock price refresh, dashboard valuation, and portfolio valuation snapshot validation; later modules append their checks as they are completed
+  - Related: AC-001, AC-003, AC-004, AC-005, AC-007, AC-015; later ACs when modules complete
   - Status: MVP-critical for vertical slice; later-v1 for full modules
 
 - [ ] T124 Create constitution compliance checklist in `specs/001-portfolio-market-app/checklists/implementation-readiness.md`
-  - Dependencies: T116, T117, T118, T119, T120, T121
-  - Verification: Checklist confirms personal-use scope, market separation, SGD display, append-only snapshots, provider abstraction, dashboard UI, and test coverage
-  - Related: Constitution v1.1.0
+  - Dependencies: T121, T122, T123
+  - Verification: Checklist confirms Vertical Slice 1 compliance for personal-use authentication, manual card/add-to-portfolio flow, SGD-only mock valuation display, append-only price snapshots, portfolio valuation snapshots, provider abstraction, and dark financial dashboard UI
+  - Related: Constitution v1.1.0, Vertical Slice 1
   - Status: MVP-critical
 
 - [ ] T125 Document future real provider adapter backlog in `docs/future-provider-integrations.md`
@@ -816,8 +858,8 @@
 
 - [ ] T126 Run final validation and record results in `specs/001-portfolio-market-app/checklists/final-validation.md`
   - Dependencies: T121, T122, T123, T124
-  - Verification: Build, tests, vertical slice smoke flow, and UI direction review pass with all values displayed in SGD
-  - Related: SC-001 through SC-008, AC-001 through AC-017
+  - Verification: Vertical Slice 1 build, focused tests, smoke flow, and UI direction review pass for login, manual card creation/selection, add-to-portfolio, SGD-only mock price snapshot, dashboard value in SGD, and historical portfolio valuation snapshot storage; full regression remains T116-T120 after later modules
+  - Related: Vertical Slice 1, SC-001, SC-002, AC-001, AC-003, AC-004, AC-005, AC-007, AC-015
   - Status: MVP-critical for vertical slice; later-v1 for all modules
 
 ## Dependency Graph
@@ -828,20 +870,22 @@ Vertical Slice 1 MVP path:
 3. Authentication: T013-T018
 4. Core domain: T019-T022
 5. Catalogue and portfolio: T023-T034
-6. Provider abstraction/mock pricing/exchange: T035-T055
+6. Provider abstraction and SGD-only mock pricing: T035-T050
 7. Portfolio valuation: T056-T059
-8. Price/portfolio scheduled jobs: T084-T086, T089 partial
-9. Dark UI and dashboard/search/portfolio/history pages: T090-T103
-10. Vertical slice test and docs: T121-T124, T126 partial
+8. Price/portfolio scheduled jobs: T084-T086, T089
+9. Dark UI and dashboard/search/portfolio pages: T090-T100
+10. Vertical slice test and docs: T121-T124, T126
 
 Expansion order after Vertical Slice 1:
-1. Market Signal Engine: T060-T065
-2. Alerts: T066-T070, T087, T104-T105
-3. Trade analyzer: T071-T074, T106-T107
-4. Grading analyzer: T075-T079, T108-T109, T114
-5. Forecasting: T080-T083, T110-T111
-6. Settings and provider configuration: T112-T115
-7. Full regression and final validation: T116-T120, T123-T126
+1. Exchange-rate conversion, manual price fallback, and price history: T051-T055, T101-T103, T127, T131-T132
+2. Item-level portfolio contribution: T128
+3. Market Signal Engine: T060-T065
+4. Alerts: T066-T070, T087, T104-T105
+5. Trade analyzer: T071-T074, T106-T107
+6. Grading analyzer: T075-T079, T108-T109, T114, T129
+7. Forecasting: T080-T083, T110-T111
+8. Settings and provider configuration: T112-T115, T133
+9. Full regression and final validation: T116-T120, T130, T123-T126
 
 Future-phase tasks:
 - T040 and T125 explicitly keep real TCGPlayer, eBay, and PriceCharting adapter work outside the local-first MVP.
@@ -854,9 +898,10 @@ Future-phase tasks:
 - Phase 4: T020 and T021 can run in parallel after T019.
 - Phase 5: T024 and T027 can run after T023.
 - Phase 7/8: T040 can run in parallel with T038/T039; mock fixture work T042 can run with T043 setup after T041.
+- Phase 10/21: T127 follows currency conversion T054-T055; T131-T132 can run after T101 and shared UI fragments exist.
 - Phase 12: T061, T062, and T063 can run in parallel after T060.
 - UI phases: T098, T101, T104, T106, T108, T110, and T113 can be designed in parallel after the shared layout T090-T092 and relevant controllers exist.
-- Testing phase: T116-T120 can be split by module after their dependencies complete.
+- Testing phase: T116-T120 can be split by module after their dependencies complete; T116 remains aggregate smoke/regression rather than duplicate deep module coverage.
 
 ## Independent Test Criteria by User Story
 
@@ -871,14 +916,16 @@ Future-phase tasks:
 
 ## Final Implementation Order Recommendation
 
-1. Complete Vertical Slice 1 first: T001-T059, T084-T086, T089 partial, T090-T103, T121-T124, and T126 partial.
-2. Add Market Signal Engine: T060-T065 so item detail can separate Market Price from Expected Price.
-3. Add Alerts: T066-T070, T087, T104-T105.
-4. Add Trade Analyzer: T071-T074, T106-T107.
-5. Add Grading Analyzer: T075-T079, T108-T109, T114.
-6. Add Forecasting: T080-T083, T110-T111.
-7. Add Settings and full regression coverage: T112-T120.
-8. Finish documentation and full final validation: T123-T126.
+1. Complete independently executable Vertical Slice 1 first: T001-T050, T056-T059, T084-T086, T089, T090-T100, T121-T124, and T126.
+2. Add exchange-rate conversion, manual price fallback, and price history: T051-T055, T101-T103, T127, T131-T132.
+3. Add item-level portfolio contribution: T128.
+4. Add Market Signal Engine: T060-T065 so item detail can separate Market Price from Expected Price.
+5. Add Alerts: T066-T070, T087, T104-T105.
+6. Add Trade Analyzer: T071-T074, T106-T107.
+7. Add Grading Analyzer: T075-T079, T108-T109, T114, T129.
+8. Add Forecasting: T080-T083, T110-T111.
+9. Add Settings, provider toggles, and full regression coverage: T112-T120, T130, T133.
+10. Finish documentation and full final validation updates: T123-T126.
 
 ## Risks and Scope Notes
 
