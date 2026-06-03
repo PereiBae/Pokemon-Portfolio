@@ -1,16 +1,19 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head('Add Card')}"></head>
+<head th:replace="~{fragments/layout :: head('Create Custom Card')}"></head>
 <body>
 <div class="app-shell">
     <header th:replace="~{fragments/layout :: topbar}"></header>
     <main class="page">
         <div class="page-header">
             <div>
-                <h1>Add Card</h1>
-                <p class="subtle">Create an English card record before adding a specific owned copy.</p>
+                <h1>Create Custom / Unverified Card</h1>
+                <p class="subtle">Create an English card record when the official catalogue is unavailable.</p>
             </div>
         </div>
+        <section class="card message-card">
+            <p class="warning">Manual cards are unverified and may not have reliable pricing or analytics.</p>
+        </section>
         <section class="card">
             <form th:action="@{/cards}" th:object="${cardForm}" method="post" class="form-grid">
                 <label>
@@ -38,8 +41,8 @@
                     </select>
                 </label>
                 <div class="actions">
-                    <button class="primary" type="submit">Save Card</button>
-                    <a class="button" th:href="@{/dashboard}">Cancel</a>
+                    <button class="primary" type="submit">Save Unverified Card</button>
+                    <a class="button" th:href="@{/catalog/search}">Official Catalogue</a>
                 </div>
             </form>
         </section>
@@ -47,4 +50,3 @@
 </div>
 </body>
 </html>
-

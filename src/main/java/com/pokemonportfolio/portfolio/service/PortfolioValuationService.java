@@ -86,6 +86,9 @@ public class PortfolioValuationService {
                 ownedItem.getCard().getName(),
                 ownedItem.getCard().getPokemonSet().getName(),
                 ownedItem.getCard().getCardNumber(),
+                ownedItem.getOwnedVariant().getLabel(),
+                ownedItem.getCard().getVerificationStatus().getLabel(),
+                ownedItem.getCard().getExternalImageSmallUrl(),
                 ownedItem.getCondition().getLabel(),
                 ownedItem.getPurchasePriceSgd(),
                 MoneyCalculationSupport.money(marketValue),
@@ -93,4 +96,3 @@ public class PortfolioValuationService {
                 confidence);
     }
 }
-

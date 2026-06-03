@@ -27,6 +27,7 @@ class FlywayMigrationTest {
                 "card",
                 "owned_item",
                 "price_snapshot",
+                "exchange_rate_snapshot",
                 "portfolio_valuation_snapshot");
 
         try (Connection connection = dataSource.getConnection()) {
@@ -39,4 +40,3 @@ class FlywayMigrationTest {
         }
     }
 }
-

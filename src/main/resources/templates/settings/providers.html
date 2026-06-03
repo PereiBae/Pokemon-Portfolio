@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Provider Settings')}"></head>
+<body>
+<div class="app-shell">
+    <header th:replace="~{fragments/layout :: topbar}"></header>
+    <main class="page">
+        <div class="page-header">
+            <div>
+                <h1>Provider Settings</h1>
+                <p class="subtle">Local provider controls for mock and manual pricing. Real providers remain disabled by default.</p>
+            </div>
+        </div>
+        <section class="card">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Provider</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="provider : ${providers}">
+                    <td th:text="${provider.label}">Provider</td>
+                    <td th:text="${provider.realProvider ? 'External placeholder' : 'Local'}">Local</td>
+                    <td>
+                        <span th:class="${provider.enabled ? 'positive' : 'subtle'}" th:text="${provider.statusLabel}">Enabled</span>
+                    </td>
+                    <td>
+                        <form th:if="${provider.toggleable}" th:action="@{/settings/providers}" method="post">
+                            <input type="hidden" name="providerKey" th:value="${provider.key}">
+                            <input type="hidden" name="enabled" th:value="${!provider.enabled}">
+                            <button type="submit" th:text="${provider.enabled ? 'Disable' : 'Enable'}">Toggle</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</div>
+</body>
+</html>

@@ -15,12 +15,19 @@
             <form th:action="@{/portfolio/items}" th:object="${ownedItemForm}" method="post" class="form-grid">
                 <label>
                     Card
-	                    <select th:field="*{cardId}" required>
-	                        <option value="">Select a card</option>
-	                        <option th:each="card : ${cardOptions}" th:value="${card.id}"
-	                                th:text="${card.displayLabel}">Card</option>
-	                    </select>
-	                </label>
+                    <select th:field="*{cardId}" required>
+                        <option value="">Select a card</option>
+                        <option th:each="card : ${cardOptions}" th:value="${card.id}"
+                                th:text="${card.displayLabel}">Card</option>
+                    </select>
+                </label>
+                <label>
+                    Owned Variant
+                    <select th:field="*{variant}">
+                        <option value="">Use card default</option>
+                        <option th:each="variant : ${variants}" th:value="${variant}" th:text="${variant.label}">Standard</option>
+                    </select>
+                </label>
                 <label>
                     Condition
                     <select th:field="*{condition}">
@@ -55,9 +62,44 @@
                 </label>
                 <div class="actions">
                     <button class="primary" type="submit">Add Holding</button>
-                    <a class="button" th:href="@{/cards/new}">Create Another Card</a>
+                    <a class="button" th:href="@{/catalog/search}">Search Official Catalogue</a>
+                    <a class="button" th:href="@{/cards/new}">Create Custom Card</a>
                 </div>
             </form>
+        </section>
+        <section class="card">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Card</th>
+                    <th>Set</th>
+                    <th>Available Variants</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${cardOptions.isEmpty()}">
+                    <td colspan="4" class="subtle">No cards available.</td>
+                </tr>
+                <tr th:each="card : ${cardOptions}">
+                    <td class="catalog-card-cell">
+                        <div class="card-cell-content">
+                            <img class="card-detail-thumb" th:if="${card.imageLargeUrl != null}" th:src="${card.imageLargeUrl}" th:alt="${card.name}">
+                            <img class="card-thumb" th:if="${card.imageLargeUrl == null and card.imageSmallUrl != null}" th:src="${card.imageSmallUrl}" th:alt="${card.name}">
+                            <span class="image-placeholder" th:if="${card.imageLargeUrl == null and card.imageSmallUrl == null}">Image not available</span>
+                            <span th:text="|${card.name} #${card.cardNumber}|">Card</span>
+                        </div>
+                    </td>
+                    <td th:text="${card.setName}">Set</td>
+                    <td th:text="${card.availableVariantLabels}">Standard</td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${card.verificationStatus.name() == 'VERIFIED'} ? ' positive-badge' : ' muted-badge'"
+                              th:text="${card.verificationStatus.label}">Verified</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
         </section>
     </main>
 </div>

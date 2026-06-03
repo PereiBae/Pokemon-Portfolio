@@ -47,6 +47,7 @@ class PortfolioControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Umbreon")))
                 .andExpect(content().string(containsString("VS1 Add Page Test")))
+                .andExpect(content().string(containsString("Owned Variant")))
                 .andExpect(content().string(containsString("Alternate Art")));
     }
 }

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Manual Price Entry')}"></head>
+<body>
+<div class="app-shell">
+    <header th:replace="~{fragments/layout :: topbar}"></header>
+    <main class="page">
+        <div class="page-header">
+            <div>
+                <h1>Manual Price Entry</h1>
+                <p class="subtle">Local fallback pricing with SGD conversion audit fields.</p>
+            </div>
+        </div>
+        <section class="card">
+            <p th:if="${param.success}" class="positive">Manual price snapshot stored.</p>
+            <form th:action="@{/pricing/manual-entry}" th:object="${manualPriceEntryForm}" method="post" class="form-grid">
+                <p th:if="${#fields.hasGlobalErrors()}" class="error" th:each="err : ${#fields.globalErrors()}" th:text="${err}">Error</p>
+                <label>
+                    Portfolio Item
+                    <select th:field="*{ownedItemId}">
+                        <option value="">Optional portfolio item</option>
+                        <option th:each="item : ${ownedItemOptions}" th:value="${item.ownedItemId}"
+                                th:text="${item.displayLabel}">Owned item</option>
+                    </select>
+                </label>
+                <label>
+                    Card
+                    <select th:field="*{cardId}">
+                        <option value="">Select a card if no portfolio item is selected</option>
+                        <option th:each="card : ${cardOptions}" th:value="${card.id}"
+                                th:text="${card.displayLabel}">Card</option>
+                    </select>
+                </label>
+                <label>
+                    Source Provider Label
+                    <input th:field="*{providerName}" maxlength="120" placeholder="MANUAL">
+                </label>
+                <label>
+                    Raw Market Price
+                    <input th:field="*{sourcePrice}" type="number" min="0.01" step="0.01" required>
+                </label>
+                <label>
+                    Source Currency
+                    <select th:field="*{sourceCurrency}">
+                        <option th:each="currency : ${currencies}" th:value="${currency}" th:text="${currency}">SGD</option>
+                    </select>
+                </label>
+                <label>
+                    Exchange Rate To SGD
+                    <input th:field="*{exchangeRateUsed}" type="number" min="0.00000001" step="0.00000001" required>
+                </label>
+                <label>
+                    Calculated Market Price (SGD)
+                    <input th:field="*{marketPriceSgd}" type="number" min="0.01" step="0.01" required>
+                </label>
+                <label>
+                    Confidence Rating
+                    <select th:field="*{confidenceRating}">
+                        <option th:each="confidence : ${confidenceRatings}" th:value="${confidence}" th:text="${confidence}">LOW</option>
+                    </select>
+                </label>
+                <label>
+                    Notes
+                    <textarea th:field="*{notes}" rows="3" maxlength="900"></textarea>
+                </label>
+                <div class="actions">
+                    <button class="primary" type="submit">Store Snapshot</button>
+                    <a class="button" th:href="@{/portfolio}">Portfolio</a>
+                </div>
+            </form>
+        </section>
+    </main>
+</div>
+</body>
+</html>

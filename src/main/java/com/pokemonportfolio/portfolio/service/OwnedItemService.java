@@ -3,6 +3,7 @@ package com.pokemonportfolio.portfolio.service;
 import com.pokemonportfolio.auth.entity.AppUser;
 import com.pokemonportfolio.catalog.entity.Card;
 import com.pokemonportfolio.catalog.service.CardService;
+import com.pokemonportfolio.config.domain.CardVariant;
 import com.pokemonportfolio.config.domain.GradedStatus;
 import com.pokemonportfolio.portfolio.entity.OwnedItem;
 import com.pokemonportfolio.portfolio.repository.OwnedItemRepository;
@@ -29,6 +30,7 @@ public class OwnedItemService {
         OwnedItem item = new OwnedItem(
                 owner,
                 card,
+                selectedVariant(card, form),
                 form.getCondition(),
                 MoneyCalculationSupport.money(form.getPurchasePriceSgd()),
                 form.getPurchaseDate(),
@@ -44,6 +46,19 @@ public class OwnedItemService {
         return ownedItemRepository.findByOwnerAndArchivedAtIsNullOrderByCreatedAtDesc(owner);
     }
 
+    @Transactional(readOnly = true)
+    public List<OwnedItemOptionView> listActiveItemOptions(AppUser owner) {
+        return listActiveItems(owner).stream()
+                .map(OwnedItemOptionView::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public OwnedItem requireActiveItemForOwner(AppUser owner, Long ownedItemId) {
+        return ownedItemRepository.findByIdAndOwnerAndArchivedAtIsNull(ownedItemId, owner)
+                .orElseThrow(() -> new IllegalArgumentException("Portfolio item not found"));
+    }
+
     private void validateGradingFields(OwnedItemForm form) {
         if (form.getGradedStatus() == GradedStatus.UNGRADED && form.getPsaGrade() != null) {
             throw new IllegalArgumentException("PSA grade can only be set for PSA graded cards");
@@ -53,8 +68,14 @@ public class OwnedItemService {
         }
     }
 
+    private CardVariant selectedVariant(Card card, OwnedItemForm form) {
+        if (form.getVariant() != null) {
+            return form.getVariant();
+        }
+        return card.getDefaultOwnedVariant();
+    }
+
     private String blankToNull(String value) {
         return value == null || value.isBlank() ? null : value.trim();
     }
 }
-

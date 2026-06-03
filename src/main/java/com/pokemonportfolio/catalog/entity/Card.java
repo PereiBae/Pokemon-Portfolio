@@ -1,7 +1,9 @@
 package com.pokemonportfolio.catalog.entity;
 
 import com.pokemonportfolio.config.domain.CardVariant;
+import com.pokemonportfolio.config.domain.CatalogSource;
 import com.pokemonportfolio.config.domain.LanguageMarket;
+import com.pokemonportfolio.config.domain.VerificationStatus;
 import com.pokemonportfolio.config.entity.AuditableEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,6 +16,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.OffsetDateTime;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "card")
@@ -44,6 +50,35 @@ public class Card extends AuditableEntity {
     @Column(nullable = false)
     private boolean active = true;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "catalog_source", nullable = false)
+    private CatalogSource catalogSource = CatalogSource.MANUAL;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "verification_status", nullable = false)
+    private VerificationStatus verificationStatus = VerificationStatus.UNVERIFIED;
+
+    @Column(name = "external_card_id", length = 120)
+    private String externalCardId;
+
+    @Column(name = "external_image_url", length = 1000)
+    private String externalImageUrl;
+
+    @Column(name = "external_image_large_url", length = 1000)
+    private String externalImageLargeUrl;
+
+    @Column(name = "external_card_url", length = 1000)
+    private String externalCardUrl;
+
+    @Column(length = 120)
+    private String rarity;
+
+    @Column(name = "available_variant_codes", length = 500, nullable = false)
+    private String availableVariantCodes = CardVariant.STANDARD.name();
+
+    @Column(name = "last_synced_at")
+    private OffsetDateTime lastSyncedAt;
+
     protected Card() {
     }
 
@@ -53,6 +88,7 @@ public class Card extends AuditableEntity {
         this.cardNumber = cardNumber;
         this.languageMarket = languageMarket;
         this.variant = variant;
+        this.availableVariantCodes = serializeVariants(List.of(variant));
     }
 
     public Long getId() {
@@ -83,8 +119,96 @@ public class Card extends AuditableEntity {
         return active;
     }
 
+    public CatalogSource getCatalogSource() {
+        return catalogSource;
+    }
+
+    public VerificationStatus getVerificationStatus() {
+        return verificationStatus;
+    }
+
+    public String getExternalCardId() {
+        return externalCardId;
+    }
+
+    public String getExternalImageUrl() {
+        return externalImageUrl;
+    }
+
+    public String getExternalImageSmallUrl() {
+        return externalImageUrl;
+    }
+
+    public String getExternalImageLargeUrl() {
+        return externalImageLargeUrl;
+    }
+
+    public String getExternalCardUrl() {
+        return externalCardUrl;
+    }
+
+    public String getRarity() {
+        return rarity;
+    }
+
+    public List<CardVariant> getAvailableVariants() {
+        if (availableVariantCodes == null || availableVariantCodes.isBlank()) {
+            return List.of(variant);
+        }
+        return Arrays.stream(availableVariantCodes.split(","))
+                .map(String::trim)
+                .filter(code -> !code.isBlank())
+                .map(CardVariant::valueOf)
+                .distinct()
+                .toList();
+    }
+
+    public CardVariant getDefaultOwnedVariant() {
+        List<CardVariant> availableVariants = getAvailableVariants();
+        if (availableVariants.isEmpty()) {
+            return variant;
+        }
+        return availableVariants.getFirst();
+    }
+
+    public OffsetDateTime getLastSyncedAt() {
+        return lastSyncedAt;
+    }
+
+    public void markVerified(
+            CatalogSource catalogSource,
+            String externalCardId,
+            String externalImageSmallUrl,
+            String externalImageLargeUrl,
+            String externalCardUrl,
+            String rarity,
+            List<CardVariant> availableVariants,
+            OffsetDateTime lastSyncedAt) {
+        this.catalogSource = catalogSource;
+        this.verificationStatus = VerificationStatus.VERIFIED;
+        this.externalCardId = externalCardId;
+        this.externalImageUrl = externalImageSmallUrl;
+        this.externalImageLargeUrl = externalImageLargeUrl;
+        this.externalCardUrl = externalCardUrl;
+        this.rarity = rarity;
+        this.availableVariantCodes = serializeVariants(availableVariants == null || availableVariants.isEmpty()
+                ? List.of(CardVariant.STANDARD)
+                : availableVariants);
+        this.lastSyncedAt = lastSyncedAt;
+    }
+
+    public void moveToSet(PokemonSet pokemonSet) {
+        this.pokemonSet = pokemonSet;
+    }
+
     public String getDisplayName() {
         return name + " #" + cardNumber;
     }
-}
 
+    private String serializeVariants(List<CardVariant> variants) {
+        return variants.stream()
+                .distinct()
+                .map(CardVariant::name)
+                .collect(Collectors.joining(","));
+    }
+}

@@ -10,14 +10,16 @@
                 <h1>Portfolio</h1>
                 <p class="subtle">Owned card copies are listed independently.</p>
             </div>
-            <a class="button primary" th:href="@{/cards/new}">Add Card</a>
+            <a class="button primary" th:href="@{/catalog/search}">Add Verified Card</a>
         </div>
         <section class="card">
             <table class="table">
                 <thead>
                 <tr>
                     <th>Card</th>
+                    <th>Status</th>
                     <th>Set</th>
+                    <th>Variant</th>
                     <th>Condition</th>
                     <th>Purchase</th>
                     <th>Market</th>
@@ -27,11 +29,23 @@
                 </thead>
                 <tbody>
                 <tr th:if="${summary.items.isEmpty()}">
-                    <td colspan="7" class="subtle">No portfolio records yet.</td>
+                    <td colspan="9" class="subtle">No portfolio records yet.</td>
                 </tr>
                 <tr th:each="item : ${summary.items}">
-                    <td th:text="|${item.cardName} #${item.cardNumber}|">Card</td>
+                    <td class="catalog-card-cell">
+                        <div class="card-cell-content">
+                            <img class="card-thumb" th:if="${item.imageSmallUrl != null}" th:src="${item.imageSmallUrl}" th:alt="${item.cardName}">
+                            <span class="image-placeholder" th:if="${item.imageSmallUrl == null}">Image not available</span>
+                            <span th:text="|${item.cardName} #${item.cardNumber}|">Card</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${item.verificationStatus == 'Verified'} ? ' positive-badge' : ' muted-badge'"
+                              th:text="${item.verificationStatus}">Verified</span>
+                    </td>
                     <td th:text="${item.setName}">Set</td>
+                    <td th:text="${item.variant}">Standard</td>
                     <td th:text="${item.condition}">Condition</td>
                     <td th:text="|SGD ${#numbers.formatDecimal(item.purchasePriceSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
                     <td th:text="|SGD ${#numbers.formatDecimal(item.marketValueSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
@@ -46,4 +60,3 @@
 </div>
 </body>
 </html>
-

@@ -4,7 +4,10 @@ import com.pokemonportfolio.catalog.entity.Card;
 import com.pokemonportfolio.catalog.entity.PokemonSet;
 import com.pokemonportfolio.catalog.repository.CardRepository;
 import com.pokemonportfolio.catalog.repository.PokemonSetRepository;
+import com.pokemonportfolio.config.domain.CardVariant;
+import com.pokemonportfolio.config.domain.CatalogSource;
 import com.pokemonportfolio.config.domain.LanguageMarket;
+import java.time.OffsetDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +41,21 @@ public class CardService {
         return cardRepository.save(card);
     }
 
+    @Transactional
+    public Card importOfficialCard(OfficialCardSearchResult result) {
+        if (result.getLanguageMarket() != LanguageMarket.ENGLISH) {
+            throw new IllegalArgumentException("Only English official cards are supported in this phase");
+        }
+        if (result.getSource() != CatalogSource.POKEMON_TCG_API) {
+            throw new IllegalArgumentException("Unsupported official catalogue source");
+        }
+        PokemonSet pokemonSet = findOrCreateOfficialSet(result);
+        return cardRepository
+                .findByCatalogSourceAndExternalCardId(result.getSource(), result.getExternalCardId())
+                .map(existing -> updateVerifiedMetadata(existing, result, pokemonSet))
+                .orElseGet(() -> importOrPromoteByIdentity(result, pokemonSet));
+    }
+
     @Transactional(readOnly = true)
     public Card requireCard(Long id) {
         return cardRepository.findById(id)
@@ -60,5 +78,73 @@ public class CardService {
                 .stream()
                 .map(CardOptionView::from)
                 .toList();
+    }
+
+    private Card importOrPromoteByIdentity(OfficialCardSearchResult result, PokemonSet pokemonSet) {
+        return cardRepository
+                .findByIdentity(
+                        result.getName().trim(),
+                        result.getSetName().trim(),
+                        result.getCardNumber().trim(),
+                        LanguageMarket.ENGLISH,
+                        CardVariant.STANDARD)
+                .map(existing -> updateVerifiedMetadata(existing, result, pokemonSet))
+                .orElseGet(() -> createVerifiedCard(result, pokemonSet));
+    }
+
+    private Card createVerifiedCard(OfficialCardSearchResult result, PokemonSet pokemonSet) {
+        Card card = new Card(
+                pokemonSet,
+                result.getName().trim(),
+                result.getCardNumber().trim(),
+                LanguageMarket.ENGLISH,
+                CardVariant.STANDARD);
+        updateVerifiedMetadata(card, result, pokemonSet);
+        return cardRepository.save(card);
+    }
+
+    private Card updateVerifiedMetadata(Card card, OfficialCardSearchResult result, PokemonSet pokemonSet) {
+        card.moveToSet(pokemonSet);
+        card.markVerified(
+                result.getSource(),
+                result.getExternalCardId(),
+                result.getImageSmallUrl(),
+                result.getImageLargeUrl(),
+                result.getExternalCardUrl(),
+                result.getRarity(),
+                result.getAvailableVariants(),
+                OffsetDateTime.now());
+        return cardRepository.save(card);
+    }
+
+    private PokemonSet findOrCreateOfficialSet(OfficialCardSearchResult result) {
+        String externalSetId = blankToNull(result.getExternalSetId());
+        if (externalSetId != null) {
+            return pokemonSetRepository
+                    .findByExternalSetIdAndLanguageMarket(externalSetId, LanguageMarket.ENGLISH)
+                    .map(existing -> updateOfficialSet(existing, result))
+                    .orElseGet(() -> findByNameOrCreateOfficialSet(result));
+        }
+        return findByNameOrCreateOfficialSet(result);
+    }
+
+    private PokemonSet findByNameOrCreateOfficialSet(OfficialCardSearchResult result) {
+        return pokemonSetRepository
+                .findByNameIgnoreCaseAndLanguageMarket(result.getSetName().trim(), LanguageMarket.ENGLISH)
+                .map(existing -> updateOfficialSet(existing, result))
+                .orElseGet(() -> updateOfficialSet(new PokemonSet(result.getSetName().trim(), LanguageMarket.ENGLISH), result));
+    }
+
+    private PokemonSet updateOfficialSet(PokemonSet pokemonSet, OfficialCardSearchResult result) {
+        pokemonSet.markOfficial(
+                blankToNull(result.getExternalSetId()),
+                blankToNull(result.getSetSeries()),
+                result.getSetReleaseDate(),
+                OffsetDateTime.now());
+        return pokemonSetRepository.save(pokemonSet);
+    }
+
+    private String blankToNull(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
     }
 }

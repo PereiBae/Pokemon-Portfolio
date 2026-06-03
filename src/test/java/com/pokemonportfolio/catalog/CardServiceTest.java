@@ -6,7 +6,9 @@ import com.pokemonportfolio.catalog.entity.Card;
 import com.pokemonportfolio.catalog.service.CardForm;
 import com.pokemonportfolio.catalog.service.CardService;
 import com.pokemonportfolio.config.domain.CardVariant;
+import com.pokemonportfolio.config.domain.CatalogSource;
 import com.pokemonportfolio.config.domain.LanguageMarket;
+import com.pokemonportfolio.config.domain.VerificationStatus;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -37,6 +39,9 @@ class CardServiceTest {
         assertThat(card.getPokemonSet().getName()).isEqualTo("Scarlet & Violet Promos");
         assertThat(card.getLanguageMarket()).isEqualTo(LanguageMarket.ENGLISH);
         assertThat(card.getVariant()).isEqualTo(CardVariant.PROMO);
+        assertThat(card.getAvailableVariants()).containsExactly(CardVariant.PROMO);
+        assertThat(card.getDefaultOwnedVariant()).isEqualTo(CardVariant.PROMO);
+        assertThat(card.getCatalogSource()).isEqualTo(CatalogSource.MANUAL);
+        assertThat(card.getVerificationStatus()).isEqualTo(VerificationStatus.UNVERIFIED);
     }
 }
-

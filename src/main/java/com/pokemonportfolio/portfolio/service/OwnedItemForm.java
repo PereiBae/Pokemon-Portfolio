@@ -1,6 +1,7 @@
 package com.pokemonportfolio.portfolio.service;
 
 import com.pokemonportfolio.config.domain.CardCondition;
+import com.pokemonportfolio.config.domain.CardVariant;
 import com.pokemonportfolio.config.domain.GradedStatus;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
@@ -12,6 +13,8 @@ public class OwnedItemForm {
 
     @NotNull
     private Long cardId;
+
+    private CardVariant variant;
 
     @NotNull
     private CardCondition condition = CardCondition.RAW_NEAR_MINT;
@@ -37,6 +40,14 @@ public class OwnedItemForm {
 
     public void setCardId(Long cardId) {
         this.cardId = cardId;
+    }
+
+    public CardVariant getVariant() {
+        return variant;
+    }
+
+    public void setVariant(CardVariant variant) {
+        this.variant = variant;
     }
 
     public CardCondition getCondition() {
@@ -95,4 +106,3 @@ public class OwnedItemForm {
         this.notes = notes;
     }
 }
-

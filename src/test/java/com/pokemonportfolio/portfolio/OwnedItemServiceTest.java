@@ -52,6 +52,18 @@ class OwnedItemServiceTest {
                 .contains("42.00", "45.00");
     }
 
+    @Test
+    void storesSelectedOwnedVariantOnPortfolioRecord() {
+        var owner = appUserRepository.findByUsername("owner@example.com").orElseThrow();
+        Card card = createCard("Scizor", "VS1 Variant Test", "205");
+        OwnedItemForm form = form(card.getId(), "22.00");
+        form.setVariant(CardVariant.REVERSE_HOLO);
+
+        var ownedItem = ownedItemService.addCardToPortfolio(owner, form);
+
+        assertThat(ownedItem.getOwnedVariant()).isEqualTo(CardVariant.REVERSE_HOLO);
+    }
+
     private Card createCard(String name, String setName, String number) {
         CardForm form = new CardForm();
         form.setName(name);
@@ -72,4 +84,3 @@ class OwnedItemServiceTest {
         return form;
     }
 }
-

@@ -4,6 +4,7 @@ import com.pokemonportfolio.auth.entity.AppUser;
 import com.pokemonportfolio.auth.service.CurrentUserService;
 import com.pokemonportfolio.catalog.service.CardService;
 import com.pokemonportfolio.config.domain.CardCondition;
+import com.pokemonportfolio.config.domain.CardVariant;
 import com.pokemonportfolio.config.domain.GradedStatus;
 import com.pokemonportfolio.portfolio.service.OwnedItemForm;
 import com.pokemonportfolio.portfolio.service.PortfolioDashboardService;
@@ -45,9 +46,17 @@ public class PortfolioController {
     }
 
     @GetMapping("/portfolio/add")
-    String addItem(@RequestParam(name = "cardId", required = false) Long cardId, Model model) {
+    String addItem(
+            @RequestParam(name = "cardId", required = false) Long cardId,
+            @RequestParam(name = "variant", required = false) CardVariant variant,
+            Model model) {
         OwnedItemForm form = new OwnedItemForm();
         form.setCardId(cardId);
+        if (variant != null) {
+            form.setVariant(variant);
+        } else if (cardId != null) {
+            form.setVariant(cardService.requireCard(cardId).getDefaultOwnedVariant());
+        }
         prepareAddModel(model, form);
         return "portfolio/add";
     }
@@ -70,6 +79,7 @@ public class PortfolioController {
     private void prepareAddModel(Model model, OwnedItemForm form) {
         model.addAttribute("ownedItemForm", form);
         model.addAttribute("cardOptions", cardService.listEnglishCardOptions());
+        model.addAttribute("variants", CardVariant.values());
         model.addAttribute("conditions", CardCondition.values());
         model.addAttribute("gradedStatuses", GradedStatus.values());
     }

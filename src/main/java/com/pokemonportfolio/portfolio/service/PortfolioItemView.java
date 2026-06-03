@@ -8,6 +8,9 @@ public record PortfolioItemView(
         String cardName,
         String setName,
         String cardNumber,
+        String variant,
+        String verificationStatus,
+        String imageSmallUrl,
         String condition,
         BigDecimal purchasePriceSgd,
         BigDecimal marketValueSgd,
@@ -18,4 +21,3 @@ public record PortfolioItemView(
         return gainLossSgd.compareTo(BigDecimal.ZERO) >= 0;
     }
 }
-

@@ -4,6 +4,10 @@ public enum CardVariant {
     STANDARD("Standard"),
     REVERSE_HOLO("Reverse Holo"),
     HOLO("Holo"),
+    FIRST_EDITION_HOLO("1st Edition Holo"),
+    FIRST_EDITION_NORMAL("1st Edition Normal"),
+    UNLIMITED_HOLO("Unlimited Holo"),
+    UNLIMITED_NORMAL("Unlimited Normal"),
     PROMO("Promo"),
     STAMPED("Stamped"),
     ALTERNATE_ART("Alternate Art"),
@@ -22,4 +26,3 @@ public enum CardVariant {
         return label;
     }
 }
-

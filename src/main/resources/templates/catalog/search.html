@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Official Catalogue')}"></head>
+<body>
+<div class="app-shell">
+    <header th:replace="~{fragments/layout :: topbar}"></header>
+    <main class="page">
+        <div class="page-header">
+            <div>
+                <h1>Search Official Catalogue</h1>
+                <p class="subtle">Import verified English card metadata before adding a holding.</p>
+            </div>
+            <a class="button" th:href="@{/cards/new}">Create Custom / Unverified Card</a>
+        </div>
+
+        <section class="card">
+            <form th:action="@{/catalog/search}" method="get" class="catalog-search-form">
+                <div class="search-row">
+                    <label class="wide-label">
+                        Keyword
+                        <input name="q" th:value="${searchRequest.keyword}" placeholder="Scizor">
+                    </label>
+                    <label>
+                        Page Size
+                        <select name="pageSize">
+                            <option th:each="option : ${pageSizeOptions}"
+                                    th:value="${option}"
+                                    th:selected="${option == searchRequest.pageSize}"
+                                    th:text="${option}">25</option>
+                        </select>
+                    </label>
+                    <button class="primary" type="submit">Search</button>
+                </div>
+                <p class="helper-text">
+                    Search by Pokemon name, set, or card number. For specific cards, try:
+                    <span>Scizor Paldea Evolved 205</span>
+                    or use Advanced Filters.
+                </p>
+                <div class="filter-grid">
+                    <label>
+                        Card Name
+                        <input name="cardName" th:value="${searchRequest.cardName}" placeholder="Scizor">
+                    </label>
+                    <label>
+                        Set Name
+                        <input name="setName" th:value="${searchRequest.setName}" placeholder="Obsidian Flames">
+                    </label>
+                    <label>
+                        Card Number
+                        <input name="cardNumber" th:value="${searchRequest.cardNumber}" placeholder="205">
+                    </label>
+                    <label>
+                        Rarity
+                        <input name="rarity" th:value="${searchRequest.rarity}" placeholder="Illustration Rare">
+                    </label>
+                </div>
+            </form>
+        </section>
+
+        <section class="card message-card" th:if="${catalogError != null}">
+            <p class="error" th:text="${catalogError}">Official catalogue unavailable.</p>
+        </section>
+
+        <section class="card message-card" th:if="${successMessage != null}">
+            <p class="positive" th:text="${successMessage}">Verified card imported.</p>
+        </section>
+
+        <section class="card">
+            <div class="table-toolbar">
+                <div>
+                    <span class="subtle" th:if="${resultsPage.totalCount != null}"
+                          th:text="|${resultsPage.totalCount} official results|">0 official results</span>
+                    <span class="subtle" th:if="${resultsPage.totalCount == null}">Official results</span>
+                </div>
+                <div class="pagination">
+                    <a class="button"
+                       th:classappend="${!resultsPage.hasPrevious()} ? ' disabled' : ''"
+                       th:href="@{/catalog/search(q=${searchRequest.keyword},cardName=${searchRequest.cardName},setName=${searchRequest.setName},cardNumber=${searchRequest.cardNumber},rarity=${searchRequest.rarity},page=${resultsPage.previousPage},pageSize=${resultsPage.pageSize})}">Previous</a>
+                    <span class="page-indicator" th:if="${resultsPage.totalPages != null}"
+                          th:text="|Page ${resultsPage.page} of ${resultsPage.totalPages}|">Page 1 of 1</span>
+                    <span class="page-indicator" th:if="${resultsPage.totalPages == null}"
+                          th:text="|Page ${resultsPage.page}|">Page 1</span>
+                    <a class="button"
+                       th:classappend="${!resultsPage.hasNext()} ? ' disabled' : ''"
+                       th:href="@{/catalog/search(q=${searchRequest.keyword},cardName=${searchRequest.cardName},setName=${searchRequest.setName},cardNumber=${searchRequest.cardNumber},rarity=${searchRequest.rarity},page=${resultsPage.nextPage},pageSize=${resultsPage.pageSize})}">Next</a>
+                </div>
+            </div>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Card</th>
+                    <th>Set</th>
+                    <th>Number</th>
+                    <th>Rarity</th>
+                    <th>Variants</th>
+                    <th>Source</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${results.isEmpty()}">
+                    <td colspan="8" class="subtle">Search official English cards to import verified metadata.</td>
+                </tr>
+                <tr th:each="card : ${results}">
+                    <td>
+                        <div class="card-cell-content">
+                            <img class="card-thumb" th:if="${card.imageSmallUrl != null}" th:src="${card.imageSmallUrl}" th:alt="${card.name}">
+                            <span class="image-placeholder" th:if="${card.imageSmallUrl == null}">Image not available</span>
+                            <div>
+                                <div th:text="${card.name}">Card</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td th:text="${card.setName}">Set</td>
+                    <td th:text="${card.cardNumber}">001</td>
+                    <td th:text="${card.rarity != null ? card.rarity : 'Unknown'}">Rare</td>
+                    <td>
+                        <span class="variant-list" th:text="${card.availableVariantLabels}">Standard</span>
+                    </td>
+                    <td th:text="${card.sourceLabel}">Pokemon TCG API</td>
+                    <td><span class="badge positive-badge">Verified</span></td>
+                    <td>
+                        <div class="table-actions">
+                            <form th:action="@{/catalog/import}" method="post">
+                                <input type="hidden" name="source" th:value="${card.source}">
+                                <input type="hidden" name="externalCardId" th:value="${card.externalCardId}">
+                                <button type="submit">Import</button>
+                            </form>
+                            <form th:action="@{/catalog/import}" method="post" class="portfolio-import-form">
+                                <input type="hidden" name="source" th:value="${card.source}">
+                                <input type="hidden" name="externalCardId" th:value="${card.externalCardId}">
+                                <input type="hidden" name="action" value="portfolio">
+                                <select class="variant-select" name="variant" th:if="${card.hasAvailableVariants()}">
+                                    <option th:each="variant : ${card.availableVariants}"
+                                            th:value="${variant}"
+                                            th:text="${variant.label}">Standard</option>
+                                </select>
+                                <input type="hidden" name="variant" value="STANDARD" th:if="${!card.hasAvailableVariants()}">
+                                <button class="primary" type="submit">Add to Portfolio</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</div>
+</body>
+</html>

@@ -3,6 +3,7 @@ package com.pokemonportfolio.portfolio.entity;
 import com.pokemonportfolio.auth.entity.AppUser;
 import com.pokemonportfolio.catalog.entity.Card;
 import com.pokemonportfolio.config.domain.CardCondition;
+import com.pokemonportfolio.config.domain.CardVariant;
 import com.pokemonportfolio.config.domain.GradedStatus;
 import com.pokemonportfolio.config.entity.AuditableEntity;
 import jakarta.persistence.Column;
@@ -37,6 +38,10 @@ public class OwnedItem extends AuditableEntity {
     private Card card;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "owned_variant", nullable = false)
+    private CardVariant ownedVariant;
+
+    @Enumerated(EnumType.STRING)
     @Column(name = "item_condition", nullable = false)
     private CardCondition condition;
 
@@ -68,6 +73,7 @@ public class OwnedItem extends AuditableEntity {
     public OwnedItem(
             AppUser owner,
             Card card,
+            CardVariant ownedVariant,
             CardCondition condition,
             BigDecimal purchasePriceSgd,
             LocalDate purchaseDate,
@@ -77,6 +83,7 @@ public class OwnedItem extends AuditableEntity {
             String notes) {
         this.owner = owner;
         this.card = card;
+        this.ownedVariant = ownedVariant;
         this.condition = condition;
         this.purchasePriceSgd = purchasePriceSgd;
         this.purchaseDate = purchaseDate;
@@ -96,6 +103,10 @@ public class OwnedItem extends AuditableEntity {
 
     public Card getCard() {
         return card;
+    }
+
+    public CardVariant getOwnedVariant() {
+        return ownedVariant;
     }
 
     public CardCondition getCondition() {
@@ -130,4 +141,3 @@ public class OwnedItem extends AuditableEntity {
         return archivedAt;
     }
 }
-

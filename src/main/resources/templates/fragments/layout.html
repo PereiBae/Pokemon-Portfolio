@@ -11,8 +11,11 @@
     <div class="brand">Pokemon Portfolio Analytics</div>
     <nav class="nav">
         <a th:href="@{/dashboard}">Dashboard</a>
-        <a th:href="@{/cards/new}">Add Card</a>
+        <a th:href="@{/catalog/search}">Official Catalogue</a>
+        <a th:href="@{/cards/new}">Custom Card</a>
         <a th:href="@{/portfolio}">Portfolio</a>
+        <a th:href="@{/pricing/manual-entry}">Manual Price</a>
+        <a th:href="@{/settings/providers}">Providers</a>
         <form th:action="@{/logout}" method="post">
             <button type="submit">Logout</button>
         </form>
@@ -20,4 +23,3 @@
 </header>
 </body>
 </html>
-

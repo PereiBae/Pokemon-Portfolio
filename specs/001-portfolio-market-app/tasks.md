@@ -186,6 +186,42 @@
   - Related: FR-003, FR-004, CA-007, CA-011
   - Status: MVP-critical
 
+- [X] T134 [US2] Add official card catalogue provider abstraction in `src/main/java/com/pokemonportfolio/catalog/provider/CardCatalogueProvider.java`
+  - Dependencies: T023, T024
+  - Verification: Business services depend on a catalogue provider interface and normalized official-card DTOs, not provider-specific response models
+  - Related: FR-003, CA-001, CA-011, NFR-007, NFR-008
+  - Status: MVP-critical before alerts/trade/grading/forecasting
+
+- [X] T135 [US2] Implement Pokemon TCG API card metadata adapter in `src/main/java/com/pokemonportfolio/catalog/provider/PokemonTcgApiCardCatalogueProvider.java`
+  - Dependencies: T134
+  - Verification: Adapter uses WebClient, configurable base URL, optional API key from properties/environment, and maps official English card metadata without ingesting pricing data
+  - Related: FR-003, CA-001, CA-011, NFR-003, NFR-007, NFR-008
+  - Status: MVP-critical before alerts/trade/grading/forecasting
+
+- [X] T136 [US2] Add verified card metadata migration in `src/main/resources/db/migration/V7__card_catalog_verification.sql`
+  - Dependencies: T008, T023
+  - Verification: Migration adds catalog source, verification status, external card ID, image URL, optional external URL, rarity, last synced timestamp, and unique provider/external-id index while preserving existing manual cards as MANUAL/UNVERIFIED
+  - Related: DR-004, CA-001, CA-011, NFR-011
+  - Status: MVP-critical before alerts/trade/grading/forecasting
+
+- [X] T137 [US2] Implement official card search/import service and controller in `src/main/java/com/pokemonportfolio/catalog/service/OfficialCardCatalogueService.java` and `src/main/java/com/pokemonportfolio/catalog/controller/CatalogController.java`
+  - Dependencies: T134, T135, T136, T015
+  - Verification: Authenticated user can search official cards, import a VERIFIED local card, re-import without duplicates, and see a friendly provider-unavailable fallback
+  - Related: FR-003, FR-005, CA-001, CA-011, NFR-007, NFR-010
+  - Status: MVP-critical before alerts/trade/grading/forecasting
+
+- [X] T138 [US2] Add official catalogue UI and unverified manual-card warning in `src/main/resources/templates/catalog/search.html` and `src/main/resources/templates/catalog/add-card.html`
+  - Dependencies: T137, T090, T091
+  - Verification: UI shows official card results with thumbnail, name, set, number, rarity, source, Import/Add to Portfolio actions, verified badges, and a clear warning for custom unverified cards
+  - Related: UI-001, UI-015, CA-011
+  - Status: MVP-critical before alerts/trade/grading/forecasting
+
+- [X] T139 [US2] Add official catalogue provider/service/controller tests in `src/test/java/com/pokemonportfolio/catalog/` and `src/test/java/com/pokemonportfolio/catalog/provider/`
+  - Dependencies: T134, T135, T136, T137, T138
+  - Verification: Tests cover mocked WebClient mapping, official search DTOs, VERIFIED import, duplicate import reuse, manual MANUAL/UNVERIFIED creation, authenticated search page rendering, provider-unavailable friendly error, and add-to-portfolio for imported verified cards
+  - Related: FR-003, FR-005, CA-011, NFR-006, NFR-007, NFR-008
+  - Status: MVP-critical before alerts/trade/grading/forecasting
+
 ## Phase 6: Portfolio Module
 
 - [X] T029 [US2] Create `OwnedItem` entity and repository in `src/main/java/com/pokemonportfolio/portfolio/entity/OwnedItem.java`
@@ -244,7 +280,7 @@
   - Related: PR-013, NFR-009, NFR-010
   - Status: MVP-critical
 
-- [ ] T038 [US4] Add manual price entry fallback service in `src/main/java/com/pokemonportfolio/pricing/service/ManualPriceEntryService.java`
+- [X] T038 [US4] Add manual price entry fallback service in `src/main/java/com/pokemonportfolio/pricing/service/ManualPriceEntryService.java`
   - Dependencies: T035
   - Verification: Service test stores manual price as auditable provider-like input with source note and LOW default confidence
   - Related: PR-002, PR-013, DR-019
@@ -328,7 +364,7 @@
 
 ## Phase 10: Exchange Rate Handling
 
-- [ ] T051 [US4] Create exchange rate snapshot entity and repository in `src/main/java/com/pokemonportfolio/pricing/entity/ExchangeRateSnapshot.java`
+- [X] T051 [US4] Create exchange rate snapshot entity and repository in `src/main/java/com/pokemonportfolio/pricing/entity/ExchangeRateSnapshot.java`
   - Dependencies: T010
   - Verification: Repository test stores USD-to-SGD and other source-to-SGD snapshots with effective timestamps
   - Related: FR-016, DR-018, PR-007
@@ -346,13 +382,13 @@
   - Related: FR-016, NFR-008
   - Status: MVP-critical
 
-- [ ] T054 [US4] Implement currency conversion service in `src/main/java/com/pokemonportfolio/pricing/service/CurrencyConversionService.java`
+- [X] T054 [US4] Implement currency conversion service in `src/main/java/com/pokemonportfolio/pricing/service/CurrencyConversionService.java`
   - Dependencies: T051, T052, T053
   - Verification: Unit tests convert source prices to SGD and reject final display when no auditable rate exists
   - Related: FR-016, PR-007, DR-018, EC-003
   - Status: MVP-critical
 
-- [ ] T055 [US4] Add currency conversion tests in `src/test/java/com/pokemonportfolio/pricing/service/CurrencyConversionServiceTest.java`
+- [X] T055 [US4] Add currency conversion tests in `src/test/java/com/pokemonportfolio/pricing/service/CurrencyConversionServiceTest.java`
   - Dependencies: T054
   - Verification: Tests cover SGD passthrough, USD conversion, missing rate, stale rate, and metadata preservation
   - Related: FR-016, SC-003, SC-004
@@ -686,7 +722,7 @@
   - Related: FR-009, FR-010, UI-007, UI-011, UI-023, AC-006
   - Status: MVP-critical after Vertical Slice 1
 
-- [ ] T131 [US4] Create manual price entry template in `src/main/resources/templates/pricing/manual-entry.html`
+- [X] T131 [US4] Create manual price entry template in `src/main/resources/templates/pricing/manual-entry.html`
   - Dependencies: T090, T091, T092, T101
   - Verification: Page supports source price, source currency, exchange-rate audit fields, source note, confidence metadata, and local fallback submission when external providers are unavailable
   - Related: PR-002, PR-007, PR-013, DR-018, DR-019, UI-016
@@ -698,7 +734,7 @@
   - Related: PR-010, PR-011, AC-006, AC-007
   - Status: MVP-critical after Vertical Slice 1
 
-- [ ] T132 [US4] Add manual price entry service/controller tests in `src/test/java/com/pokemonportfolio/pricing/service/ManualPriceEntryServiceTest.java` and `src/test/java/com/pokemonportfolio/pricing/controller/ManualPriceEntryControllerTest.java`
+- [X] T132 [US4] Add manual price entry service/controller tests in `src/test/java/com/pokemonportfolio/pricing/service/ManualPriceEntryServiceTest.java` and `src/test/java/com/pokemonportfolio/pricing/controller/ManualPriceEntryControllerTest.java`
   - Dependencies: T038, T046, T054, T101, T131
   - Verification: Tests cover GET and POST manual price entry, append-only price snapshot creation, preserved source currency, preserved exchange-rate audit fields, default LOW confidence when appropriate, and local fallback behavior when external providers are unavailable
   - Related: PR-002, PR-007, PR-010, PR-011, PR-013, DR-018, DR-019
@@ -762,19 +798,19 @@
 
 ## Phase 26: Settings UI
 
-- [ ] T112 Add settings controller in `src/main/java/com/pokemonportfolio/config/controller/SettingsController.java`
+- [X] T112 Add settings controller in `src/main/java/com/pokemonportfolio/config/controller/SettingsController.java`
   - Dependencies: T015, T044, T076
   - Verification: Controller test requires authentication/admin role and never exposes secret values
   - Related: NFR-003, NFR-004
   - Status: Later-v1
 
-- [ ] T113 Create provider settings template in `src/main/resources/templates/settings/providers.html`
+- [X] T113 Create provider settings template in `src/main/resources/templates/settings/providers.html`
   - Dependencies: T112, T090, T091
   - Verification: Page shows mock/manual provider status, disabled real provider placeholders, and API key configured/not-configured state without secrets
   - Related: PR-012, NFR-003, NFR-020
   - Status: Later-v1
 
-- [ ] T133 Add provider settings service and POST toggle controller tests in `src/main/java/com/pokemonportfolio/config/service/ProviderSettingsService.java`
+- [X] T133 Add provider settings service and POST toggle controller tests in `src/main/java/com/pokemonportfolio/config/service/ProviderSettingsService.java`
   - Dependencies: T044, T112, T113
   - Verification: Service/controller tests confirm MockPricingProvider is enabled for local development, real providers are disabled by default, POST toggle behavior updates provider enablement, and no secret values are rendered or persisted in plaintext
   - Related: PR-012, NFR-003, NFR-008, NFR-020
@@ -878,14 +914,15 @@ Vertical Slice 1 MVP path:
 
 Expansion order after Vertical Slice 1:
 1. Exchange-rate conversion, manual price fallback, and price history: T051-T055, T101-T103, T127, T131-T132
-2. Item-level portfolio contribution: T128
-3. Market Signal Engine: T060-T065
-4. Alerts: T066-T070, T087, T104-T105
-5. Trade analyzer: T071-T074, T106-T107
-6. Grading analyzer: T075-T079, T108-T109, T114, T129
-7. Forecasting: T080-T083, T110-T111
-8. Settings and provider configuration: T112-T115, T133
-9. Full regression and final validation: T116-T120, T130, T123-T126
+2. Official English card catalogue API integration: T134-T139
+3. Item-level portfolio contribution: T128
+4. Market Signal Engine: T060-T065
+5. Alerts: T066-T070, T087, T104-T105
+6. Trade analyzer: T071-T074, T106-T107
+7. Grading analyzer: T075-T079, T108-T109, T114, T129
+8. Forecasting: T080-T083, T110-T111
+9. Settings and provider configuration: T112-T115, T133
+10. Full regression and final validation: T116-T120, T130, T123-T126
 
 Future-phase tasks:
 - T040 and T125 explicitly keep real TCGPlayer, eBay, and PriceCharting adapter work outside the local-first MVP.
@@ -918,14 +955,15 @@ Future-phase tasks:
 
 1. Complete independently executable Vertical Slice 1 first: T001-T050, T056-T059, T084-T086, T089, T090-T100, T121-T124, and T126.
 2. Add exchange-rate conversion, manual price fallback, and price history: T051-T055, T101-T103, T127, T131-T132.
-3. Add item-level portfolio contribution: T128.
-4. Add Market Signal Engine: T060-T065 so item detail can separate Market Price from Expected Price.
-5. Add Alerts: T066-T070, T087, T104-T105.
-6. Add Trade Analyzer: T071-T074, T106-T107.
-7. Add Grading Analyzer: T075-T079, T108-T109, T114, T129.
-8. Add Forecasting: T080-T083, T110-T111.
-9. Add Settings, provider toggles, and full regression coverage: T112-T120, T130, T133.
-10. Finish documentation and full final validation updates: T123-T126.
+3. Add official English card catalogue API integration: T134-T139.
+4. Add item-level portfolio contribution: T128.
+5. Add Market Signal Engine: T060-T065 so item detail can separate Market Price from Expected Price.
+6. Add Alerts: T066-T070, T087, T104-T105.
+7. Add Trade Analyzer: T071-T074, T106-T107.
+8. Add Grading Analyzer: T075-T079, T108-T109, T114, T129.
+9. Add Forecasting: T080-T083, T110-T111.
+10. Add Settings, provider toggles, and full regression coverage: T112-T120, T130, T133.
+11. Finish documentation and full final validation updates: T123-T126.
 
 ## Risks and Scope Notes
 

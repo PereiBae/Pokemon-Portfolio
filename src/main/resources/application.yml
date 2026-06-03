@@ -19,10 +19,19 @@ app:
     username: ${APP_OWNER_USERNAME:owner@example.com}
     display-name: ${APP_OWNER_DISPLAY_NAME:Portfolio Owner}
     bootstrap-password: ${APP_OWNER_BOOTSTRAP_PASSWORD:}
+  catalog:
+    providers:
+      pokemon-tcg-api:
+        enabled: ${POKEMON_TCG_API_ENABLED:true}
+        base-url: ${POKEMON_TCG_API_BASE_URL:https://api.pokemontcg.io/v2}
+        api-key: ${POKEMON_TCG_API_KEY:}
   pricing:
     providers:
       mock-enabled: true
+      manual-entry-enabled: true
+      tcg-player-enabled: false
+      ebay-enabled: false
+      price-charting-enabled: false
   jobs:
     price-refresh-cron: "0 0 2 * * *"
     portfolio-valuation-cron: "0 15 2 * * *"
-

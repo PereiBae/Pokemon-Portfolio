@@ -15,6 +15,16 @@ app:
     username: owner@example.com
     display-name: Test Owner
     bootstrap-password: 1997pwner
+  catalog:
+    providers:
+      pokemon-tcg-api:
+        enabled: false
+        base-url: https://example.test/pokemontcg
+        api-key:
   pricing:
     providers:
       mock-enabled: true
+      manual-entry-enabled: true
+      tcg-player-enabled: false
+      ebay-enabled: false
+      price-charting-enabled: false
