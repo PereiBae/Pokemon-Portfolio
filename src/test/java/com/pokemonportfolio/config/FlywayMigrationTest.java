@@ -28,7 +28,9 @@ class FlywayMigrationTest {
                 "owned_item",
                 "price_snapshot",
                 "exchange_rate_snapshot",
-                "portfolio_valuation_snapshot");
+                "portfolio_valuation_snapshot",
+                "alert",
+                "owned_item_disposal");
 
         try (Connection connection = dataSource.getConnection()) {
             DatabaseMetaData metaData = connection.getMetaData();

@@ -75,6 +75,13 @@ button.primary {
   font-weight: 700;
 }
 
+.button.danger,
+button.danger {
+  background: rgba(255, 93, 93, 0.12);
+  border-color: rgba(255, 93, 93, 0.45);
+  color: var(--red);
+}
+
 .page {
   margin: 0 auto;
   max-width: 1180px;
@@ -94,6 +101,10 @@ h1 {
   margin: 0 0 6px;
 }
 
+.section-title {
+  font-size: 20px;
+}
+
 .subtle {
   color: var(--muted);
   margin: 0;
@@ -105,7 +116,7 @@ h1 {
 }
 
 .summary-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
 }
 
 .card {

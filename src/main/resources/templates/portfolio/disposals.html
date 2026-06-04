@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Disposal History')}"></head>
+<body>
+<div class="app-shell">
+    <header th:replace="~{fragments/layout :: topbar}"></header>
+    <main class="page">
+        <div class="page-header">
+            <div>
+                <h1>Disposal History</h1>
+                <p class="subtle">Sold and traded items preserve realised performance history. Deleted mistakes are retained separately.</p>
+            </div>
+            <a class="button" th:href="@{/portfolio}">Active Portfolio</a>
+        </div>
+
+        <section class="card">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Type</th>
+                    <th>Date</th>
+                    <th>Purchase</th>
+                    <th>Proceeds / Value</th>
+                    <th>Fees</th>
+                    <th>Net</th>
+                    <th>Realised Gain/Loss</th>
+                    <th>Percent</th>
+                    <th>Notes</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${disposals.isEmpty()}">
+                    <td colspan="10" class="subtle">No disposal records yet.</td>
+                </tr>
+                <tr th:each="disposal : ${disposals}">
+                    <td th:text="${disposal.itemDisplayName}">Item</td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${disposal.disposalType.name() == 'DELETED'} ? ' muted-badge' : ' positive-badge'"
+                              th:text="${disposal.disposalTypeLabel}">Sold</span>
+                    </td>
+                    <td th:text="${disposal.disposalDate}">2026-06-04</td>
+                    <td th:text="|SGD ${#numbers.formatDecimal(disposal.purchasePriceSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
+                    <td th:if="${disposal.proceedsValueSgd != null}"
+                        th:text="|SGD ${#numbers.formatDecimal(disposal.proceedsValueSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
+                    <td th:if="${disposal.proceedsValueSgd == null}" class="subtle">N/A</td>
+                    <td th:text="|SGD ${#numbers.formatDecimal(disposal.feesSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
+                    <td th:text="|SGD ${#numbers.formatDecimal(disposal.netProceedsSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
+                    <td th:classappend="${disposal.realizedGainIsNonNegative()} ? ' positive' : ' negative'"
+                        th:text="|SGD ${#numbers.formatDecimal(disposal.realizedGainLossSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
+                    <td th:classappend="${disposal.realizedGainIsNonNegative()} ? ' positive' : ' negative'"
+                        th:text="|${#numbers.formatDecimal(disposal.realizedGainLossPercent, 1, 'COMMA', 2, 'POINT')}%|">0.00%</td>
+                    <td th:text="${disposal.notes ?: ''}">Notes</td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</div>
+</body>
+</html>

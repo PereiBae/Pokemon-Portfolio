@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Price Alerts')}"></head>
+<body>
+<div class="app-shell">
+    <header th:replace="~{fragments/layout :: topbar}"></header>
+    <main class="page">
+        <div class="page-header">
+            <div>
+                <h1>Price Alerts</h1>
+                <p class="subtle">Default thresholds watch for meaningful gains from purchase price.</p>
+            </div>
+            <form th:action="@{/alerts/check}" method="post">
+                <button class="primary" type="submit">Check Alerts</button>
+            </form>
+        </div>
+
+        <section class="card message-card" th:if="${successMessage != null}">
+            <p class="positive" th:text="${successMessage}">Alerts checked.</p>
+        </section>
+
+        <section class="card">
+            <div class="table-toolbar">
+                <div>
+                    <h1 class="section-title">Active Alerts</h1>
+                    <p class="subtle" th:text="|${alerts.activeCount()} active alert(s)|">0 active alert(s)</p>
+                </div>
+            </div>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Purchase</th>
+                    <th>Current</th>
+                    <th>Gain</th>
+                    <th>Gain %</th>
+                    <th>Confidence</th>
+                    <th>Triggered</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${alerts.activeAlerts.isEmpty()}">
+                    <td colspan="9" class="subtle">No active alerts.</td>
+                </tr>
+                <tr th:each="alert : ${alerts.activeAlerts}">
+                    <td class="catalog-card-cell">
+                        <div class="card-cell-content">
+                            <img class="card-thumb" th:if="${alert.imageSmallUrl != null}" th:src="${alert.imageSmallUrl}" th:alt="${alert.itemDisplayName}">
+                            <span class="image-placeholder" th:if="${alert.imageSmallUrl == null}">Image not available</span>
+                            <span th:text="${alert.itemDisplayName}">Item</span>
+                        </div>
+                    </td>
+                    <td th:text="|SGD ${#numbers.formatDecimal(alert.purchasePriceSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
+                    <td th:text="|SGD ${#numbers.formatDecimal(alert.currentMarketValueSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
+                    <td class="positive" th:text="|SGD ${#numbers.formatDecimal(alert.gainAmountSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
+                    <td class="positive" th:text="|${#numbers.formatDecimal(alert.gainPercentage, 1, 'COMMA', 2, 'POINT')}%|">0.00%</td>
+                    <td th:text="${alert.confidenceRating}">MEDIUM</td>
+                    <td th:text="${#temporals.format(alert.triggeredAt, 'yyyy-MM-dd HH:mm')}">2026-06-03</td>
+                    <td><span class="badge positive-badge" th:text="${alert.status.label}">Active</span></td>
+                    <td>
+                        <form th:action="@{/alerts/{alertId}/dismiss(alertId=${alert.id})}" method="post">
+                            <button type="submit">Dismiss</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="card" style="margin-top: 16px;">
+            <div class="table-toolbar">
+                <div>
+                    <h1 class="section-title">Dismissed Alerts</h1>
+                    <p class="subtle">Dismissed records are retained for history.</p>
+                </div>
+            </div>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Purchase</th>
+                    <th>Current</th>
+                    <th>Gain</th>
+                    <th>Gain %</th>
+                    <th>Confidence</th>
+                    <th>Triggered</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${alerts.historicalAlerts.isEmpty()}">
+                    <td colspan="8" class="subtle">No dismissed alerts yet.</td>
+                </tr>
+                <tr th:each="alert : ${alerts.historicalAlerts}">
+                    <td class="catalog-card-cell">
+                        <div class="card-cell-content">
+                            <img class="card-thumb" th:if="${alert.imageSmallUrl != null}" th:src="${alert.imageSmallUrl}" th:alt="${alert.itemDisplayName}">
+                            <span class="image-placeholder" th:if="${alert.imageSmallUrl == null}">Image not available</span>
+                            <span th:text="${alert.itemDisplayName}">Item</span>
+                        </div>
+                    </td>
+                    <td th:text="|SGD ${#numbers.formatDecimal(alert.purchasePriceSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
+                    <td th:text="|SGD ${#numbers.formatDecimal(alert.currentMarketValueSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
+                    <td class="positive" th:text="|SGD ${#numbers.formatDecimal(alert.gainAmountSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
+                    <td class="positive" th:text="|${#numbers.formatDecimal(alert.gainPercentage, 1, 'COMMA', 2, 'POINT')}%|">0.00%</td>
+                    <td th:text="${alert.confidenceRating}">MEDIUM</td>
+                    <td th:text="${#temporals.format(alert.triggeredAt, 'yyyy-MM-dd HH:mm')}">2026-06-03</td>
+                    <td><span class="badge muted-badge" th:text="${alert.status.label}">Dismissed</span></td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</div>
+</body>
+</html>

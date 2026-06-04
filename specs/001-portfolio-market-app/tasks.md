@@ -426,6 +426,44 @@
   - Related: PR-014, PF-012, SC-002, SC-005
   - Status: MVP-critical
 
+### Phase 11A: Portfolio Disposal and Realised Performance
+
+- [X] T140 [US3] Add owned item lifecycle and disposal persistence in `src/main/java/com/pokemonportfolio/portfolio/entity/OwnedItemDisposal.java`
+  - Dependencies: T029, T056
+  - Verification: Migration adds ACTIVE/SOLD/TRADED/DELETED item lifecycle support and an auditable disposal table without deleting owned item history
+  - Related: PF-001, PF-002, PF-003, PF-004, PF-012
+  - Status: Current slice
+
+- [X] T141 [US3] Implement portfolio disposal service in `src/main/java/com/pokemonportfolio/portfolio/service/PortfolioDisposalService.java`
+  - Dependencies: T140, T031
+  - Verification: Service calculates sold/traded proceeds, fees, net proceeds, realised gain/loss, realised percent, and excludes deleted mistakes from realised performance
+  - Related: PF-001, PF-002, PF-003, PF-004
+  - Status: Current slice
+
+- [X] T142 [US3] Update active portfolio valuation and dashboard performance calculations in `src/main/java/com/pokemonportfolio/portfolio/service/PortfolioValuationService.java`
+  - Dependencies: T141, T057, T058
+  - Verification: Dashboard separates active value/cost/unrealised performance from realised gain/loss and total performance; valuation snapshots use ACTIVE holdings only
+  - Related: PF-001, PF-002, PF-003, PF-004, PF-012
+  - Status: Current slice
+
+- [X] T143 [US3] Add sell, trade-away, delete-mistake, and disposal history UI in `src/main/resources/templates/portfolio/`
+  - Dependencies: T141, T142, T099
+  - Verification: Authenticated user can sell, trade away, or delete mistake from active holdings and view retained disposal history with SGD profit/loss styling
+  - Related: FR-005, PF-001, PF-002, PF-003, UI-001
+  - Status: Current slice
+
+- [X] T144 [US5] Update price alert interaction for disposed items in `src/main/java/com/pokemonportfolio/alerts/service/AlertViewService.java`
+  - Dependencies: T067, T141
+  - Verification: Alert checks evaluate ACTIVE holdings only and existing active alerts are dismissed and retained when an item is disposed
+  - Related: PA-001, PA-005, PA-008
+  - Status: Current slice
+
+- [X] T145 [US3] Add disposal business-rule and UI tests in `src/test/java/com/pokemonportfolio/portfolio/`
+  - Dependencies: T140, T141, T142, T143, T144
+  - Verification: Tests cover SOLD/TRADED/DELETED status changes, disposal records, fees/net proceeds, realised/unrealised/total performance, alert interaction, dashboard rendering, and disposal history rendering
+  - Related: PF-001, PF-002, PF-003, PF-004, PA-008, SC-005
+  - Status: Current slice
+
 ## Phase 12: Market Signal Engine
 
 - [ ] T060 [US4] Create market signal snapshot entity and repository in `src/main/java/com/pokemonportfolio/market_signal/entity/MarketSignalSnapshot.java`
@@ -466,31 +504,31 @@
 
 ## Phase 13: Price Alerts
 
-- [ ] T066 [US5] Create alert entity and repository in `src/main/java/com/pokemonportfolio/alerts/entity/Alert.java`
+- [X] T066 [US5] Create alert entity and repository in `src/main/java/com/pokemonportfolio/alerts/entity/Alert.java`
   - Dependencies: T011, T029, T045
   - Verification: Repository test stores alert status, trigger snapshot, purchase price, current market value, gain, date, and confidence
   - Related: PA-001, PA-005, DR-014
   - Status: Later-v1
 
-- [ ] T067 [US5] Implement alert evaluation service in `src/main/java/com/pokemonportfolio/alerts/service/AlertEvaluationService.java`
+- [X] T067 [US5] Implement alert evaluation service in `src/main/java/com/pokemonportfolio/alerts/service/PriceAlertService.java`
   - Dependencies: T066, T045, T029
   - Verification: Service test triggers SGD 10 gain alert below SGD 100 and SGD 25 gain alert at or above SGD 100
   - Related: PA-002, PA-003, PA-009, PA-010
   - Status: Later-v1
 
-- [ ] T068 [US5] Implement alert view service in `src/main/java/com/pokemonportfolio/alerts/service/AlertViewService.java`
+- [X] T068 [US5] Implement alert view service in `src/main/java/com/pokemonportfolio/alerts/service/AlertViewService.java`
   - Dependencies: T066
   - Verification: Service test separates new, active, and historical alerts
   - Related: PA-006, PA-007, PA-008
   - Status: Later-v1
 
-- [ ] T069 [US5] Add alert controller in `src/main/java/com/pokemonportfolio/alerts/controller/AlertController.java`
+- [X] T069 [US5] Add alert controller in `src/main/java/com/pokemonportfolio/alerts/controller/AlertController.java`
   - Dependencies: T068, T015
   - Verification: Controller test lists alerts and acknowledges/dismisses alerts only for authenticated owner
   - Related: PA-006, PA-007, PA-008, FR-002
   - Status: Later-v1
 
-- [ ] T070 [US5] Add alert business-rule tests in `src/test/java/com/pokemonportfolio/alerts/service/AlertEvaluationServiceTest.java`
+- [X] T070 [US5] Add alert business-rule tests in `src/test/java/com/pokemonportfolio/alerts/service/PriceAlertServiceTest.java`
   - Dependencies: T067
   - Verification: Tests cover thresholds, gain percentage, source confidence, dedupe on rerun, and no alert below threshold
   - Related: PA-002, PA-003, PA-005, EC-008
@@ -742,13 +780,13 @@
 
 ## Phase 22: Alerts UI
 
-- [ ] T104 [US5] Create alerts template in `src/main/resources/templates/alerts/index.html`
+- [X] T104 [US5] Create alerts template in `src/main/resources/templates/alerts/index.html`
   - Dependencies: T069, T090, T091, T092
   - Verification: Page shows new, active, and historical alert panels with item name, purchase price, current value, gain, date, and confidence
   - Related: PA-005, PA-006, PA-007, PA-008, UI-012
   - Status: Later-v1
 
-- [ ] T105 [US5] Add alerts UI tests in `src/test/java/com/pokemonportfolio/alerts/controller/AlertControllerTest.java`
+- [X] T105 [US5] Add alerts UI tests in `src/test/java/com/pokemonportfolio/alerts/controller/AlertControllerTest.java`
   - Dependencies: T069, T104
   - Verification: Tests confirm alert panels render and acknowledge/dismiss actions update status
   - Related: AC-010, AC-011, PA-006, PA-007, PA-008

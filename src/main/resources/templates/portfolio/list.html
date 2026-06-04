@@ -8,10 +8,16 @@
         <div class="page-header">
             <div>
                 <h1>Portfolio</h1>
-                <p class="subtle">Owned card copies are listed independently.</p>
+                <p class="subtle">Active owned card copies are listed independently.</p>
             </div>
-            <a class="button primary" th:href="@{/catalog/search}">Add Verified Card</a>
+            <div class="actions compact-actions">
+                <a class="button" th:href="@{/portfolio/disposals}">Disposal History</a>
+                <a class="button primary" th:href="@{/catalog/search}">Add Verified Card</a>
+            </div>
         </div>
+        <section class="card message-card">
+            <p class="subtle">Sell and Trade Away keep history and affect realised gain/loss. Delete Mistake is only for accidental duplicate or wrong entries and does not count as profit/loss.</p>
+        </section>
         <section class="card">
             <table class="table">
                 <thead>
@@ -25,11 +31,12 @@
                     <th>Market</th>
                     <th>Gain/Loss</th>
                     <th>Confidence</th>
+                    <th>Actions</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:if="${summary.items.isEmpty()}">
-                    <td colspan="9" class="subtle">No portfolio records yet.</td>
+                    <td colspan="10" class="subtle">No active portfolio records yet.</td>
                 </tr>
                 <tr th:each="item : ${summary.items}">
                     <td class="catalog-card-cell">
@@ -52,6 +59,13 @@
                     <td th:classappend="${item.gainIsNonNegative()} ? ' positive' : ' negative'"
                         th:text="|SGD ${#numbers.formatDecimal(item.gainLossSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
                     <td th:text="${item.confidenceRating}">MEDIUM</td>
+                    <td>
+                        <div class="table-actions">
+                            <a class="button" th:href="@{/portfolio/items/{id}/sell(id=${item.ownedItemId})}">Sell</a>
+                            <a class="button" th:href="@{/portfolio/items/{id}/trade-away(id=${item.ownedItemId})}">Trade Away</a>
+                            <a class="button danger" th:href="@{/portfolio/items/{id}/delete-mistake(id=${item.ownedItemId})}">Delete Mistake</a>
+                        </div>
+                    </td>
                 </tr>
                 </tbody>
             </table>

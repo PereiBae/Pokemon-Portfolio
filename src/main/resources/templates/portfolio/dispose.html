@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Dispose Portfolio Item')}"></head>
+<body>
+<div class="app-shell">
+    <header th:replace="~{fragments/layout :: topbar}"></header>
+    <main class="page">
+        <div class="page-header">
+            <div>
+                <h1 th:text="${disposalType.label}">Dispose Item</h1>
+                <p class="subtle" th:text="${item.displayLabel}">Portfolio item</p>
+            </div>
+            <a class="button" th:href="@{/portfolio}">Back To Portfolio</a>
+        </div>
+
+        <section class="card message-card">
+            <p class="warning" th:if="${disposalType.name() == 'SOLD'}">Selling keeps this item in disposal history and counts towards realised gain/loss.</p>
+            <p class="warning" th:if="${disposalType.name() == 'TRADED'}">Trading away keeps this item in disposal history and counts towards realised gain/loss.</p>
+            <p class="warning" th:if="${disposalType.name() == 'DELETED'}">Delete Mistake is only for accidental duplicate or wrong entries. It removes the item from active holdings but does not count as profit/loss.</p>
+        </section>
+
+        <section class="card">
+            <form th:action="@{${actionPath}}" th:object="${disposalForm}" method="post" class="form-grid"
+                  onsubmit="return confirm('Confirm this portfolio disposal action?');">
+                <label>
+                    Original Purchase Price
+                    <input th:value="|SGD ${#numbers.formatDecimal(purchasePriceSgd, 1, 'COMMA', 2, 'POINT')}|" readonly>
+                </label>
+                <label>
+                    Disposal Date
+                    <input th:field="*{disposalDate}" type="date" required>
+                </label>
+                <label th:if="${disposalType.name() == 'SOLD'}">
+                    Sale Price (SGD)
+                    <input th:field="*{salePriceSgd}" type="number" min="0" step="0.01" required>
+                </label>
+                <label th:if="${disposalType.name() == 'SOLD'}">
+                    Fees (SGD)
+                    <input th:field="*{feesSgd}" type="number" min="0" step="0.01">
+                </label>
+                <label th:if="${disposalType.name() == 'TRADED'}">
+                    Trade Value Received (SGD)
+                    <input th:field="*{tradeValueSgd}" type="number" min="0" step="0.01" required>
+                </label>
+                <label>
+                    Notes / Reason
+                    <textarea th:field="*{notes}" rows="4"></textarea>
+                </label>
+                <div class="actions">
+                    <button th:class="${disposalType.name() == 'DELETED'} ? 'danger' : 'primary'" type="submit"
+                            th:text="${disposalType.label}">Confirm</button>
+                    <a class="button" th:href="@{/portfolio}">Cancel</a>
+                </div>
+            </form>
+        </section>
+    </main>
+</div>
+</body>
+</html>

@@ -20,6 +20,28 @@ class DomainModelTest {
     }
 
     @Test
+    void alertsTrackLifecycleStatus() {
+        assertThat(AlertStatus.values()).containsExactly(
+                AlertStatus.NEW,
+                AlertStatus.ACTIVE,
+                AlertStatus.ACKNOWLEDGED,
+                AlertStatus.DISMISSED);
+    }
+
+    @Test
+    void ownedItemsTrackDisposalLifecycleStatus() {
+        assertThat(OwnedItemStatus.values()).containsExactly(
+                OwnedItemStatus.ACTIVE,
+                OwnedItemStatus.SOLD,
+                OwnedItemStatus.TRADED,
+                OwnedItemStatus.DELETED);
+        assertThat(DisposalType.values()).containsExactly(
+                DisposalType.SOLD,
+                DisposalType.TRADED,
+                DisposalType.DELETED);
+    }
+
+    @Test
     void moneyValuesRoundToTwoDecimals() {
         assertThat(MoneyCalculationSupport.money(new BigDecimal("10.555")))
                 .isEqualByComparingTo("10.56");

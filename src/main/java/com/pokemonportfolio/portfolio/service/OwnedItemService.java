@@ -5,6 +5,7 @@ import com.pokemonportfolio.catalog.entity.Card;
 import com.pokemonportfolio.catalog.service.CardService;
 import com.pokemonportfolio.config.domain.CardVariant;
 import com.pokemonportfolio.config.domain.GradedStatus;
+import com.pokemonportfolio.config.domain.OwnedItemStatus;
 import com.pokemonportfolio.portfolio.entity.OwnedItem;
 import com.pokemonportfolio.portfolio.repository.OwnedItemRepository;
 import com.pokemonportfolio.pricing.service.MoneyCalculationSupport;
@@ -43,7 +44,7 @@ public class OwnedItemService {
 
     @Transactional(readOnly = true)
     public List<OwnedItem> listActiveItems(AppUser owner) {
-        return ownedItemRepository.findByOwnerAndArchivedAtIsNullOrderByCreatedAtDesc(owner);
+        return ownedItemRepository.findByOwnerAndStatusOrderByCreatedAtDesc(owner, OwnedItemStatus.ACTIVE);
     }
 
     @Transactional(readOnly = true)
@@ -55,7 +56,13 @@ public class OwnedItemService {
 
     @Transactional(readOnly = true)
     public OwnedItem requireActiveItemForOwner(AppUser owner, Long ownedItemId) {
-        return ownedItemRepository.findByIdAndOwnerAndArchivedAtIsNull(ownedItemId, owner)
+        return ownedItemRepository.findByIdAndOwnerAndStatus(ownedItemId, owner, OwnedItemStatus.ACTIVE)
+                .orElseThrow(() -> new IllegalArgumentException("Portfolio item not found"));
+    }
+
+    @Transactional(readOnly = true)
+    public OwnedItem requireItemForOwner(AppUser owner, Long ownedItemId) {
+        return ownedItemRepository.findByIdAndOwner(ownedItemId, owner)
                 .orElseThrow(() -> new IllegalArgumentException("Portfolio item not found"));
     }
 

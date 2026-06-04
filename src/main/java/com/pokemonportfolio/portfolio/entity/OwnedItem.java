@@ -5,6 +5,7 @@ import com.pokemonportfolio.catalog.entity.Card;
 import com.pokemonportfolio.config.domain.CardCondition;
 import com.pokemonportfolio.config.domain.CardVariant;
 import com.pokemonportfolio.config.domain.GradedStatus;
+import com.pokemonportfolio.config.domain.OwnedItemStatus;
 import com.pokemonportfolio.config.entity.AuditableEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -63,6 +64,10 @@ public class OwnedItem extends AuditableEntity {
 
     @Column(length = 1000)
     private String notes;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "item_status", nullable = false)
+    private OwnedItemStatus status = OwnedItemStatus.ACTIVE;
 
     @Column(name = "archived_at")
     private OffsetDateTime archivedAt;
@@ -137,7 +142,32 @@ public class OwnedItem extends AuditableEntity {
         return notes;
     }
 
+    public OwnedItemStatus getStatus() {
+        return status;
+    }
+
     public OffsetDateTime getArchivedAt() {
         return archivedAt;
+    }
+
+    public boolean isActive() {
+        return status == OwnedItemStatus.ACTIVE;
+    }
+
+    public void markSold(OffsetDateTime disposedAt) {
+        markDisposed(OwnedItemStatus.SOLD, disposedAt);
+    }
+
+    public void markTraded(OffsetDateTime disposedAt) {
+        markDisposed(OwnedItemStatus.TRADED, disposedAt);
+    }
+
+    public void markDeleted(OffsetDateTime disposedAt) {
+        markDisposed(OwnedItemStatus.DELETED, disposedAt);
+    }
+
+    private void markDisposed(OwnedItemStatus newStatus, OffsetDateTime disposedAt) {
+        this.status = newStatus;
+        this.archivedAt = disposedAt;
     }
 }

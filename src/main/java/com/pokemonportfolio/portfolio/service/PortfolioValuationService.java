@@ -20,14 +20,17 @@ import org.springframework.transaction.annotation.Transactional;
 public class PortfolioValuationService {
 
     private final OwnedItemService ownedItemService;
+    private final PortfolioDisposalService disposalService;
     private final PriceSnapshotRepository priceSnapshotRepository;
     private final PortfolioValuationSnapshotRepository snapshotRepository;
 
     public PortfolioValuationService(
             OwnedItemService ownedItemService,
+            PortfolioDisposalService disposalService,
             PriceSnapshotRepository priceSnapshotRepository,
             PortfolioValuationSnapshotRepository snapshotRepository) {
         this.ownedItemService = ownedItemService;
+        this.disposalService = disposalService;
         this.priceSnapshotRepository = priceSnapshotRepository;
         this.snapshotRepository = snapshotRepository;
     }
@@ -47,6 +50,9 @@ public class PortfolioValuationService {
         int lowConfidenceCount = (int) itemViews.stream()
                 .filter(item -> item.confidenceRating() == ConfidenceRating.LOW)
                 .count();
+        PortfolioDisposalSummary realized = disposalService.realizedSummary(owner);
+        BigDecimal totalPerformance = MoneyCalculationSupport.money(gainLoss.add(realized.realizedGainLossSgd()));
+        BigDecimal totalPerformanceBasis = totalCost.add(realized.realizedCostBasisSgd());
 
         return new PortfolioDashboardView(
                 MoneyCalculationSupport.money(totalValue),
@@ -55,7 +61,14 @@ public class PortfolioValuationService {
                 MoneyCalculationSupport.percent(gainLoss, totalCost),
                 itemViews.size(),
                 lowConfidenceCount,
-                itemViews);
+                itemViews,
+                realized.realizedGainLossSgd(),
+                realized.realizedGainLossPercent(),
+                realized.realizedCostBasisSgd(),
+                totalPerformance,
+                MoneyCalculationSupport.percent(totalPerformance, totalPerformanceBasis),
+                0,
+                List.of());
     }
 
     @Transactional

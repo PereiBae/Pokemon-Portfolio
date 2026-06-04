@@ -8,18 +8,18 @@
         <div class="page-header">
             <div>
                 <h1>Portfolio Dashboard</h1>
-                <p class="subtle">Current valuation from latest append-only mock price snapshots.</p>
+                <p class="subtle">Active holdings plus realised performance from disposal history.</p>
             </div>
             <a class="button primary" th:href="@{/cards/new}">Add Card</a>
         </div>
 
         <section class="grid summary-grid">
             <div class="card">
-                <div class="metric-label">Total Value</div>
+                <div class="metric-label">Active Portfolio Value</div>
                 <div class="metric-value" th:text="|SGD ${#numbers.formatDecimal(summary.totalValueSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</div>
             </div>
             <div class="card">
-                <div class="metric-label">Cost Basis</div>
+                <div class="metric-label">Active Cost Basis</div>
                 <div class="metric-value" th:text="|SGD ${#numbers.formatDecimal(summary.totalCostBasisSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</div>
             </div>
             <div class="card">
@@ -32,14 +32,66 @@
                 <div class="metric-value" th:classappend="${summary.gainIsNonNegative()} ? ' positive' : ' negative'"
                      th:text="|${#numbers.formatDecimal(summary.unrealizedGainLossPercent, 1, 'COMMA', 2, 'POINT')}%|">0.00%</div>
             </div>
+            <div class="card">
+                <div class="metric-label">Realised Gain/Loss</div>
+                <div class="metric-value" th:classappend="${summary.realizedGainIsNonNegative()} ? ' positive' : ' negative'"
+                     th:text="|SGD ${#numbers.formatDecimal(summary.realizedGainLossSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">Realised Percent</div>
+                <div class="metric-value" th:classappend="${summary.realizedGainIsNonNegative()} ? ' positive' : ' negative'"
+                     th:text="|${#numbers.formatDecimal(summary.realizedGainLossPercent, 1, 'COMMA', 2, 'POINT')}%|">0.00%</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">Total Performance</div>
+                <div class="metric-value" th:classappend="${summary.totalPerformanceIsNonNegative()} ? ' positive' : ' negative'"
+                     th:text="|SGD ${#numbers.formatDecimal(summary.totalPerformanceSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">Total Performance Percent</div>
+                <div class="metric-value" th:classappend="${summary.totalPerformanceIsNonNegative()} ? ' positive' : ' negative'"
+                     th:text="|${#numbers.formatDecimal(summary.totalPerformancePercent, 1, 'COMMA', 2, 'POINT')}%|">0.00%</div>
+            </div>
+        </section>
+
+        <section class="card" style="margin-top: 16px;">
+            <div class="page-header">
+                <div>
+                    <h1 class="section-title">Price Alerts</h1>
+                    <p class="subtle" th:text="|${summary.activeAlertCount} active alert(s)|">0 active alert(s)</p>
+                </div>
+                <a class="button" th:href="@{/alerts}">View Alerts</a>
+            </div>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Gain</th>
+                    <th>Confidence</th>
+                    <th>Triggered</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${summary.latestAlerts.isEmpty()}">
+                    <td colspan="4" class="subtle">No active alerts.</td>
+                </tr>
+                <tr th:each="alert : ${summary.latestAlerts}">
+                    <td th:text="${alert.itemDisplayName}">Item</td>
+                    <td class="positive" th:text="|SGD ${#numbers.formatDecimal(alert.gainAmountSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
+                    <td th:text="${alert.confidenceRating}">MEDIUM</td>
+                    <td th:text="${#temporals.format(alert.triggeredAt, 'yyyy-MM-dd HH:mm')}">2026-06-03</td>
+                </tr>
+                </tbody>
+            </table>
         </section>
 
         <section class="card" style="margin-top: 16px;">
             <div class="page-header">
                 <div>
                     <h1 style="font-size: 20px;">Holdings</h1>
-                    <p class="subtle" th:text="|${summary.itemCount} owned card records|">0 owned card records</p>
+                    <p class="subtle" th:text="|${summary.itemCount} active owned card records|">0 active owned card records</p>
                 </div>
+                <a class="button" th:href="@{/portfolio/disposals}">Disposal History</a>
             </div>
             <table class="table">
                 <thead>
@@ -74,4 +126,3 @@
 </div>
 </body>
 </html>
-
