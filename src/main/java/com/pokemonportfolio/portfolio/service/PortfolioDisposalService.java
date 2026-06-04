@@ -8,6 +8,7 @@ import com.pokemonportfolio.portfolio.entity.OwnedItemDisposal;
 import com.pokemonportfolio.portfolio.repository.OwnedItemDisposalRepository;
 import com.pokemonportfolio.pricing.service.MoneyCalculationSupport;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -59,23 +60,58 @@ public class PortfolioDisposalService {
     public OwnedItemDisposal tradeAwayItem(AppUser owner, Long ownedItemId, OwnedItemDisposalForm form) {
         OwnedItem item = ownedItemService.requireActiveItemForOwner(owner, ownedItemId);
         BigDecimal tradeValue = requireNonNegative(form.getTradeValueSgd(), "Trade value received is required");
+        return createTradeDisposal(
+                owner,
+                item,
+                tradeValue,
+                form.getDisposalDate(),
+                blankToNull(form.getNotes()),
+                null);
+    }
+
+    @Transactional
+    public OwnedItemDisposal tradeAwayItemFromTransaction(
+            AppUser owner,
+            Long ownedItemId,
+            BigDecimal tradeValueReceivedAllocationSgd,
+            LocalDate disposalDate,
+            String notes,
+            Long tradeTransactionId) {
+        OwnedItem item = ownedItemService.requireActiveItemForOwner(owner, ownedItemId);
+        BigDecimal tradeValue = requireNonNegative(
+                tradeValueReceivedAllocationSgd,
+                "Trade value received allocation is required");
+        if (tradeTransactionId == null) {
+            throw new IllegalArgumentException("Trade transaction link is required");
+        }
+        return createTradeDisposal(owner, item, tradeValue, disposalDate, blankToNull(notes), tradeTransactionId);
+    }
+
+    private OwnedItemDisposal createTradeDisposal(
+            AppUser owner,
+            OwnedItem item,
+            BigDecimal tradeValue,
+            LocalDate disposalDate,
+            String notes,
+            Long tradeTransactionId) {
         BigDecimal purchasePrice = MoneyCalculationSupport.money(item.getPurchasePriceSgd());
         BigDecimal realizedGain = MoneyCalculationSupport.money(tradeValue.subtract(purchasePrice));
         OwnedItemDisposal disposal = new OwnedItemDisposal(
                 owner,
                 item,
                 DisposalType.TRADED,
-                form.getDisposalDate(),
+                disposalDate,
                 tradeValue,
                 BigDecimal.ZERO.setScale(2),
                 tradeValue,
                 purchasePrice,
                 realizedGain,
                 MoneyCalculationSupport.percent(realizedGain, purchasePrice),
-                blankToNull(form.getNotes()));
+                notes,
+                tradeTransactionId);
         item.markTraded(OffsetDateTime.now());
         OwnedItemDisposal saved = disposalRepository.save(disposal);
-        alertViewService.dismissActiveAlertsForOwnedItem(owner, ownedItemId);
+        alertViewService.dismissActiveAlertsForOwnedItem(owner, item.getId());
         return saved;
     }
 
@@ -139,7 +175,8 @@ public class PortfolioDisposalService {
                 disposal.getNetProceedsSgd(),
                 disposal.getRealizedGainLossSgd(),
                 disposal.getRealizedGainLossPercent(),
-                disposal.getNotes());
+                disposal.getNotes(),
+                disposal.getTradeTransactionId());
     }
 
     private BigDecimal requireNonNegative(BigDecimal value, String message) {
@@ -154,14 +191,7 @@ public class PortfolioDisposalService {
     }
 
     private String displayName(OwnedItem ownedItem) {
-        return ownedItem.getCard().getName()
-                + " #"
-                + ownedItem.getCard().getCardNumber()
-                + " - "
-                + ownedItem.getCard().getPokemonSet().getName()
-                + " ("
-                + ownedItem.getOwnedVariant().getLabel()
-                + ")";
+        return ownedItem.displayName();
     }
 
     private String blankToNull(String value) {

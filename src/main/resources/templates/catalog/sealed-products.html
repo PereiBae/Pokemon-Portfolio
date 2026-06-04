@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Sealed Products')}"></head>
+<body>
+<div class="app-shell">
+    <header th:replace="~{fragments/layout :: topbar}"></header>
+    <main class="page">
+        <div class="page-header">
+            <div>
+                <h1>Sealed Products</h1>
+                <p class="subtle">Manual sealed catalogue records for portfolio tracking and local pricing.</p>
+            </div>
+            <div class="actions compact-actions">
+                <a class="button primary" th:href="@{/sealed-products/new}">Create Sealed Product</a>
+                <a class="button" th:href="@{/portfolio/add-sealed}">Add Sealed Holding</a>
+            </div>
+        </div>
+
+        <section class="card">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Type</th>
+                    <th>Market</th>
+                    <th>Set</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${sealedProducts.isEmpty()}">
+                    <td colspan="6" class="subtle">No sealed products yet.</td>
+                </tr>
+                <tr th:each="product : ${sealedProducts}">
+                    <td class="catalog-card-cell">
+                        <div class="card-cell-content">
+                            <img class="card-thumb" th:if="${product.imageUrl != null}" th:src="${product.imageUrl}" th:alt="${product.name}">
+                            <span class="image-placeholder" th:if="${product.imageUrl == null}">Image not available</span>
+                            <span th:text="${product.name}">Product</span>
+                        </div>
+                    </td>
+                    <td th:text="${product.productTypeLabel}">Booster Box</td>
+                    <td th:text="${product.languageMarketLabel}">English</td>
+                    <td th:text="${product.setName}">Set</td>
+                    <td><span class="badge muted-badge" th:text="${product.verificationStatusLabel}">Unverified</span></td>
+                    <td>
+                        <a class="button" th:href="@{/portfolio/add-sealed(sealedProductId=${product.id})}">Add Holding</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</div>
+</body>
+</html>

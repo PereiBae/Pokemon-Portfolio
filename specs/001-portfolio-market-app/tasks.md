@@ -74,7 +74,7 @@
 
 - [ ] T011 Create analytics migration in `src/main/resources/db/migration/V5__portfolio_signal_alerts_trade_grading_forecast.sql`
   - Dependencies: T010
-  - Verification: Flyway creates `portfolio_valuation_snapshot`, `market_signal_snapshot`, `alert`, `trade_analysis`, `trade_side`, `trade_item`, `grading_fee`, `grading_analysis`, `grading_scenario`, `forecast_snapshot`, and `scheduled_job_run`
+  - Verification: Flyway creates `portfolio_valuation_snapshot`, `market_signal_snapshot`, `alert`, `trade_transaction`, `trade_transaction_side`, `trade_transaction_item`, `grading_fee`, `grading_analysis`, `grading_scenario`, `forecast_snapshot`, and `scheduled_job_run`
   - Related: PF-012, MS-007, PA-005, TA-001, GA-005, FC-007
   - Status: MVP-critical for portfolio snapshot and alerts; later-v1 for trade/grading/forecast
 
@@ -536,28 +536,70 @@
 
 ## Phase 14: Trade Analyzer
 
-- [ ] T071 [US6] Create trade entities and repositories in `src/main/java/com/pokemonportfolio/trade/entity/TradeAnalysis.java`
-  - Dependencies: T011, T023, T045
-  - Verification: Repository test persists trade analysis with exactly USER and OTHER_PARTY sides and trade items
-  - Related: TA-001, TA-002, DR-015
+- [X] T071 [US6] Create trade transaction entity and repository in `src/main/java/com/pokemonportfolio/trade/entity/TradeTransaction.java`
+  - Dependencies: T011, T023, T045, T140
+  - Verification: Repository test persists trade transaction mode, status, totals, imbalance, confidence, notes, and execution timestamp metadata
+  - Related: TA-001, TA-016, TA-018, DR-015, DR-020
   - Status: Later-v1
 
-- [ ] T072 [US6] Implement trade analyzer service in `src/main/java/com/pokemonportfolio/trade/service/TradeAnalyzerService.java`
-  - Dependencies: T071, T045
-  - Verification: Service test calculates adjusted values, side totals, net difference, fairness, confidence, and LOW-confidence warning
-  - Related: TA-003, TA-004, TA-008, TA-009, TA-011, TA-012, TA-013, TA-014, TA-015
+- [X] T146 [US6] Create trade transaction side entity and repository in `src/main/java/com/pokemonportfolio/trade/entity/TradeTransactionSide.java`
+  - Dependencies: T071
+  - Verification: Repository test persists exactly USER and OTHER_PARTY sides with independent trade percentages and side totals
+  - Related: TA-001, TA-002, TA-003, DR-015, DR-020
   - Status: Later-v1
 
-- [ ] T073 [US6] Add trade controller in `src/main/java/com/pokemonportfolio/trade/controller/TradeController.java`
-  - Dependencies: T072, T015
-  - Verification: Controller test renders trade form and returns analysis result for authenticated owner
-  - Related: FR-013, TA-005, TA-006, TA-007
+- [X] T147 [US6] Create trade transaction item entity and repository in `src/main/java/com/pokemonportfolio/trade/entity/TradeTransactionItem.java`
+  - Dependencies: T071, T146, T029, T140
+  - Verification: Repository test stores outgoing owned item links, incoming catalog item links, agreed trade values, adjusted values, allocated cost basis, linked disposal record, linked incoming owned item, confidence, and warnings
+  - Related: TA-002, TA-005, TA-006, TA-007, TA-023, TA-024, DR-020, DR-021
   - Status: Later-v1
 
-- [ ] T074 [US6] Add trade calculation tests in `src/test/java/com/pokemonportfolio/trade/service/TradeAnalyzerServiceTest.java`
+- [X] T072 [US6] Implement analysis-only trade comparison in `src/main/java/com/pokemonportfolio/trade/service/TradeAnalyzerService.java`
+  - Dependencies: T071, T146, T147, T045
+  - Verification: Service test calculates adjusted values, side totals, net difference, fairness, confidence, and LOW-confidence warning without changing portfolio items, disposal records, realised gain/loss, or cost basis
+  - Related: TA-003, TA-004, TA-008, TA-009, TA-011, TA-012, TA-013, TA-014, TA-015, TA-016, TA-017
+  - Status: Later-v1
+
+- [X] T148 [US6] Implement incoming cost basis allocation in `src/main/java/com/pokemonportfolio/trade/service/TradeCostBasisAllocationService.java`
+  - Dependencies: T147
+  - Verification: Unit tests allocate incoming basis directly when incoming agreed values equal outgoing trade value, allocate proportionally when values differ, and expose trade imbalance in SGD
+  - Related: TA-024, TA-025, AC-012B, AC-012C
+  - Status: Later-v1
+
+- [X] T149 [US6] Implement execute trade workflow in `src/main/java/com/pokemonportfolio/trade/service/TradeExecutionService.java`
+  - Dependencies: T141, T147, T148, T031
+  - Verification: Service test marks outgoing owned items as TRADED, creates linked disposal records, creates incoming owned items, links all records to one trade transaction, and records realised gain/loss as trade value received minus original purchase price
+  - Related: TA-018, TA-019, TA-020, TA-021, TA-022, TA-023, DR-020, DR-021
+  - Status: Later-v1
+
+- [X] T073 [US6] Add trade controller in `src/main/java/com/pokemonportfolio/trade/controller/TradeController.java`
+  - Dependencies: T072, T149, T015
+  - Verification: Controller test renders trade form, returns analysis-only results, and requires explicit confirmation before executing a trade
+  - Related: FR-013, TA-005, TA-006, TA-007, TA-016, TA-018
+  - Status: Later-v1
+
+- [X] T074 [US6] Add trade calculation tests in `src/test/java/com/pokemonportfolio/trade/service/TradeAnalyzerServiceTest.java`
   - Dependencies: T072
-  - Verification: Tests cover 80 percent example, independent side percentages, low confidence, and card/sealed product mix
-  - Related: TA-002, TA-003, TA-004, AC-012
+  - Verification: Tests cover 80 percent example, independent side percentages, low confidence, card/sealed product mix, and proof that analysis-only mode makes no portfolio/disposal/accounting changes
+  - Related: TA-002, TA-003, TA-004, TA-017, AC-012, AC-012A
+  - Status: Later-v1
+
+- [X] T150 [US6] Preserve simple trade-away disposal alongside full trade transaction in `src/main/java/com/pokemonportfolio/portfolio/service/PortfolioDisposalService.java`
+  - Dependencies: T141, T149
+  - Verification: Service/controller tests confirm simple Trade Away still works without incoming items while full Trade Transaction is presented as the preferred workflow when incoming cards/products are known
+  - Related: TA-026, TA-027
+  - Status: Later-v1
+
+- [X] T151 [US6] Add trade execution accounting tests in `src/test/java/com/pokemonportfolio/trade/service/TradeExecutionServiceTest.java`
+  - Dependencies: T149, T150
+  - Verification: Tests cover Magikarp example, outgoing realised gain/loss, incoming allocated cost basis, proportional allocation on imbalance, linked disposal records, linked incoming owned items, and separate records for each incoming copy
+  - Related: TA-019, TA-020, TA-021, TA-022, TA-023, TA-024, TA-025, AC-012B, AC-012C
+  - Status: Later-v1
+
+- [X] T152 [US6] Add dashboard compatibility tests for executed trades in `src/test/java/com/pokemonportfolio/portfolio/PortfolioValuationServiceTest.java`
+  - Dependencies: T149, T151
+  - Verification: Tests prove realised gain/loss includes outgoing trade disposals and future unrealised gain/loss for incoming items starts from allocated cost basis
+  - Related: TA-021, TA-024, DR-021, PF-001, PF-002, PF-003, PF-004
   - Status: Later-v1
 
 ## Phase 15: Grading Analyzer
@@ -794,16 +836,16 @@
 
 ## Phase 23: Trade Analyzer UI
 
-- [ ] T106 [US6] Create trade analyzer template in `src/main/resources/templates/trade/index.html`
+- [X] T106 [US6] Create trade analyzer template in `src/main/resources/templates/trade/index.html`
   - Dependencies: T073, T090, T091, T092
-  - Verification: Page shows two trade sides, item selectors, independent trade percentages, adjusted totals, net difference, fairness, confidence, and LOW warning
-  - Related: UI-013, TA-001, TA-003, TA-011, TA-014
+  - Verification: Page shows analysis-only and execute-trade modes, two trade sides, item selectors, independent trade percentages, agreed trade values, adjusted totals, net difference, imbalance, fairness, confidence, LOW warning, and explicit execution confirmation
+  - Related: UI-013, TA-001, TA-003, TA-011, TA-014, TA-016, TA-018, TA-025
   - Status: Later-v1
 
-- [ ] T107 [US6] Add trade UI tests in `src/test/java/com/pokemonportfolio/trade/controller/TradeControllerTest.java`
+- [X] T107 [US6] Add trade UI tests in `src/test/java/com/pokemonportfolio/trade/controller/TradeControllerTest.java`
   - Dependencies: T073, T106
-  - Verification: Tests submit a two-sided trade and verify adjusted value result and confidence warning display
-  - Related: AC-012, TA-004, TA-014
+  - Verification: Tests submit analysis-only comparison without portfolio changes and submit execute-trade confirmation with outgoing/incoming item linkage, allocated cost basis, and imbalance display
+  - Related: AC-012, AC-012A, AC-012B, AC-012C, TA-004, TA-014, TA-018, TA-024, TA-025
   - Status: Later-v1
 
 ## Phase 24: Grading Analyzer UI
@@ -869,13 +911,13 @@
 ## Phase 27: Testing
 
 - [ ] T116 Add final cross-module smoke/regression suite in `src/test/java/com/pokemonportfolio/businessrules/BusinessRuleRegressionTest.java`
-  - Dependencies: T050, T055, T059, T065, T070, T074, T079, T083
+  - Dependencies: T050, T055, T059, T065, T070, T074, T151, T152, T079, T083
   - Verification: Suite samples critical cross-module regressions for price calculation, confidence, currency conversion, snapshot preservation, portfolio valuation, alerts, trade, grading, signal classification, and forecast output without duplicating every module-specific business-rule test deeply
   - Related: NFR-006, XXIII-Testing
   - Status: Later-v1 final regression; MVP-critical only when limited to completed Vertical Slice 1 modules
 
 - [ ] T117 Add repository integration test suite in `src/test/java/com/pokemonportfolio/repository/RepositoryIntegrityTest.java`
-  - Dependencies: T012, T023, T029, T035, T045, T051, T056, T060, T066, T071, T075, T080, T084
+  - Dependencies: T012, T023, T029, T035, T045, T051, T056, T060, T066, T071, T146, T147, T075, T080, T084
   - Verification: Tests cover table mappings, required constraints, append-only snapshots, and owned-item separate row behavior
   - Related: DR-009, DR-012, DR-013, NFR-011
   - Status: MVP-critical for completed entities
@@ -954,13 +996,14 @@ Expansion order after Vertical Slice 1:
 1. Exchange-rate conversion, manual price fallback, and price history: T051-T055, T101-T103, T127, T131-T132
 2. Official English card catalogue API integration: T134-T139
 3. Item-level portfolio contribution: T128
-4. Market Signal Engine: T060-T065
-5. Alerts: T066-T070, T087, T104-T105
-6. Trade analyzer: T071-T074, T106-T107
-7. Grading analyzer: T075-T079, T108-T109, T114, T129
-8. Forecasting: T080-T083, T110-T111
-9. Settings and provider configuration: T112-T115, T133
-10. Full regression and final validation: T116-T120, T130, T123-T126
+4. Portfolio disposal and realised performance: T140-T145
+5. Market Signal Engine: T060-T065
+6. Alerts: T066-T070, T087, T104-T105
+7. Trade analyzer and trade execution accounting: T071-T074, T146-T152, T106-T107
+8. Grading analyzer: T075-T079, T108-T109, T114, T129
+9. Forecasting: T080-T083, T110-T111
+10. Settings and provider configuration: T112-T115, T133
+11. Full regression and final validation: T116-T120, T130, T123-T126
 
 Future-phase tasks:
 - T040 and T125 explicitly keep real TCGPlayer, eBay, and PriceCharting adapter work outside the local-first MVP.
@@ -985,7 +1028,7 @@ Future-phase tasks:
 - US3 Portfolio Dashboard: T097 proves dashboard value, cost basis, gain/loss, confidence, alerts, and SGD labels render.
 - US4 Price and Signal Review: T103 proves price history uses stored snapshots; T065 proves Expected Price vs Market Price classification.
 - US5 Alerts: T070 and T105 prove threshold rules, dedupe, and alert UI.
-- US6 Trade Analysis: T074 and T107 prove independent trade percentages and LOW-confidence warning.
+- US6 Trade Analysis: T074 proves analysis-only comparison and no accounting side effects; T151-T152 prove executed trade realised gain/loss, incoming cost basis allocation, imbalance handling, and dashboard compatibility; T107 proves UI mode behavior.
 - US7 Manual PSA Grading Analysis: T079 and T109 prove manual-only PSA 8/9/10 scenario calculations.
 - US8 Forecast Review: T083 and T111 prove advisory forecast output for all supported horizons.
 
@@ -995,13 +1038,14 @@ Future-phase tasks:
 2. Add exchange-rate conversion, manual price fallback, and price history: T051-T055, T101-T103, T127, T131-T132.
 3. Add official English card catalogue API integration: T134-T139.
 4. Add item-level portfolio contribution: T128.
-5. Add Market Signal Engine: T060-T065 so item detail can separate Market Price from Expected Price.
-6. Add Alerts: T066-T070, T087, T104-T105.
-7. Add Trade Analyzer: T071-T074, T106-T107.
-8. Add Grading Analyzer: T075-T079, T108-T109, T114, T129.
-9. Add Forecasting: T080-T083, T110-T111.
-10. Add Settings, provider toggles, and full regression coverage: T112-T120, T130, T133.
-11. Finish documentation and full final validation updates: T123-T126.
+5. Add Portfolio Disposal and Realised Performance: T140-T145.
+6. Add Market Signal Engine: T060-T065 so item detail can separate Market Price from Expected Price.
+7. Add Alerts: T066-T070, T087, T104-T105.
+8. Add Trade Analyzer and Full Trade Transaction accounting: T071-T074, T146-T152, T106-T107.
+9. Add Grading Analyzer: T075-T079, T108-T109, T114, T129.
+10. Add Forecasting: T080-T083, T110-T111.
+11. Add Settings, provider toggles, and full regression coverage: T112-T120, T130, T133.
+12. Finish documentation and full final validation updates: T123-T126.
 
 ## Risks and Scope Notes
 

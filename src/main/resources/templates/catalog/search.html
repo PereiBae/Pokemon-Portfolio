@@ -9,12 +9,15 @@
             <div>
                 <h1>Search Official Catalogue</h1>
                 <p class="subtle">Import verified English card metadata before adding a holding.</p>
+                <p class="subtle" th:if="${returnTradeId != null}">Select a verified card to return it to the incoming side of Trade #<span th:text="${returnTradeId}">1</span>.</p>
             </div>
-            <a class="button" th:href="@{/cards/new}">Create Custom / Unverified Card</a>
+            <a class="button" th:if="${returnTradeId == null}" th:href="@{/cards/new}">Create Custom / Unverified Card</a>
+            <a class="button" th:if="${returnTradeId != null}" th:href="@{/cards/new(returnTradeId=${returnTradeId})}">Create Custom / Unverified Card</a>
         </div>
 
         <section class="card">
             <form th:action="@{/catalog/search}" method="get" class="catalog-search-form">
+                <input type="hidden" name="returnTradeId" th:value="${returnTradeId}" th:if="${returnTradeId != null}">
                 <div class="search-row">
                     <label class="wide-label">
                         Keyword
@@ -75,14 +78,14 @@
                 <div class="pagination">
                     <a class="button"
                        th:classappend="${!resultsPage.hasPrevious()} ? ' disabled' : ''"
-                       th:href="@{/catalog/search(q=${searchRequest.keyword},cardName=${searchRequest.cardName},setName=${searchRequest.setName},cardNumber=${searchRequest.cardNumber},rarity=${searchRequest.rarity},page=${resultsPage.previousPage},pageSize=${resultsPage.pageSize})}">Previous</a>
+                       th:href="@{/catalog/search(q=${searchRequest.keyword},cardName=${searchRequest.cardName},setName=${searchRequest.setName},cardNumber=${searchRequest.cardNumber},rarity=${searchRequest.rarity},page=${resultsPage.previousPage},pageSize=${resultsPage.pageSize},returnTradeId=${returnTradeId})}">Previous</a>
                     <span class="page-indicator" th:if="${resultsPage.totalPages != null}"
                           th:text="|Page ${resultsPage.page} of ${resultsPage.totalPages}|">Page 1 of 1</span>
                     <span class="page-indicator" th:if="${resultsPage.totalPages == null}"
                           th:text="|Page ${resultsPage.page}|">Page 1</span>
                     <a class="button"
                        th:classappend="${!resultsPage.hasNext()} ? ' disabled' : ''"
-                       th:href="@{/catalog/search(q=${searchRequest.keyword},cardName=${searchRequest.cardName},setName=${searchRequest.setName},cardNumber=${searchRequest.cardNumber},rarity=${searchRequest.rarity},page=${resultsPage.nextPage},pageSize=${resultsPage.pageSize})}">Next</a>
+                       th:href="@{/catalog/search(q=${searchRequest.keyword},cardName=${searchRequest.cardName},setName=${searchRequest.setName},cardNumber=${searchRequest.cardNumber},rarity=${searchRequest.rarity},page=${resultsPage.nextPage},pageSize=${resultsPage.pageSize},returnTradeId=${returnTradeId})}">Next</a>
                 </div>
             </div>
             <table class="table">
@@ -125,9 +128,10 @@
                             <form th:action="@{/catalog/import}" method="post">
                                 <input type="hidden" name="source" th:value="${card.source}">
                                 <input type="hidden" name="externalCardId" th:value="${card.externalCardId}">
+                                <input type="hidden" name="returnTradeId" th:value="${returnTradeId}" th:if="${returnTradeId != null}">
                                 <button type="submit">Import</button>
                             </form>
-                            <form th:action="@{/catalog/import}" method="post" class="portfolio-import-form">
+                            <form th:action="@{/catalog/import}" method="post" class="portfolio-import-form" th:if="${returnTradeId == null}">
                                 <input type="hidden" name="source" th:value="${card.source}">
                                 <input type="hidden" name="externalCardId" th:value="${card.externalCardId}">
                                 <input type="hidden" name="action" value="portfolio">
@@ -138,6 +142,19 @@
                                 </select>
                                 <input type="hidden" name="variant" value="STANDARD" th:if="${!card.hasAvailableVariants()}">
                                 <button class="primary" type="submit">Add to Portfolio</button>
+                            </form>
+                            <form th:action="@{/catalog/import}" method="post" class="portfolio-import-form" th:if="${returnTradeId != null}">
+                                <input type="hidden" name="source" th:value="${card.source}">
+                                <input type="hidden" name="externalCardId" th:value="${card.externalCardId}">
+                                <input type="hidden" name="action" value="tradeIncoming">
+                                <input type="hidden" name="returnTradeId" th:value="${returnTradeId}">
+                                <select class="variant-select" name="variant" th:if="${card.hasAvailableVariants()}">
+                                    <option th:each="variant : ${card.availableVariants}"
+                                            th:value="${variant}"
+                                            th:text="${variant.label}">Standard</option>
+                                </select>
+                                <input type="hidden" name="variant" value="STANDARD" th:if="${!card.hasAvailableVariants()}">
+                                <button class="primary" type="submit">Select for Trade</button>
                             </form>
                         </div>
                     </td>

@@ -66,7 +66,7 @@ public class AlertViewService {
         return new AlertView(
                 alert.getId(),
                 alert.getItemDisplayName(),
-                alert.getOwnedItem().getCard().getExternalImageSmallUrl(),
+                alert.getOwnedItem().imageSmallUrl(),
                 alert.getPurchasePriceSgd(),
                 alert.getCurrentMarketValueSgd(),
                 alert.getGainAmountSgd(),

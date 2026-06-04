@@ -29,6 +29,8 @@ import com.pokemonportfolio.config.domain.VerificationStatus;
 import com.pokemonportfolio.portfolio.repository.OwnedItemRepository;
 import com.pokemonportfolio.portfolio.service.OwnedItemForm;
 import com.pokemonportfolio.portfolio.service.OwnedItemService;
+import com.pokemonportfolio.trade.service.TradeCreateForm;
+import com.pokemonportfolio.trade.service.TradeTransactionService;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -69,6 +71,9 @@ class CatalogControllerTest {
     @Autowired
     private OwnedItemService ownedItemService;
 
+    @Autowired
+    private TradeTransactionService tradeTransactionService;
+
     @Test
     @WithUserDetails("owner@example.com")
     void searchPageRendersOfficialResultsForAuthenticatedUser() throws Exception {
@@ -105,6 +110,47 @@ class CatalogControllerTest {
                         .param("variant", "HOLO"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrlPattern("/portfolio/add?cardId=*&variant=HOLO"));
+    }
+
+    @Test
+    @WithUserDetails("owner@example.com")
+    void officialCatalogueCanReturnImportedCardToIncomingTradeSelection() throws Exception {
+        var owner = appUserRepository.findByUsername("owner@example.com").orElseThrow();
+        var trade = tradeTransactionService.createDraft(owner, tradeForm());
+
+        mockMvc.perform(get("/catalog/search")
+                        .param("q", "Charizard")
+                        .param("returnTradeId", trade.getId().toString()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Select for Trade")))
+                .andExpect(content().string(containsString("Trade #")))
+                .andExpect(content().string(containsString("returnTradeId")));
+
+        String redirect = mockMvc.perform(post("/catalog/import")
+                        .with(csrf())
+                        .param("source", "POKEMON_TCG_API")
+                        .param("externalCardId", "sv3-223")
+                        .param("action", "tradeIncoming")
+                        .param("returnTradeId", trade.getId().toString())
+                        .param("variant", "HOLO"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrlPattern("/trades/*?incomingCardId=*&variant=HOLO"))
+                .andReturn()
+                .getResponse()
+                .getRedirectedUrl();
+
+        Long cardId = Long.valueOf(redirect.substring(
+                redirect.indexOf("incomingCardId=") + "incomingCardId=".length(),
+                redirect.indexOf("&variant")));
+        assertThat(cardRepository.findById(cardId).orElseThrow().getVerificationStatus()).isEqualTo(VerificationStatus.VERIFIED);
+        assertThat(ownedItemRepository.countByCardId(cardId)).isZero();
+
+        mockMvc.perform(get(redirect))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Selected Incoming Card")))
+                .andExpect(content().string(containsString("Charizard ex")))
+                .andExpect(content().string(containsString("https://images.example/charizard-large.png")))
+                .andExpect(content().string(containsString("Holo")));
     }
 
     @Test
@@ -271,5 +317,13 @@ class CatalogControllerTest {
                 }
             };
         }
+    }
+
+    private TradeCreateForm tradeForm() {
+        TradeCreateForm form = new TradeCreateForm();
+        form.setName("Catalogue Trade " + System.nanoTime());
+        form.setOutgoingTradePercentage(new BigDecimal("100.00"));
+        form.setIncomingTradePercentage(new BigDecimal("100.00"));
+        return form;
     }
 }

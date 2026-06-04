@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,8 +40,7 @@ public class PriceAlertService {
     public List<Alert> checkAlerts(AppUser owner) {
         List<Alert> createdAlerts = new ArrayList<>();
         for (OwnedItem ownedItem : ownedItemService.listActiveItems(owner)) {
-            priceSnapshotRepository
-                    .findTopByCardIdOrderByCalculatedAtDescIdDesc(ownedItem.getCard().getId())
+            latestPrice(ownedItem)
                     .ifPresent(snapshot -> createIfThresholdMet(owner, ownedItem, snapshot, createdAlerts));
         }
         return createdAlerts;
@@ -84,13 +84,14 @@ public class PriceAlertService {
     }
 
     private String displayName(OwnedItem ownedItem) {
-        return ownedItem.getCard().getName()
-                + " #"
-                + ownedItem.getCard().getCardNumber()
-                + " - "
-                + ownedItem.getCard().getPokemonSet().getName()
-                + " ("
-                + ownedItem.getOwnedVariant().getLabel()
-                + ")";
+        return ownedItem.displayName();
+    }
+
+    private Optional<PriceSnapshot> latestPrice(OwnedItem ownedItem) {
+        if (ownedItem.isSealedProduct()) {
+            return priceSnapshotRepository
+                    .findTopBySealedProductIdOrderByCalculatedAtDescIdDesc(ownedItem.getSealedProduct().getId());
+        }
+        return priceSnapshotRepository.findTopByCardIdOrderByCalculatedAtDescIdDesc(ownedItem.getCard().getId());
     }
 }

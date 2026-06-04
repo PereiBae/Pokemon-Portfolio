@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 public class ManualPriceEntryForm {
 
     private Long cardId;
+    private Long sealedProductId;
     private Long ownedItemId;
 
     @NotNull
@@ -45,6 +46,14 @@ public class ManualPriceEntryForm {
 
     public void setCardId(Long cardId) {
         this.cardId = cardId;
+    }
+
+    public Long getSealedProductId() {
+        return sealedProductId;
+    }
+
+    public void setSealedProductId(Long sealedProductId) {
+        this.sealedProductId = sealedProductId;
     }
 
     public Long getOwnedItemId() {

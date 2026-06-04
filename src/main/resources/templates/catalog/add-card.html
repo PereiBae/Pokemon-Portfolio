@@ -16,6 +16,7 @@
         </section>
         <section class="card">
             <form th:action="@{/cards}" th:object="${cardForm}" method="post" class="form-grid">
+                <input type="hidden" name="returnTradeId" th:value="${returnTradeId}" th:if="${returnTradeId != null}">
                 <label>
                     Card Name
                     <input th:field="*{name}" required>
@@ -42,7 +43,8 @@
                 </label>
                 <div class="actions">
                     <button class="primary" type="submit">Save Unverified Card</button>
-                    <a class="button" th:href="@{/catalog/search}">Official Catalogue</a>
+                    <a class="button" th:if="${returnTradeId == null}" th:href="@{/catalog/search}">Official Catalogue</a>
+                    <a class="button" th:if="${returnTradeId != null}" th:href="@{/catalog/search(returnTradeId=${returnTradeId})}">Official Catalogue</a>
                 </div>
             </form>
         </section>

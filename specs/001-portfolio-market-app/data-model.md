@@ -21,6 +21,8 @@ historical snapshots, and explainable analysis outputs.
 - `SignalClassification`: UNDERVALUED, FAIRLY_VALUED, OVERVALUED
 - `AlertStatus`: NEW, ACTIVE, ACKNOWLEDGED, DISMISSED
 - `TradeSideType`: USER, OTHER_PARTY
+- `TradeTransactionMode`: ANALYSIS_ONLY, EXECUTE_TRADE
+- `TradeTransactionStatus`: DRAFT, ANALYZED, EXECUTED, CANCELLED
 - `ForecastHorizon`: DAYS_30, DAYS_90, DAYS_180, DAYS_365
 
 ## Entities
@@ -39,8 +41,8 @@ Fields:
 - last login at
 
 Relationships:
-- One user owns many owned items, alerts, portfolio snapshots, trade analyses,
-  grading analyses, and forecast snapshots.
+- One user owns many owned items, alerts, portfolio snapshots, trade
+  transactions, grading analyses, and forecast snapshots.
 
 Validation:
 - Password hash is required.
@@ -280,60 +282,79 @@ Validation:
 - Default threshold rules are fixed in v1.
 - Reruns must not create duplicate alerts for the same trigger.
 
-### TradeAnalysis
+### TradeTransaction
 
 Fields:
 - id
 - app user id
 - name
+- mode
+- status
 - notes
 - total user market value SGD
 - total other market value SGD
 - total user adjusted value SGD
 - total other adjusted value SGD
+- total outgoing agreed value SGD
+- total incoming agreed value SGD
+- trade imbalance SGD
 - net difference SGD
 - fairness result
 - confidence rating
+- executed at
 - created at
 
 Relationships:
-- Has two trade sides.
+- Has two trade transaction sides.
 
 Validation:
 - Exactly one USER side and one OTHER_PARTY side.
+- Analysis-only mode does not mutate portfolio, disposal, realised gain/loss, or
+  cost-basis records.
+- Execute-trade mode links all outgoing, incoming, and disposal records.
 
-### TradeSide
+### TradeTransactionSide
 
 Fields:
 - id
-- trade analysis id
+- trade transaction id
 - side type
 - trade percentage
 - total market value SGD
 - total adjusted value SGD
+- total agreed value SGD
 
 Relationships:
-- Has many trade items.
+- Has many trade transaction items.
 
 Validation:
 - Trade percentage is positive and can be independently set per side.
 
-### TradeItem
+### TradeTransactionItem
 
 Fields:
 - id
-- trade side id
+- trade transaction side id
 - item type
 - card id
 - sealed product id
 - quantity for proposed trade display only
 - market value SGD
 - adjusted trade value SGD
+- agreed trade value SGD
+- allocated cost basis SGD
+- outgoing owned item id, nullable
+- incoming owned item id, nullable
+- disposal record id, nullable
 - confidence rating
 - warning
 
 Validation:
 - Uses calculated market value.
+- Outgoing item realised gain/loss is trade value received minus original
+  purchase price.
+- Incoming allocated cost basis uses agreed incoming item values when totals
+  match, or proportional allocation when incoming and outgoing totals differ.
 
 ### GradingFee
 
@@ -443,4 +464,3 @@ Fields:
 Validation:
 - Treated as manual provider fallback.
 - Default confidence is LOW unless user marks supporting context.
-

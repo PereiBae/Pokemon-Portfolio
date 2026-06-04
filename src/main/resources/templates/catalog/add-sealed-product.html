@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Create Sealed Product')}"></head>
+<body>
+<div class="app-shell">
+    <header th:replace="~{fragments/layout :: topbar}"></header>
+    <main class="page">
+        <div class="page-header">
+            <div>
+                <h1>Create Sealed Product</h1>
+                <p class="subtle">Manual sealed product records are unverified until a future official sealed catalogue exists.</p>
+            </div>
+            <a class="button" th:href="@{/sealed-products}">Sealed Products</a>
+        </div>
+
+        <section class="card message-card">
+            <p class="subtle">Manual sealed products may not have reliable pricing until you add manual price snapshots.</p>
+        </section>
+
+        <section class="card">
+            <form th:action="@{/sealed-products}" th:object="${sealedProductForm}" method="post" class="form-grid">
+                <label>Product Name
+                    <input th:field="*{name}" maxlength="255" required>
+                </label>
+                <label>Product Type
+                    <select th:field="*{productType}">
+                        <option th:each="type : ${productTypes}" th:value="${type}" th:text="${type.label}">Booster Box</option>
+                    </select>
+                </label>
+                <label>Language / Market
+                    <select th:field="*{languageMarket}">
+                        <option th:each="market : ${markets}" th:value="${market}" th:text="${market.label}">English</option>
+                    </select>
+                </label>
+                <label>Set Name
+                    <input th:field="*{setName}" maxlength="255">
+                </label>
+                <label>Release Date
+                    <input th:field="*{releaseDate}" type="date">
+                </label>
+                <label>Image URL
+                    <input th:field="*{imageUrl}" maxlength="1000">
+                </label>
+                <label>Notes
+                    <textarea th:field="*{notes}" rows="3" maxlength="1000"></textarea>
+                </label>
+                <div class="actions">
+                    <button class="primary" type="submit">Create Sealed Product</button>
+                    <a class="button" th:href="@{/sealed-products}">Cancel</a>
+                </div>
+            </form>
+        </section>
+    </main>
+</div>
+</body>
+</html>

@@ -3,6 +3,7 @@ package com.pokemonportfolio.pricing.controller;
 import com.pokemonportfolio.auth.entity.AppUser;
 import com.pokemonportfolio.auth.service.CurrentUserService;
 import com.pokemonportfolio.catalog.service.CardService;
+import com.pokemonportfolio.catalog.service.SealedProductService;
 import com.pokemonportfolio.config.domain.ConfidenceRating;
 import com.pokemonportfolio.portfolio.service.OwnedItemService;
 import com.pokemonportfolio.pricing.service.ManualPriceEntryForm;
@@ -24,16 +25,19 @@ public class PricingController {
 
     private final CurrentUserService currentUserService;
     private final CardService cardService;
+    private final SealedProductService sealedProductService;
     private final OwnedItemService ownedItemService;
     private final ManualPriceEntryService manualPriceEntryService;
 
     public PricingController(
             CurrentUserService currentUserService,
             CardService cardService,
+            SealedProductService sealedProductService,
             OwnedItemService ownedItemService,
             ManualPriceEntryService manualPriceEntryService) {
         this.currentUserService = currentUserService;
         this.cardService = cardService;
+        this.sealedProductService = sealedProductService;
         this.ownedItemService = ownedItemService;
         this.manualPriceEntryService = manualPriceEntryService;
     }
@@ -42,9 +46,11 @@ public class PricingController {
     String manualEntry(
             Authentication authentication,
             @RequestParam(name = "cardId", required = false) Long cardId,
+            @RequestParam(name = "sealedProductId", required = false) Long sealedProductId,
             Model model) {
         ManualPriceEntryForm form = new ManualPriceEntryForm();
         form.setCardId(cardId);
+        form.setSealedProductId(sealedProductId);
         form.setExchangeRateUsed(BigDecimal.ONE.setScale(8));
         prepareManualEntryModel(authentication, model, form);
         return "pricing/manual-entry";
@@ -73,6 +79,7 @@ public class PricingController {
         AppUser owner = currentUserService.requireCurrentUser(authentication);
         model.addAttribute("manualPriceEntryForm", form);
         model.addAttribute("cardOptions", cardService.listEnglishCardOptions());
+        model.addAttribute("sealedProductOptions", sealedProductService.listActiveOptions());
         model.addAttribute("ownedItemOptions", ownedItemService.listActiveItemOptions(owner));
         model.addAttribute("confidenceRatings", ConfidenceRating.values());
         model.addAttribute("currencies", List.of("SGD", "USD", "JPY", "CNY"));

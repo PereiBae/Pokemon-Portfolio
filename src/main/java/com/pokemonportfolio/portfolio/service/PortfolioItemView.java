@@ -5,6 +5,8 @@ import java.math.BigDecimal;
 
 public record PortfolioItemView(
         Long ownedItemId,
+        String assetTypeLabel,
+        String assetName,
         String cardName,
         String setName,
         String cardNumber,

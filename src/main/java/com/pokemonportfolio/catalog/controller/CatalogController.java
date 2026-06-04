@@ -32,6 +32,7 @@ public class CatalogController {
             @RequestParam(name = "rarity", required = false) String rarity,
             @RequestParam(name = "page", required = false) Integer page,
             @RequestParam(name = "pageSize", required = false) Integer pageSize,
+            @RequestParam(name = "returnTradeId", required = false) Long returnTradeId,
             Model model) {
         OfficialCardSearchRequest request =
                 new OfficialCardSearchRequest(query, cardName, setName, cardNumber, rarity, page, pageSize);
@@ -47,6 +48,7 @@ public class CatalogController {
         model.addAttribute("resultsPage", resultsPage);
         model.addAttribute("results", resultsPage.getResults());
         model.addAttribute("pageSizeOptions", OfficialCardSearchRequest.PAGE_SIZE_OPTIONS);
+        model.addAttribute("returnTradeId", returnTradeId);
         return "catalog/search";
     }
 
@@ -56,22 +58,38 @@ public class CatalogController {
             @RequestParam("externalCardId") String externalCardId,
             @RequestParam(name = "action", defaultValue = "import") String action,
             @RequestParam(name = "variant", required = false) CardVariant variant,
+            @RequestParam(name = "returnTradeId", required = false) Long returnTradeId,
             RedirectAttributes redirectAttributes) {
         try {
             Card card = officialCardCatalogueService.importOfficialCard(source, externalCardId);
+            if ("tradeIncoming".equalsIgnoreCase(action)) {
+                if (returnTradeId == null) {
+                    redirectAttributes.addFlashAttribute("catalogError", "Trade return target is missing.");
+                    return "redirect:/catalog/search";
+                }
+                String variantParam = variant == null ? "" : "&variant=" + variant.name();
+                return "redirect:/trades/" + returnTradeId + "?incomingCardId=" + card.getId() + variantParam;
+            }
             if ("portfolio".equalsIgnoreCase(action)) {
                 String variantParam = variant == null ? "" : "&variant=" + variant.name();
                 return "redirect:/portfolio/add?cardId=" + card.getId() + variantParam;
             }
             redirectAttributes.addFlashAttribute("successMessage", "Verified card imported.");
-            return "redirect:/catalog/search";
+            return redirectToSearch(returnTradeId);
         } catch (CardCatalogueProviderException ex) {
             redirectAttributes.addFlashAttribute("catalogError", friendlyError());
-            return "redirect:/catalog/search";
+            return redirectToSearch(returnTradeId);
         }
     }
 
     private String friendlyError() {
         return "Official catalogue is unavailable right now. Create a custom unverified card as a local fallback.";
+    }
+
+    private String redirectToSearch(Long returnTradeId) {
+        if (returnTradeId == null) {
+            return "redirect:/catalog/search";
+        }
+        return "redirect:/catalog/search?returnTradeId=" + returnTradeId;
     }
 }

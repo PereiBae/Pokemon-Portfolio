@@ -10,7 +10,10 @@
                 <h1>Portfolio Dashboard</h1>
                 <p class="subtle">Active holdings plus realised performance from disposal history.</p>
             </div>
-            <a class="button primary" th:href="@{/cards/new}">Add Card</a>
+            <div class="actions compact-actions">
+                <a class="button primary" th:href="@{/cards/new}">Add Card</a>
+                <a class="button" th:href="@{/sealed-products/new}">Create Sealed Product</a>
+            </div>
         </div>
 
         <section class="grid summary-grid">
@@ -89,14 +92,15 @@
             <div class="page-header">
                 <div>
                     <h1 style="font-size: 20px;">Holdings</h1>
-                    <p class="subtle" th:text="|${summary.itemCount} active owned card records|">0 active owned card records</p>
+                    <p class="subtle" th:text="|${summary.itemCount} active owned item records|">0 active owned item records</p>
                 </div>
                 <a class="button" th:href="@{/portfolio/disposals}">Disposal History</a>
             </div>
             <table class="table">
                 <thead>
                 <tr>
-                    <th>Card</th>
+                    <th>Type</th>
+                    <th>Item</th>
                     <th>Set</th>
                     <th>Condition</th>
                     <th>Cost</th>
@@ -107,10 +111,11 @@
                 </thead>
                 <tbody>
                 <tr th:if="${summary.items.isEmpty()}">
-                    <td colspan="7" class="subtle">No holdings yet.</td>
+                    <td colspan="8" class="subtle">No holdings yet.</td>
                 </tr>
                 <tr th:each="item : ${summary.items}">
-                    <td th:text="|${item.cardName} #${item.cardNumber}|">Card</td>
+                    <td><span class="badge muted-badge" th:text="${item.assetTypeLabel}">Card</span></td>
+                    <td th:text="${#strings.isEmpty(item.cardNumber) ? item.assetName : item.assetName + ' #' + item.cardNumber}">Item</td>
                     <td th:text="${item.setName}">Set</td>
                     <td th:text="${item.condition}">Condition</td>
                     <td th:text="|SGD ${#numbers.formatDecimal(item.purchasePriceSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>

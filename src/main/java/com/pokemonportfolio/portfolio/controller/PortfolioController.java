@@ -3,10 +3,12 @@ package com.pokemonportfolio.portfolio.controller;
 import com.pokemonportfolio.auth.entity.AppUser;
 import com.pokemonportfolio.auth.service.CurrentUserService;
 import com.pokemonportfolio.catalog.service.CardService;
+import com.pokemonportfolio.catalog.service.SealedProductService;
 import com.pokemonportfolio.config.domain.CardCondition;
 import com.pokemonportfolio.config.domain.CardVariant;
 import com.pokemonportfolio.config.domain.GradedStatus;
 import com.pokemonportfolio.config.domain.DisposalType;
+import com.pokemonportfolio.config.domain.SealedProductCondition;
 import com.pokemonportfolio.portfolio.service.OwnedItemForm;
 import com.pokemonportfolio.portfolio.service.OwnedItemDisposalForm;
 import com.pokemonportfolio.portfolio.service.OwnedItemOptionView;
@@ -30,6 +32,7 @@ public class PortfolioController {
 
     private final CurrentUserService currentUserService;
     private final CardService cardService;
+    private final SealedProductService sealedProductService;
     private final OwnedItemService ownedItemService;
     private final PortfolioDashboardService dashboardService;
     private final PortfolioWorkflowService workflowService;
@@ -38,12 +41,14 @@ public class PortfolioController {
     public PortfolioController(
             CurrentUserService currentUserService,
             CardService cardService,
+            SealedProductService sealedProductService,
             OwnedItemService ownedItemService,
             PortfolioDashboardService dashboardService,
             PortfolioWorkflowService workflowService,
             PortfolioDisposalService disposalService) {
         this.currentUserService = currentUserService;
         this.cardService = cardService;
+        this.sealedProductService = sealedProductService;
         this.ownedItemService = ownedItemService;
         this.dashboardService = dashboardService;
         this.workflowService = workflowService;
@@ -91,8 +96,43 @@ public class PortfolioController {
             return "portfolio/add";
         }
         AppUser owner = currentUserService.requireCurrentUser(authentication);
-        workflowService.addCardToPortfolioAndSnapshot(owner, form);
-        return "redirect:/dashboard";
+        try {
+            workflowService.addCardToPortfolioAndSnapshot(owner, form);
+            return "redirect:/dashboard";
+        } catch (IllegalArgumentException ex) {
+            bindingResult.reject("ownedItem.invalid", ex.getMessage());
+            prepareAddModel(model, form);
+            return "portfolio/add";
+        }
+    }
+
+    @GetMapping("/portfolio/add-sealed")
+    String addSealedProduct(
+            @RequestParam(name = "sealedProductId", required = false) Long sealedProductId,
+            Model model) {
+        OwnedItemForm form = new OwnedItemForm();
+        form.setSealedProductId(sealedProductId);
+        prepareAddSealedModel(model, form);
+        return "portfolio/add-sealed";
+    }
+
+    @PostMapping("/portfolio/sealed-items")
+    String createSealedItem(
+            Authentication authentication,
+            @Valid @ModelAttribute("ownedItemForm") OwnedItemForm form,
+            BindingResult bindingResult,
+            Model model) {
+        if (!bindingResult.hasErrors()) {
+            try {
+                AppUser owner = currentUserService.requireCurrentUser(authentication);
+                workflowService.addSealedProductToPortfolioAndSnapshot(owner, form);
+                return "redirect:/dashboard";
+            } catch (IllegalArgumentException ex) {
+                bindingResult.reject("ownedItem.invalid", ex.getMessage());
+            }
+        }
+        prepareAddSealedModel(model, form);
+        return "portfolio/add-sealed";
     }
 
     @GetMapping("/portfolio/items/{ownedItemId}/sell")
@@ -172,6 +212,12 @@ public class PortfolioController {
         model.addAttribute("variants", CardVariant.values());
         model.addAttribute("conditions", CardCondition.values());
         model.addAttribute("gradedStatuses", GradedStatus.values());
+    }
+
+    private void prepareAddSealedModel(Model model, OwnedItemForm form) {
+        model.addAttribute("ownedItemForm", form);
+        model.addAttribute("sealedProductOptions", sealedProductService.listActiveOptions());
+        model.addAttribute("sealedConditions", SealedProductCondition.values());
     }
 
     private void prepareDisposeModel(

@@ -5,19 +5,23 @@ import com.pokemonportfolio.portfolio.entity.OwnedItem;
 public record OwnedItemOptionView(
         Long ownedItemId,
         Long cardId,
+        Long sealedProductId,
+        String assetTypeLabel,
         String displayLabel) {
 
     public static OwnedItemOptionView from(OwnedItem ownedItem) {
-        String label = ownedItem.getCard().getName()
-                + " #"
-                + ownedItem.getCard().getCardNumber()
-                + " - "
-                + ownedItem.getCard().getPokemonSet().getName()
+        String label = ownedItem.displayName()
                 + " ["
-                + ownedItem.getCard().getVerificationStatus().getLabel()
-                + "]"
-                + " / "
-                + ownedItem.getCondition().getLabel();
-        return new OwnedItemOptionView(ownedItem.getId(), ownedItem.getCard().getId(), label);
+                + ownedItem.verificationStatusLabel()
+                + "] / "
+                + ownedItem.conditionLabel();
+        Long cardId = ownedItem.getCard() == null ? null : ownedItem.getCard().getId();
+        Long sealedProductId = ownedItem.getSealedProduct() == null ? null : ownedItem.getSealedProduct().getId();
+        return new OwnedItemOptionView(
+                ownedItem.getId(),
+                cardId,
+                sealedProductId,
+                ownedItem.getAssetType().getLabel(),
+                label);
     }
 }

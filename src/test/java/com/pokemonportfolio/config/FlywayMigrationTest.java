@@ -25,12 +25,16 @@ class FlywayMigrationTest {
                 "app_user",
                 "pokemon_set",
                 "card",
+                "sealed_product",
                 "owned_item",
                 "price_snapshot",
                 "exchange_rate_snapshot",
                 "portfolio_valuation_snapshot",
                 "alert",
-                "owned_item_disposal");
+                "owned_item_disposal",
+                "trade_transaction",
+                "trade_transaction_side",
+                "trade_transaction_item");
 
         try (Connection connection = dataSource.getConnection()) {
             DatabaseMetaData metaData = connection.getMetaData();

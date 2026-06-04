@@ -29,5 +29,11 @@ public class PortfolioWorkflowService {
         portfolioValuationService.createSnapshot(owner);
         return ownedItem;
     }
-}
 
+    @Transactional
+    public OwnedItem addSealedProductToPortfolioAndSnapshot(AppUser owner, OwnedItemForm form) {
+        OwnedItem ownedItem = ownedItemService.addSealedProductToPortfolio(owner, form);
+        portfolioValuationService.createSnapshot(owner);
+        return ownedItem;
+    }
+}

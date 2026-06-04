@@ -8,11 +8,12 @@
         <div class="page-header">
             <div>
                 <h1>Portfolio</h1>
-                <p class="subtle">Active owned card copies are listed independently.</p>
+                <p class="subtle">Active owned card and sealed product copies are listed independently.</p>
             </div>
             <div class="actions compact-actions">
                 <a class="button" th:href="@{/portfolio/disposals}">Disposal History</a>
                 <a class="button primary" th:href="@{/catalog/search}">Add Verified Card</a>
+                <a class="button" th:href="@{/portfolio/add-sealed}">Add Sealed Product</a>
             </div>
         </div>
         <section class="card message-card">
@@ -22,10 +23,11 @@
             <table class="table">
                 <thead>
                 <tr>
-                    <th>Card</th>
+                    <th>Type</th>
+                    <th>Item</th>
                     <th>Status</th>
                     <th>Set</th>
-                    <th>Variant</th>
+                    <th>Variant / Type</th>
                     <th>Condition</th>
                     <th>Purchase</th>
                     <th>Market</th>
@@ -36,14 +38,15 @@
                 </thead>
                 <tbody>
                 <tr th:if="${summary.items.isEmpty()}">
-                    <td colspan="10" class="subtle">No active portfolio records yet.</td>
+                    <td colspan="11" class="subtle">No active portfolio records yet.</td>
                 </tr>
                 <tr th:each="item : ${summary.items}">
+                    <td><span class="badge muted-badge" th:text="${item.assetTypeLabel}">Card</span></td>
                     <td class="catalog-card-cell">
                         <div class="card-cell-content">
-                            <img class="card-thumb" th:if="${item.imageSmallUrl != null}" th:src="${item.imageSmallUrl}" th:alt="${item.cardName}">
+                            <img class="card-thumb" th:if="${item.imageSmallUrl != null}" th:src="${item.imageSmallUrl}" th:alt="${item.assetName}">
                             <span class="image-placeholder" th:if="${item.imageSmallUrl == null}">Image not available</span>
-                            <span th:text="|${item.cardName} #${item.cardNumber}|">Card</span>
+                            <span th:text="${#strings.isEmpty(item.cardNumber) ? item.assetName : item.assetName + ' #' + item.cardNumber}">Item</span>
                         </div>
                     </td>
                     <td>

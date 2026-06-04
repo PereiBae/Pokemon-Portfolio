@@ -3,31 +3,29 @@ package com.pokemonportfolio.portfolio.service;
 import com.pokemonportfolio.config.domain.CardCondition;
 import com.pokemonportfolio.config.domain.CardVariant;
 import com.pokemonportfolio.config.domain.GradedStatus;
+import com.pokemonportfolio.config.domain.SealedProductCondition;
 import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
 public class OwnedItemForm {
 
-    @NotNull
     private Long cardId;
+    private Long sealedProductId;
 
     private CardVariant variant;
 
-    @NotNull
     private CardCondition condition = CardCondition.RAW_NEAR_MINT;
 
-    @NotNull
+    private SealedProductCondition sealedCondition = SealedProductCondition.SEALED;
+
     @DecimalMin("0.00")
     private BigDecimal purchasePriceSgd;
 
-    @NotNull
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate purchaseDate = LocalDate.now();
 
-    @NotNull
     private GradedStatus gradedStatus = GradedStatus.UNGRADED;
 
     private Integer psaGrade;
@@ -40,6 +38,14 @@ public class OwnedItemForm {
 
     public void setCardId(Long cardId) {
         this.cardId = cardId;
+    }
+
+    public Long getSealedProductId() {
+        return sealedProductId;
+    }
+
+    public void setSealedProductId(Long sealedProductId) {
+        this.sealedProductId = sealedProductId;
     }
 
     public CardVariant getVariant() {
@@ -56,6 +62,14 @@ public class OwnedItemForm {
 
     public void setCondition(CardCondition condition) {
         this.condition = condition;
+    }
+
+    public SealedProductCondition getSealedCondition() {
+        return sealedCondition;
+    }
+
+    public void setSealedCondition(SealedProductCondition sealedCondition) {
+        this.sealedCondition = sealedCondition;
     }
 
     public BigDecimal getPurchasePriceSgd() {

@@ -61,6 +61,9 @@ public class OwnedItemDisposal extends AuditableEntity {
     @Column(length = 1000)
     private String notes;
 
+    @Column(name = "trade_transaction_id")
+    private Long tradeTransactionId;
+
     protected OwnedItemDisposal() {
     }
 
@@ -76,6 +79,34 @@ public class OwnedItemDisposal extends AuditableEntity {
             BigDecimal realizedGainLossSgd,
             BigDecimal realizedGainLossPercent,
             String notes) {
+        this(
+                owner,
+                ownedItem,
+                disposalType,
+                disposalDate,
+                proceedsValueSgd,
+                feesSgd,
+                netProceedsSgd,
+                originalPurchasePriceSgd,
+                realizedGainLossSgd,
+                realizedGainLossPercent,
+                notes,
+                null);
+    }
+
+    public OwnedItemDisposal(
+            AppUser owner,
+            OwnedItem ownedItem,
+            DisposalType disposalType,
+            LocalDate disposalDate,
+            BigDecimal proceedsValueSgd,
+            BigDecimal feesSgd,
+            BigDecimal netProceedsSgd,
+            BigDecimal originalPurchasePriceSgd,
+            BigDecimal realizedGainLossSgd,
+            BigDecimal realizedGainLossPercent,
+            String notes,
+            Long tradeTransactionId) {
         this.owner = owner;
         this.ownedItem = ownedItem;
         this.disposalType = disposalType;
@@ -87,6 +118,7 @@ public class OwnedItemDisposal extends AuditableEntity {
         this.realizedGainLossSgd = realizedGainLossSgd;
         this.realizedGainLossPercent = realizedGainLossPercent;
         this.notes = notes;
+        this.tradeTransactionId = tradeTransactionId;
     }
 
     public Long getId() {
@@ -135,5 +167,9 @@ public class OwnedItemDisposal extends AuditableEntity {
 
     public String getNotes() {
         return notes;
+    }
+
+    public Long getTradeTransactionId() {
+        return tradeTransactionId;
     }
 }

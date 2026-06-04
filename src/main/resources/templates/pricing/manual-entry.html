@@ -32,6 +32,14 @@
                     </select>
                 </label>
                 <label>
+                    Sealed Product
+                    <select th:field="*{sealedProductId}">
+                        <option value="">Select sealed product if no portfolio item/card is selected</option>
+                        <option th:each="product : ${sealedProductOptions}" th:value="${product.id}"
+                                th:text="${product.displayLabel}">Sealed product</option>
+                    </select>
+                </label>
+                <label>
                     Source Provider Label
                     <input th:field="*{providerName}" maxlength="120" placeholder="MANUAL">
                 </label>

@@ -13,6 +13,7 @@
         </div>
         <section class="card">
             <form th:action="@{/portfolio/items}" th:object="${ownedItemForm}" method="post" class="form-grid">
+                <p th:if="${#fields.hasGlobalErrors()}" class="error" th:each="err : ${#fields.globalErrors()}" th:text="${err}">Error</p>
                 <label>
                     Card
                     <select th:field="*{cardId}" required>
@@ -64,6 +65,7 @@
                     <button class="primary" type="submit">Add Holding</button>
                     <a class="button" th:href="@{/catalog/search}">Search Official Catalogue</a>
                     <a class="button" th:href="@{/cards/new}">Create Custom Card</a>
+                    <a class="button" th:href="@{/portfolio/add-sealed}">Add Sealed Product</a>
                 </div>
             </form>
         </section>

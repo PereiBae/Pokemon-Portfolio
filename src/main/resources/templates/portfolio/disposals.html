@@ -26,12 +26,13 @@
                     <th>Net</th>
                     <th>Realised Gain/Loss</th>
                     <th>Percent</th>
+                    <th>Source</th>
                     <th>Notes</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:if="${disposals.isEmpty()}">
-                    <td colspan="10" class="subtle">No disposal records yet.</td>
+                    <td colspan="11" class="subtle">No disposal records yet.</td>
                 </tr>
                 <tr th:each="disposal : ${disposals}">
                     <td th:text="${disposal.itemDisplayName}">Item</td>
@@ -51,6 +52,14 @@
                         th:text="|SGD ${#numbers.formatDecimal(disposal.realizedGainLossSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
                     <td th:classappend="${disposal.realizedGainIsNonNegative()} ? ' positive' : ' negative'"
                         th:text="|${#numbers.formatDecimal(disposal.realizedGainLossPercent, 1, 'COMMA', 2, 'POINT')}%|">0.00%</td>
+                    <td>
+                        <a class="badge positive-badge"
+                           th:if="${disposal.fromTradeTransaction()}"
+                           th:href="@{/trades/{id}(id=${disposal.tradeTransactionId})}"
+                           th:text="|Trade #${disposal.tradeTransactionId}|">Trade #1</a>
+                        <span class="badge muted-badge"
+                              th:if="${!disposal.fromTradeTransaction()}">Simple</span>
+                    </td>
                     <td th:text="${disposal.notes ?: ''}">Notes</td>
                 </tr>
                 </tbody>

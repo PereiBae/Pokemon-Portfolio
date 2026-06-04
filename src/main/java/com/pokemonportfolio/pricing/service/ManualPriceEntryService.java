@@ -2,8 +2,11 @@ package com.pokemonportfolio.pricing.service;
 
 import com.pokemonportfolio.auth.entity.AppUser;
 import com.pokemonportfolio.catalog.entity.Card;
+import com.pokemonportfolio.catalog.entity.SealedProduct;
 import com.pokemonportfolio.catalog.service.CardService;
+import com.pokemonportfolio.catalog.service.SealedProductService;
 import com.pokemonportfolio.config.domain.ConfidenceRating;
+import com.pokemonportfolio.portfolio.entity.OwnedItem;
 import com.pokemonportfolio.portfolio.service.OwnedItemService;
 import com.pokemonportfolio.pricing.entity.PriceSnapshot;
 import com.pokemonportfolio.pricing.provider.PricingProviderProperties;
@@ -16,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ManualPriceEntryService {
 
     private final CardService cardService;
+    private final SealedProductService sealedProductService;
     private final OwnedItemService ownedItemService;
     private final CurrencyConversionService currencyConversionService;
     private final PriceSnapshotService priceSnapshotService;
@@ -23,11 +27,13 @@ public class ManualPriceEntryService {
 
     public ManualPriceEntryService(
             CardService cardService,
+            SealedProductService sealedProductService,
             OwnedItemService ownedItemService,
             CurrencyConversionService currencyConversionService,
             PriceSnapshotService priceSnapshotService,
             PricingProviderProperties pricingProviderProperties) {
         this.cardService = cardService;
+        this.sealedProductService = sealedProductService;
         this.ownedItemService = ownedItemService;
         this.currencyConversionService = currencyConversionService;
         this.priceSnapshotService = priceSnapshotService;
@@ -39,7 +45,7 @@ public class ManualPriceEntryService {
         if (!pricingProviderProperties.isManualEntryEnabled()) {
             throw new IllegalStateException("Manual price entry is disabled");
         }
-        Card card = resolveCard(owner, form);
+        ManualPriceAsset asset = resolveAsset(owner, form);
         ConfidenceRating confidenceRating = form.getConfidenceRating() == null
                 ? ConfidenceRating.LOW
                 : form.getConfidenceRating();
@@ -64,17 +70,24 @@ public class ManualPriceEntryService {
                 submittedSgd,
                 confidenceRating,
                 explanation(form.getNotes()));
-        return priceSnapshotService.createSnapshot(card, providerPrice);
+        if (asset.card() != null) {
+            return priceSnapshotService.createSnapshot(asset.card(), providerPrice);
+        }
+        return priceSnapshotService.createSnapshot(asset.sealedProduct(), providerPrice);
     }
 
-    private Card resolveCard(AppUser owner, ManualPriceEntryForm form) {
+    private ManualPriceAsset resolveAsset(AppUser owner, ManualPriceEntryForm form) {
         if (form.getOwnedItemId() != null) {
-            return ownedItemService.requireActiveItemForOwner(owner, form.getOwnedItemId()).getCard();
+            OwnedItem ownedItem = ownedItemService.requireActiveItemForOwner(owner, form.getOwnedItemId());
+            return new ManualPriceAsset(ownedItem.getCard(), ownedItem.getSealedProduct());
         }
-        if (form.getCardId() == null) {
-            throw new IllegalArgumentException("Select a card or portfolio item");
+        if (form.getCardId() != null) {
+            return new ManualPriceAsset(cardService.requireCard(form.getCardId()), null);
         }
-        return cardService.requireCard(form.getCardId());
+        if (form.getSealedProductId() != null) {
+            return new ManualPriceAsset(null, sealedProductService.requireSealedProduct(form.getSealedProductId()));
+        }
+        throw new IllegalArgumentException("Select a card, sealed product, or portfolio item");
     }
 
     private String providerLabel(String providerName) {
@@ -89,5 +102,8 @@ public class ManualPriceEntryService {
             return "Manual price entry fallback with auditable source currency and exchange-rate fields.";
         }
         return "Manual price entry fallback. Notes: " + notes.trim();
+    }
+
+    private record ManualPriceAsset(Card card, SealedProduct sealedProduct) {
     }
 }

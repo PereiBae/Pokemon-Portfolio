@@ -9,8 +9,28 @@ import org.junit.jupiter.api.Test;
 class DomainModelTest {
 
     @Test
-    void verticalSliceUsesEnglishMarketOnly() {
-        assertThat(LanguageMarket.values()).containsExactly(LanguageMarket.ENGLISH);
+    void languageMarketsSupportSealedProductsWhileCardsRemainEnglishFirst() {
+        assertThat(LanguageMarket.values()).containsExactly(
+                LanguageMarket.ENGLISH,
+                LanguageMarket.JAPANESE,
+                LanguageMarket.CHINESE,
+                LanguageMarket.OTHER);
+    }
+
+    @Test
+    void sealedProductsTrackTypeAndCondition() {
+        assertThat(SealedProductType.values()).containsExactly(
+                SealedProductType.BOOSTER_BOX,
+                SealedProductType.BOOSTER_PACK,
+                SealedProductType.ETB,
+                SealedProductType.COLLECTION_BOX,
+                SealedProductType.PROMO_BOX,
+                SealedProductType.OTHER);
+        assertThat(SealedProductCondition.values()).containsExactly(
+                SealedProductCondition.SEALED,
+                SealedProductCondition.DAMAGED_SEALED,
+                SealedProductCondition.OPENED,
+                SealedProductCondition.OTHER);
     }
 
     @Test

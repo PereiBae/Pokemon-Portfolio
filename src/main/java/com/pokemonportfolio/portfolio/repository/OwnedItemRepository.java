@@ -10,14 +10,16 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface OwnedItemRepository extends JpaRepository<OwnedItem, Long> {
 
-    @EntityGraph(attributePaths = {"card", "card.pokemonSet"})
+    @EntityGraph(attributePaths = {"card", "card.pokemonSet", "sealedProduct"})
     List<OwnedItem> findByOwnerAndStatusOrderByCreatedAtDesc(AppUser owner, OwnedItemStatus status);
 
-    @EntityGraph(attributePaths = {"card", "card.pokemonSet"})
+    @EntityGraph(attributePaths = {"card", "card.pokemonSet", "sealedProduct"})
     Optional<OwnedItem> findByIdAndOwnerAndStatus(Long id, AppUser owner, OwnedItemStatus status);
 
-    @EntityGraph(attributePaths = {"card", "card.pokemonSet"})
+    @EntityGraph(attributePaths = {"card", "card.pokemonSet", "sealedProduct"})
     Optional<OwnedItem> findByIdAndOwner(Long id, AppUser owner);
 
     long countByCardId(Long cardId);
+
+    long countBySealedProductId(Long sealedProductId);
 }

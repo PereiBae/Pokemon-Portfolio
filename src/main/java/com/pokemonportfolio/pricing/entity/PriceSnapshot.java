@@ -1,6 +1,8 @@
 package com.pokemonportfolio.pricing.entity;
 
 import com.pokemonportfolio.catalog.entity.Card;
+import com.pokemonportfolio.catalog.entity.SealedProduct;
+import com.pokemonportfolio.config.domain.AssetType;
 import com.pokemonportfolio.config.domain.ConfidenceRating;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -24,9 +26,17 @@ public class PriceSnapshot {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "card_id", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "asset_type", nullable = false)
+    private AssetType assetType = AssetType.CARD;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "card_id")
     private Card card;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sealed_product_id")
+    private SealedProduct sealedProduct;
 
     @Column(name = "provider_name", nullable = false)
     private String providerName;
@@ -67,6 +77,29 @@ public class PriceSnapshot {
             String explanation,
             OffsetDateTime calculatedAt) {
         this.card = card;
+        this.assetType = AssetType.CARD;
+        this.providerName = providerName;
+        this.sourcePrice = sourcePrice;
+        this.sourceCurrency = sourceCurrency;
+        this.exchangeRateUsed = exchangeRateUsed;
+        this.marketPriceSgd = marketPriceSgd;
+        this.confidenceRating = confidenceRating;
+        this.explanation = explanation;
+        this.calculatedAt = calculatedAt;
+    }
+
+    public PriceSnapshot(
+            SealedProduct sealedProduct,
+            String providerName,
+            BigDecimal sourcePrice,
+            String sourceCurrency,
+            BigDecimal exchangeRateUsed,
+            BigDecimal marketPriceSgd,
+            ConfidenceRating confidenceRating,
+            String explanation,
+            OffsetDateTime calculatedAt) {
+        this.sealedProduct = sealedProduct;
+        this.assetType = AssetType.SEALED_PRODUCT;
         this.providerName = providerName;
         this.sourcePrice = sourcePrice;
         this.sourceCurrency = sourceCurrency;
@@ -83,6 +116,14 @@ public class PriceSnapshot {
 
     public Card getCard() {
         return card;
+    }
+
+    public AssetType getAssetType() {
+        return assetType;
+    }
+
+    public SealedProduct getSealedProduct() {
+        return sealedProduct;
     }
 
     public String getProviderName() {
@@ -117,4 +158,3 @@ public class PriceSnapshot {
         return calculatedAt;
     }
 }
-

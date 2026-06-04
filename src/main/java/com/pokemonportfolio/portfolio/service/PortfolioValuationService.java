@@ -89,23 +89,32 @@ public class PortfolioValuationService {
     }
 
     private PortfolioItemView toItemView(OwnedItem ownedItem) {
-        Optional<PriceSnapshot> latest = priceSnapshotRepository
-                .findTopByCardIdOrderByCalculatedAtDescIdDesc(ownedItem.getCard().getId());
+        Optional<PriceSnapshot> latest = latestPrice(ownedItem);
         BigDecimal marketValue = latest.map(PriceSnapshot::getMarketPriceSgd).orElse(BigDecimal.ZERO);
         ConfidenceRating confidence = latest.map(PriceSnapshot::getConfidenceRating).orElse(ConfidenceRating.LOW);
         BigDecimal gainLoss = marketValue.subtract(ownedItem.getPurchasePriceSgd());
         return new PortfolioItemView(
                 ownedItem.getId(),
-                ownedItem.getCard().getName(),
-                ownedItem.getCard().getPokemonSet().getName(),
-                ownedItem.getCard().getCardNumber(),
-                ownedItem.getOwnedVariant().getLabel(),
-                ownedItem.getCard().getVerificationStatus().getLabel(),
-                ownedItem.getCard().getExternalImageSmallUrl(),
-                ownedItem.getCondition().getLabel(),
+                ownedItem.getAssetType().getLabel(),
+                ownedItem.assetName(),
+                ownedItem.assetName(),
+                ownedItem.setName(),
+                ownedItem.assetNumber(),
+                ownedItem.variantOrTypeLabel(),
+                ownedItem.verificationStatusLabel(),
+                ownedItem.imageSmallUrl(),
+                ownedItem.conditionLabel(),
                 ownedItem.getPurchasePriceSgd(),
                 MoneyCalculationSupport.money(marketValue),
                 MoneyCalculationSupport.money(gainLoss),
                 confidence);
+    }
+
+    private Optional<PriceSnapshot> latestPrice(OwnedItem ownedItem) {
+        if (ownedItem.isSealedProduct()) {
+            return priceSnapshotRepository
+                    .findTopBySealedProductIdOrderByCalculatedAtDescIdDesc(ownedItem.getSealedProduct().getId());
+        }
+        return priceSnapshotRepository.findTopByCardIdOrderByCalculatedAtDescIdDesc(ownedItem.getCard().getId());
     }
 }

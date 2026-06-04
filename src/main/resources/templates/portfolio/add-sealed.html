@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Add Sealed Product')}"></head>
+<body>
+<div class="app-shell">
+    <header th:replace="~{fragments/layout :: topbar}"></header>
+    <main class="page">
+        <div class="page-header">
+            <div>
+                <h1>Add Sealed Product</h1>
+                <p class="subtle">Each sealed copy is stored as its own portfolio record.</p>
+            </div>
+            <a class="button" th:href="@{/sealed-products/new}">Create Sealed Product</a>
+        </div>
+
+        <section class="card">
+            <form th:action="@{/portfolio/sealed-items}" th:object="${ownedItemForm}" method="post" class="form-grid">
+                <p th:if="${#fields.hasGlobalErrors()}" class="error" th:each="err : ${#fields.globalErrors()}" th:text="${err}">Error</p>
+                <label>Sealed Product
+                    <select th:field="*{sealedProductId}" required>
+                        <option value="">Select a sealed product</option>
+                        <option th:each="product : ${sealedProductOptions}" th:value="${product.id}"
+                                th:text="${product.displayLabel}">Product</option>
+                    </select>
+                </label>
+                <label>Condition
+                    <select th:field="*{sealedCondition}">
+                        <option th:each="condition : ${sealedConditions}" th:value="${condition}" th:text="${condition.label}">Sealed</option>
+                    </select>
+                </label>
+                <label>Purchase Price (SGD)
+                    <input th:field="*{purchasePriceSgd}" type="number" min="0" step="0.01" required>
+                </label>
+                <label>Purchase Date
+                    <input th:field="*{purchaseDate}" type="date" required>
+                </label>
+                <label>Notes
+                    <textarea th:field="*{notes}" rows="3"></textarea>
+                </label>
+                <div class="actions">
+                    <button class="primary" type="submit">Add Sealed Holding</button>
+                    <a class="button" th:href="@{/sealed-products}">Sealed Products</a>
+                </div>
+            </form>
+        </section>
+    </main>
+</div>
+</body>
+</html>

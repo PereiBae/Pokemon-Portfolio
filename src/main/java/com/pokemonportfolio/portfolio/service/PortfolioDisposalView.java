@@ -17,9 +17,14 @@ public record PortfolioDisposalView(
         BigDecimal netProceedsSgd,
         BigDecimal realizedGainLossSgd,
         BigDecimal realizedGainLossPercent,
-        String notes) {
+        String notes,
+        Long tradeTransactionId) {
 
     public boolean realizedGainIsNonNegative() {
         return realizedGainLossSgd.compareTo(BigDecimal.ZERO) >= 0;
+    }
+
+    public boolean fromTradeTransaction() {
+        return tradeTransactionId != null;
     }
 }

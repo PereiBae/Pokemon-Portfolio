@@ -10,5 +10,8 @@ public interface PriceSnapshotRepository extends JpaRepository<PriceSnapshot, Lo
     Optional<PriceSnapshot> findTopByCardIdOrderByCalculatedAtDescIdDesc(Long cardId);
 
     List<PriceSnapshot> findByCardIdOrderByCalculatedAtDescIdDesc(Long cardId);
-}
 
+    Optional<PriceSnapshot> findTopBySealedProductIdOrderByCalculatedAtDescIdDesc(Long sealedProductId);
+
+    List<PriceSnapshot> findBySealedProductIdOrderByCalculatedAtDescIdDesc(Long sealedProductId);
+}

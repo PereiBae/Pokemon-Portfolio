@@ -83,6 +83,7 @@ class PortfolioDisposalServiceTest {
 
         assertThat(item.getStatus()).isEqualTo(OwnedItemStatus.TRADED);
         assertThat(disposal.getDisposalType()).isEqualTo(DisposalType.TRADED);
+        assertThat(disposal.getTradeTransactionId()).isNull();
         assertThat(disposal.getNetProceedsSgd()).isEqualByComparingTo("95.00");
         assertThat(disposal.getRealizedGainLossSgd()).isEqualByComparingTo("15.00");
         assertThat(ownedItemService.listActiveItems(owner)).doesNotContain(item);

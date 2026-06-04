@@ -186,9 +186,12 @@ Core tables/entities:
   explanation snapshot.
 - `portfolio_valuation_snapshot`: portfolio-level valuation snapshot.
 - `alert`: price movement alert.
-- `trade_analysis`: saved trade analysis header.
-- `trade_side`: user side or other party side.
-- `trade_item`: item included in a trade side.
+- `trade_transaction`: saved trade analysis or executed trade header, including
+  mode, status, totals, imbalance, and execution metadata.
+- `trade_transaction_side`: user/outgoing side and other-party/incoming side.
+- `trade_transaction_item`: item included in a trade side, including agreed
+  value, allocated incoming cost basis, linked owned item, linked disposal
+  record, and linked incoming owned item where applicable.
 - `grading_fee`: updateable PSA fee and turnaround data.
 - `grading_analysis`: manually triggered grading analysis header.
 - `grading_scenario`: PSA 8, PSA 9, PSA 10 scenario output.
@@ -207,6 +210,9 @@ Important database rules:
   historical analysis.
 - Alerts are deduplicated by owned item, threshold rule, and triggering snapshot
   so reruns do not create duplicate user-facing alerts.
+- Executed trade transactions link outgoing owned items, incoming owned items,
+  and disposal records; incoming owned items use allocated trade cost basis so
+  dashboard realised and unrealised gain/loss remain auditable.
 - Monetary columns use decimal precision suitable for currency, not floating
   point.
 - Timestamps are stored with timezone.
@@ -281,10 +287,17 @@ Important database rules:
 - Rules: default v1 gain thresholds; status supports NEW, ACTIVE, ACKNOWLEDGED,
   DISMISSED.
 
-`TradeAnalysis`, `TradeSide`, `TradeItem`:
-- Fields: analysis name/notes/status/timestamp; side type and trade percentage;
-  item references, market value, adjusted value, confidence, warnings.
-- Rules: two sides only; each side has independent percentage.
+`TradeTransaction`, `TradeTransactionSide`, `TradeTransactionItem`:
+- Fields: transaction name/notes/mode/status/timestamp, execution timestamp,
+  side type and trade percentage, item references, market value, adjusted value,
+  agreed trade value, allocated cost basis, trade imbalance, confidence,
+  warnings, linked outgoing owned item, linked incoming owned item, and linked
+  disposal record.
+- Rules: two modes are supported. Analysis-only mode compares both sides and
+  MUST NOT change portfolio records or realised gain/loss. Execute trade mode
+  marks outgoing owned items as TRADED, creates disposal records, creates
+  incoming owned items, links all records to one transaction, and allocates
+  incoming cost basis from agreed trade values.
 
 `GradingFee`, `GradingAnalysis`, `GradingScenario`:
 - Fields: PSA service level, fee, currency, turnaround estimate, effective dates;
@@ -337,8 +350,13 @@ Alerts:
 - `AlertViewService`: lists new, active, and historical alerts.
 
 Trade:
-- `TradeAnalyzerService`: calculates market totals, adjusted totals, net
-  difference, fairness, confidence, and LOW-confidence warnings.
+- `TradeAnalyzerService`: calculates analysis-only market totals, adjusted
+  totals, net difference, fairness, confidence, and LOW-confidence warnings.
+- `TradeExecutionService`: executes confirmed trade transactions, marks outgoing
+  items as TRADED, creates linked disposal records, creates incoming owned
+  items, allocates incoming cost basis, calculates trade imbalance, and leaves
+  the existing simple Trade Away disposal flow available for partial/manual
+  records.
 
 Grading:
 - `GradingAnalyzerService`: manually runs PSA 8/9/10 scenario analysis.
@@ -364,7 +382,8 @@ Controllers:
 - `CatalogController`: card/product search and detail pages.
 - `PricingController`: price history view and manual price entry fallback.
 - `AlertController`: new/active/historical alerts and acknowledgment.
-- `TradeController`: trade analyzer form/results and optional save.
+- `TradeController`: trade analyzer form/results, analysis-only save, and
+  explicit execute-trade confirmation workflow.
 - `GradingController`: manual grading analyzer form/results and optional save.
 - `ForecastController`: forecast horizon selection/results.
 - `SettingsController`: provider configuration, exchange-rate status, PSA fee
@@ -552,9 +571,14 @@ Future configurability:
 ## 15. Trade Analyzer Design
 
 Model:
-- One `trade_analysis` has exactly two sides: USER and OTHER_PARTY.
+- One `trade_transaction` has exactly two sides: USER and OTHER_PARTY.
 - Each side has independent trade percentage.
 - Each side contains card and/or sealed product trade items.
+- Transaction mode is either ANALYSIS_ONLY or EXECUTE_TRADE.
+- ANALYSIS_ONLY transactions are comparison-only and create no owned item,
+  disposal, status, realised gain/loss, or cost-basis changes.
+- EXECUTE_TRADE transactions link outgoing owned items, incoming owned items,
+  and outgoing disposal records to one auditable transaction.
 
 Calculation:
 - Market value per item comes from calculated market value.
@@ -565,6 +589,18 @@ Calculation:
   a configured tolerance.
 - Confidence is the lowest or aggregated confidence across included items.
 - LOW confidence produces a visible warning.
+- For execution accounting, outgoing realised gain/loss equals Trade Value
+  Received minus Original Purchase Price.
+- Incoming items receive allocated cost basis based on agreed incoming trade
+  values. If total incoming agreed value differs from total outgoing trade value,
+  allocate proportionally and display the difference as trade imbalance.
+- Example: a Magikarp IR bought for SGD 200 and traded at agreed value SGD 500
+  records SGD 300 realised gain; incoming items agreed at SGD 250, SGD 150, and
+  SGD 100 receive those cost bases. If the incoming side total is not SGD 500,
+  the allocation is scaled proportionally and the imbalance is shown.
+- Full Trade Transaction is the preferred workflow when incoming items are known;
+  the simpler Trade Away disposal flow remains available when the owner does not
+  want to record incoming items yet.
 
 ## 16. Grading Analyzer Design
 
@@ -660,7 +696,9 @@ Flyway migration phases:
 - V4: exchange rate, provider result, and price snapshot tables.
 - V5: market signal and portfolio valuation snapshot tables.
 - V6: alert tables.
-- V7: trade analyzer tables.
+- V7: trade transaction, trade transaction side, and trade transaction item
+  tables, including links to owned items and disposal records for executed
+  trades.
 - V8: grading fee, grading analysis, and grading scenario tables.
 - V9: forecast snapshot tables.
 - V10: scheduled job run table and operational indexes.
@@ -802,4 +840,3 @@ projects are introduced for v1.
 ## Complexity Tracking
 
 No constitution violations or exceptional complexity are required.
-

@@ -178,6 +178,14 @@ independent trade percentages, and view adjusted totals and fairness result.
    analyzed, **Then** adjusted trade value is SGD 80.
 2. **Given** any trade item has LOW valuation confidence, **When** results are
    shown, **Then** the analysis displays a warning.
+3. **Given** the owner runs trade analysis-only mode, **When** the comparison is
+   completed, **Then** no portfolio items are changed and no realised gain/loss
+   is recorded.
+4. **Given** the owner confirms execute trade mode, **When** outgoing and
+   incoming items are supplied with agreed trade values, **Then** outgoing items
+   are marked TRADED, disposal records are created, incoming items are added to
+   the portfolio with allocated cost basis, and all items are linked to one trade
+   transaction.
 
 ### User Story 7 - Manual PSA Grading Analysis (Priority: P2)
 
@@ -232,8 +240,9 @@ expected value, range, confidence level, and explanation.
 - **FR-011**: The system MUST classify valued items as Undervalued, Fairly
   Valued, or Overvalued where signal inputs are available.
 - **FR-012**: The system MUST support price movement alerts.
-- **FR-013**: The system MUST allow the user to run trade analysis for two trade
-  sides.
+- **FR-013**: The system MUST allow the user to run two-sided trade analysis and,
+  when explicitly confirmed, execute a full trade transaction with auditable
+  portfolio accounting.
 - **FR-014**: The system MUST allow the user to manually run PSA grading analysis
   for a card.
 - **FR-015**: The system MUST allow the user to view advisory forecasting output.
@@ -293,6 +302,13 @@ expected value, range, confidence level, and explanation.
   available, effective timestamp, and currency pair.
 - **DR-019**: Important calculation outputs MUST retain enough input metadata to
   explain how the result was produced.
+- **DR-020**: Executed trade transaction records MUST store one transaction that
+  links outgoing owned items, incoming portfolio items, agreed trade values,
+  allocated incoming cost basis, trade imbalance, disposal records, and execution
+  timestamp.
+- **DR-021**: Incoming items created by an executed trade MUST receive cost basis
+  from allocated agreed trade values so future unrealised gain/loss starts from
+  that allocated basis.
 
 ## 7. Pricing and Valuation Requirements
 
@@ -428,6 +444,30 @@ expected value, range, confidence level, and explanation.
 - **TA-014**: The analyzer MUST warn when any valuation confidence is LOW.
 - **TA-015**: The analyzer MUST use calculated market value, not a single raw
   pricing source.
+- **TA-016**: The trade analyzer MUST support analysis-only mode.
+- **TA-017**: Analysis-only mode MUST compare both trade sides without changing
+  portfolio records, owned item status, disposal records, realised gain/loss, or
+  cost basis.
+- **TA-018**: The trade analyzer MUST support execute trade mode after explicit
+  user confirmation.
+- **TA-019**: Execute trade mode MUST mark outgoing owned items as TRADED.
+- **TA-020**: Execute trade mode MUST create disposal records for outgoing owned
+  items.
+- **TA-021**: Outgoing trade realised gain/loss MUST equal Trade Value Received
+  minus Original Purchase Price.
+- **TA-022**: Execute trade mode MUST add incoming cards/products to the
+  portfolio as separate owned records.
+- **TA-023**: Execute trade mode MUST link all outgoing items, incoming items,
+  and disposal records to one trade transaction.
+- **TA-024**: Incoming items MUST receive allocated cost basis based on their
+  agreed trade values.
+- **TA-025**: If total incoming agreed value differs from total outgoing trade
+  value, the system MUST allocate incoming cost basis proportionally and display
+  the difference as trade imbalance.
+- **TA-026**: The existing simple Trade Away disposal flow MUST remain available
+  for cases where the owner does not want to record incoming cards yet.
+- **TA-027**: Full Trade Transaction MUST be the preferred workflow when incoming
+  cards/products are known.
 
 ## 12. Grading Analyzer Requirements
 
@@ -683,6 +723,16 @@ expected value, range, confidence level, and explanation.
 - **AC-012**: Given the owner enters two trade sides and trade percentages, when
   trade analysis runs, then market totals, adjusted totals, net difference,
   fairness, confidence, and LOW-confidence warnings are shown.
+- **AC-012A**: Given the owner runs analysis-only trade mode, when the result is
+  displayed, then no portfolio item, disposal record, realised gain/loss, or cost
+  basis value is changed.
+- **AC-012B**: Given the owner executes a trade, when one outgoing item bought for
+  SGD 200 is traded at agreed value SGD 500 for incoming items agreed at SGD 250,
+  SGD 150, and SGD 100, then realised gain/loss is SGD 300 and the incoming
+  portfolio items receive cost basis of SGD 250, SGD 150, and SGD 100.
+- **AC-012C**: Given incoming agreed value differs from outgoing agreed trade
+  value, when the trade is executed, then incoming cost basis is allocated
+  proportionally and trade imbalance is shown.
 - **AC-013**: Given the owner manually runs grading analysis, when PSA scenario
   data exists, then conservative, balanced, and aggressive scenarios show
   expected value, total cost, expected profit, ROI, recommendation, confidence,
@@ -708,8 +758,9 @@ expected value, range, confidence level, and explanation.
   be seeded for the first release?
 - **OQ-004**: Which charting and table interaction patterns best fit
   server-rendered UI while preserving the financial dashboard direction?
-- **OQ-005**: Should saved trade and grading analyses be required for v1, or is
-  on-demand analysis sufficient with optional save?
+- **OQ-005**: Should analysis-only trade comparisons and grading analyses be
+  saved by default, or remain on-demand with optional save? Executed trades MUST
+  be saved as trade transactions.
 
 ## Constitution Conflicts
 

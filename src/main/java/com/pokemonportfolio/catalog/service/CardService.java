@@ -9,6 +9,7 @@ import com.pokemonportfolio.config.domain.CatalogSource;
 import com.pokemonportfolio.config.domain.LanguageMarket;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -78,6 +79,15 @@ public class CardService {
                 .stream()
                 .map(CardOptionView::from)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<CardOptionView> findCardOption(Long id) {
+        if (id == null) {
+            return Optional.empty();
+        }
+        return cardRepository.findById(id)
+                .map(CardOptionView::from);
     }
 
     private Card importOrPromoteByIdentity(OfficialCardSearchResult result, PokemonSet pokemonSet) {

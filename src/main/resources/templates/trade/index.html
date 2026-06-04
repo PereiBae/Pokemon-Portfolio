@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Trade Analyzer')}"></head>
+<body>
+<div class="app-shell">
+    <header th:replace="~{fragments/layout :: topbar}"></header>
+    <main class="page">
+        <div class="page-header">
+            <div>
+                <h1>Trade Analyzer</h1>
+                <p class="subtle">Compare proposed trades, then execute only when the accounting should affect your portfolio.</p>
+            </div>
+            <a class="button primary" th:href="@{/trades/new}">Create Trade</a>
+        </div>
+
+        <section class="card message-card">
+            <p class="subtle">Analysis-only trades do not change holdings or realised gain/loss. Executed trades link outgoing disposals and incoming owned records to one transaction.</p>
+        </section>
+
+        <section class="card">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Trade</th>
+                    <th>Status</th>
+                    <th>Outgoing Adjusted</th>
+                    <th>Incoming Adjusted</th>
+                    <th>Net Difference</th>
+                    <th>Imbalance</th>
+                    <th>Fairness</th>
+                    <th>Confidence</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${trades.isEmpty()}">
+                    <td colspan="9" class="subtle">No trade analyses yet.</td>
+                </tr>
+                <tr th:each="trade : ${trades}">
+                    <td th:text="${trade.name}">Trade</td>
+                    <td><span class="badge muted-badge" th:text="${trade.statusLabel}">Draft</span></td>
+                    <td th:text="|SGD ${#numbers.formatDecimal(trade.outgoingAdjustedValueSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
+                    <td th:text="|SGD ${#numbers.formatDecimal(trade.incomingAdjustedValueSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
+                    <td th:classappend="${trade.netDifferenceIsNonNegative()} ? ' positive' : ' negative'"
+                        th:text="|SGD ${#numbers.formatDecimal(trade.netDifferenceSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
+                    <td th:text="|SGD ${#numbers.formatDecimal(trade.tradeImbalanceSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
+                    <td><span class="badge" th:text="${trade.fairnessLabel}">Balanced</span></td>
+                    <td th:text="${trade.confidenceRating}">LOW</td>
+                    <td><a class="button" th:href="@{/trades/{id}(id=${trade.id})}">Review</a></td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</div>
+</body>
+</html>
