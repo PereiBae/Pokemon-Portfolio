@@ -39,6 +39,7 @@ class SettingsControllerTest {
                 .andExpect(content().string(containsString("Mock Pricing Provider")))
                 .andExpect(content().string(containsString("Manual Price Entry")))
                 .andExpect(content().string(containsString("TCGPlayer")))
+                .andExpect(content().string(containsString("Test Pokemon API")))
                 .andExpect(content().string(containsString("Disabled by default")));
     }
 

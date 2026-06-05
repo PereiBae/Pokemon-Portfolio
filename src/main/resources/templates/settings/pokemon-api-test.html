@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Pokemon API Provider Test')}"></head>
+<body>
+<div class="app-shell">
+    <header th:replace="~{fragments/layout :: topbar}"></header>
+    <main class="page">
+        <div class="page-header">
+            <div>
+                <h1>Pokemon API Provider Test</h1>
+                <p class="subtle">Live provider smoke test only. This page does not create price snapshots or update valuation.</p>
+            </div>
+            <a class="button" th:href="@{/settings/providers}">Provider Settings</a>
+        </div>
+
+        <section class="grid summary-grid">
+            <div class="card">
+                <div class="metric-label">Provider</div>
+                <div class="metric-value" th:text="${providerStatus.providerName}">PokemonApiPricingProvider</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">Enabled</div>
+                <div class="metric-value" th:classappend="${providerStatus.enabled} ? ' positive' : ' negative'"
+                     th:text="${providerStatus.enabled ? 'Yes' : 'No'}">No</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">RapidAPI Key</div>
+                <div class="metric-value" th:classappend="${providerStatus.apiKeyConfigured} ? ' positive' : ' negative'"
+                     th:text="${providerStatus.apiKeyConfigured ? 'Configured' : 'Missing'}">Missing</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">Base URL</div>
+                <div class="subtle" style="margin-top: 10px;" th:text="${providerStatus.baseUrl}">Base URL</div>
+            </div>
+        </section>
+
+        <section class="card message-card" style="margin-top: 16px;" th:if="${errorMessage != null}">
+            <p class="error" th:text="${errorMessage}">Provider error</p>
+        </section>
+
+        <section class="card" style="margin-top: 16px;">
+            <div class="table-toolbar">
+                <div>
+                    <h1 class="section-title">Run One Test Request</h1>
+                    <p class="subtle">Card lookup accepts a numeric provider card id or search text. Sealed product lookup requires a numeric product id.</p>
+                </div>
+            </div>
+            <form class="form-grid" th:action="@{/settings/providers/pokemon-api/test}" method="post" th:object="${testForm}">
+                <div class="filter-grid">
+                    <label>Lookup type
+                        <select th:field="*{lookupType}">
+                            <option th:each="lookupType : ${lookupTypes}"
+                                    th:value="${lookupType}"
+                                    th:text="${lookupType.label}">Card</option>
+                        </select>
+                    </label>
+                    <label>Card id, search text, or product id
+                        <input type="text" th:field="*{searchOrId}" placeholder="3852">
+                    </label>
+                </div>
+                <p class="helper-text">Example card: <span>3852</span>. Example card search: <span>Scizor Obsidian Flames 205</span>.</p>
+                <div class="actions">
+                    <button class="primary" type="submit">Run Provider Test</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="card" style="margin-top: 16px;" th:if="${result != null}">
+            <div class="table-toolbar">
+                <div>
+                    <h1 class="section-title">Mapped Provider Response</h1>
+                    <p class="subtle" th:text="|Source provider: ${result.sourceProvider}|">Source provider</p>
+                </div>
+            </div>
+
+            <div th:if="${result.card != null}">
+                <div class="selected-card-summary">
+                    <img class="card-detail-thumb" th:if="${result.card.imageUrl != null}" th:src="${result.card.imageUrl}" th:alt="${result.card.cardName}">
+                    <span class="image-placeholder" th:if="${result.card.imageUrl == null}">Image not available</span>
+                    <div>
+                        <div class="selected-card-title" th:text="${result.card.cardName}">Card name</div>
+                        <div class="badge-row">
+                            <span class="badge muted-badge" th:text="|ID ${result.card.cardId}|">ID</span>
+                            <span class="badge muted-badge" th:text="${result.card.expansionName}">Expansion</span>
+                            <span class="badge muted-badge" th:text="|#${result.card.cardNumber}|">#</span>
+                        </div>
+                    </div>
+                </div>
+
+                <table class="table">
+                    <tbody>
+                    <tr>
+                        <th>Source URL</th>
+                        <td th:text="${result.sourceUrl}">Source URL</td>
+                    </tr>
+                    <tr>
+                        <th>Image URL</th>
+                        <td th:text="${result.card.imageUrl ?: 'Image not available'}">Image URL</td>
+                    </tr>
+                    <tr>
+                        <th>TCGPlayer Currency</th>
+                        <td th:text="${result.card.tcgPlayerCurrency ?: 'Not mapped'}">USD</td>
+                    </tr>
+                    <tr>
+                        <th>TCGPlayer Market Price</th>
+                        <td th:text="${result.card.tcgPlayerMarketPrice != null ? result.card.tcgPlayerMarketPrice : 'Not mapped'}">0.00</td>
+                    </tr>
+                    <tr>
+                        <th>TCGPlayer Mid Price</th>
+                        <td th:text="${result.card.tcgPlayerMidPrice != null ? result.card.tcgPlayerMidPrice : 'Not mapped'}">0.00</td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <table class="table" style="margin-top: 16px;">
+                    <thead>
+                    <tr>
+                        <th>PSA Grade</th>
+                        <th>Median Price</th>
+                        <th>Sample Size</th>
+                        <th>Currency</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${result.card.psa8Price == null and result.card.psa9Price == null and result.card.psa10Price == null}">
+                        <td colspan="4" class="subtle">No PSA prices mapped.</td>
+                    </tr>
+                    <tr th:if="${result.card.psa8Price != null}">
+                        <td>PSA 8</td>
+                        <td th:text="${result.card.psa8Price.medianPrice}">0.00</td>
+                        <td th:text="${result.card.psa8Price.sampleSize}">0</td>
+                        <td th:text="${result.card.psa8Price.currency}">USD</td>
+                    </tr>
+                    <tr th:if="${result.card.psa9Price != null}">
+                        <td>PSA 9</td>
+                        <td th:text="${result.card.psa9Price.medianPrice}">0.00</td>
+                        <td th:text="${result.card.psa9Price.sampleSize}">0</td>
+                        <td th:text="${result.card.psa9Price.currency}">USD</td>
+                    </tr>
+                    <tr th:if="${result.card.psa10Price != null}">
+                        <td>PSA 10</td>
+                        <td th:text="${result.card.psa10Price.medianPrice}">0.00</td>
+                        <td th:text="${result.card.psa10Price.sampleSize}">0</td>
+                        <td th:text="${result.card.psa10Price.currency}">USD</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div th:if="${result.sealedProduct != null}">
+                <div class="selected-card-summary">
+                    <img class="card-detail-thumb" th:if="${result.sealedProduct.imageUrl != null}" th:src="${result.sealedProduct.imageUrl}" th:alt="${result.sealedProduct.productName}">
+                    <span class="image-placeholder" th:if="${result.sealedProduct.imageUrl == null}">Image not available</span>
+                    <div>
+                        <div class="selected-card-title" th:text="${result.sealedProduct.productName}">Sealed product</div>
+                        <div class="badge-row">
+                            <span class="badge muted-badge" th:text="|ID ${result.sealedProduct.productId}|">ID</span>
+                            <span class="badge muted-badge" th:text="${result.sealedProduct.expansionName}">Expansion</span>
+                        </div>
+                    </div>
+                </div>
+
+                <table class="table">
+                    <tbody>
+                    <tr>
+                        <th>Source URL</th>
+                        <td th:text="${result.sourceUrl}">Source URL</td>
+                    </tr>
+                    <tr>
+                        <th>Image URL</th>
+                        <td th:text="${result.sealedProduct.imageUrl ?: 'Image not available'}">Image URL</td>
+                    </tr>
+                    <tr>
+                        <th>Cardmarket Currency</th>
+                        <td th:text="${result.sealedProduct.cardmarketCurrency ?: 'Not mapped'}">EUR</td>
+                    </tr>
+                    <tr>
+                        <th>Cardmarket Lowest</th>
+                        <td th:text="${result.sealedProduct.cardmarketLowestPrice != null ? result.sealedProduct.cardmarketLowestPrice : 'Not mapped'}">0.00</td>
+                    </tr>
+                    <tr>
+                        <th>TCGPlayer Currency</th>
+                        <td th:text="${result.sealedProduct.tcgPlayerCurrency ?: 'Not mapped'}">USD</td>
+                    </tr>
+                    <tr>
+                        <th>TCGPlayer Market Price</th>
+                        <td th:text="${result.sealedProduct.tcgPlayerMarketPrice != null ? result.sealedProduct.tcgPlayerMarketPrice : 'Not mapped'}">0.00</td>
+                    </tr>
+                    <tr>
+                        <th>TCGPlayer Mid Price</th>
+                        <td th:text="${result.sealedProduct.tcgPlayerMidPrice != null ? result.sealedProduct.tcgPlayerMidPrice : 'Not mapped'}">0.00</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+</body>
+</html>

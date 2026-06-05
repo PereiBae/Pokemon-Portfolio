@@ -34,7 +34,10 @@ class FlywayMigrationTest {
                 "owned_item_disposal",
                 "trade_transaction",
                 "trade_transaction_side",
-                "trade_transaction_item");
+                "trade_transaction_item",
+                "grading_fee",
+                "grading_analysis",
+                "grading_scenario");
 
         try (Connection connection = dataSource.getConnection()) {
             DatabaseMetaData metaData = connection.getMetaData();

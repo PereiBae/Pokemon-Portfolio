@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Grading Analysis Result')}"></head>
+<body>
+<div class="app-shell">
+    <header th:replace="~{fragments/layout :: topbar}"></header>
+    <main class="page">
+        <div class="page-header">
+            <div>
+                <h1>Grading Analysis Result</h1>
+                <p class="subtle">Manual PSA scenario output. Advisory only, based on entered market assumptions.</p>
+            </div>
+            <div class="actions compact-actions">
+                <a class="button primary" th:href="@{/grading}">Run Another</a>
+                <a class="button" th:href="@{/dashboard}">Dashboard</a>
+            </div>
+        </div>
+
+        <section class="grid summary-grid">
+            <div class="card">
+                <div class="metric-label">Final Recommendation</div>
+                <div class="metric-value" th:text="${analysis.recommendationLabel}">Hold Raw</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">Raw Value</div>
+                <div class="metric-value" th:text="|SGD ${#numbers.formatDecimal(analysis.rawValueSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">Grading Fee</div>
+                <div class="metric-value" th:text="|SGD ${#numbers.formatDecimal(analysis.gradingFeeSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">Confidence</div>
+                <div class="metric-value" th:text="${analysis.confidenceRating}">LOW</div>
+            </div>
+        </section>
+
+        <section class="card" style="margin-top: 16px;">
+            <div class="selected-card-summary">
+                <img class="card-detail-thumb" th:if="${analysis.imageSmallUrl != null}" th:src="${analysis.imageSmallUrl}" th:alt="${analysis.itemDisplayName}">
+                <span class="image-placeholder" th:if="${analysis.imageSmallUrl == null}">Image not available</span>
+                <div>
+                    <div class="selected-card-title" th:text="${analysis.itemDisplayName}">Card</div>
+                    <div class="badge-row">
+                        <span class="badge muted-badge" th:text="${analysis.setName}">Set</span>
+                        <span class="badge muted-badge" th:text="|#${analysis.cardNumber}|">#000</span>
+                        <span class="badge muted-badge" th:text="${analysis.variantLabel}">Variant</span>
+                    </div>
+                    <p class="subtle" style="margin-top: 8px;"
+                       th:text="|Purchase SGD ${#numbers.formatDecimal(analysis.purchasePriceSgd, 1, 'COMMA', 2, 'POINT')} · Opportunity cost SGD ${#numbers.formatDecimal(analysis.opportunityCostSgd, 1, 'COMMA', 2, 'POINT')} · ${analysis.estimatedTurnaroundDays} days|">
+                        Purchase and grading assumptions
+                    </p>
+                </div>
+            </div>
+            <p class="subtle" th:if="${analysis.notes != null}" th:text="${analysis.notes}">Notes</p>
+        </section>
+
+        <section class="card" style="margin-top: 16px;">
+            <div class="table-toolbar">
+                <div>
+                    <h1 class="section-title">Scenario Comparison</h1>
+                    <p class="subtle" th:text="|Profitable threshold: SGD ${#numbers.formatDecimal(analysis.minimumProfitThresholdSgd, 1, 'COMMA', 2, 'POINT')} expected profit|">
+                        Profitable threshold
+                    </p>
+                </div>
+            </div>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Scenario</th>
+                    <th>Assumed Grade</th>
+                    <th>Expected Value</th>
+                    <th>Total Cost</th>
+                    <th>Expected Profit</th>
+                    <th>ROI</th>
+                    <th>Recommendation</th>
+                    <th>Warning</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="scenario : ${analysis.scenarios}">
+                    <td th:text="${scenario.scenarioLabel}">Conservative</td>
+                    <td th:text="${scenario.assumedGradeLabel}">PSA 8</td>
+                    <td th:text="|SGD ${#numbers.formatDecimal(scenario.expectedGradedValueSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
+                    <td th:text="|SGD ${#numbers.formatDecimal(scenario.totalCostSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
+                    <td th:classappend="${scenario.profitIsNonNegative()} ? ' positive' : ' negative'"
+                        th:text="|SGD ${#numbers.formatDecimal(scenario.expectedProfitSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
+                    <td th:classappend="${scenario.profitIsNonNegative()} ? ' positive' : ' negative'"
+                        th:text="|${#numbers.formatDecimal(scenario.roiPercentage, 1, 'COMMA', 2, 'POINT')}%|">0.00%</td>
+                    <td><span class="badge" th:text="${scenario.recommendationLabel}">Hold Raw</span></td>
+                    <td>
+                        <span class="warning" th:if="${scenario.warningMessage != null}" th:text="${scenario.warningMessage}">Warning</span>
+                        <span class="subtle" th:if="${scenario.warningMessage == null}">No warning</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</div>
+</body>
+</html>

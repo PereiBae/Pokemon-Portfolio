@@ -32,6 +32,10 @@ app:
       tcg-player-enabled: false
       ebay-enabled: false
       price-charting-enabled: false
+      pokemon-api:
+        enabled: ${POKEMON_API_PRICING_ENABLED:false}
+        base-url: ${POKEMON_API_PRICING_BASE_URL:https://pokemon-tcg-api.p.rapidapi.com}
+        rapid-api-key: ${POKEMON_API_RAPIDAPI_KEY:}
   jobs:
     price-refresh-cron: "0 0 2 * * *"
     portfolio-valuation-cron: "0 15 2 * * *"

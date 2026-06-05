@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('PSA Grading Analyzer')}"></head>
+<body>
+<div class="app-shell">
+    <header th:replace="~{fragments/layout :: topbar}"></header>
+    <main class="page">
+        <div class="page-header">
+            <div>
+                <h1>PSA Grading Analyzer</h1>
+                <p class="subtle">Manually compare raw value against PSA 8, PSA 9, and PSA 10 outcomes.</p>
+            </div>
+            <a class="button" th:href="@{/dashboard}">Dashboard</a>
+        </div>
+
+        <section class="card message-card" th:if="${errorMessage != null}">
+            <p class="error" th:text="${errorMessage}">Error</p>
+        </section>
+
+        <section class="card">
+            <div class="table-toolbar">
+                <div>
+                    <h1 class="section-title">Run Analysis</h1>
+                    <p class="subtle">Only active ungraded card holdings are eligible. Sealed products and disposed items are excluded.</p>
+                </div>
+            </div>
+            <form class="form-grid" th:action="@{/grading/analyze}" method="post" th:object="${gradingForm}">
+                <div class="error" th:if="${#fields.hasGlobalErrors()}" th:each="error : ${#fields.globalErrors()}" th:text="${error}">Validation error</div>
+
+                <label>Portfolio card
+                    <select th:field="*{ownedItemId}" required>
+                        <option value="">Select active ungraded card</option>
+                        <option th:each="item : ${eligibleItems}"
+                                th:value="${item.ownedItemId}"
+                                th:text="|${item.displayLabel} - Cost SGD ${#numbers.formatDecimal(item.purchasePriceSgd, 1, 'COMMA', 2, 'POINT')}|">
+                            Card option
+                        </option>
+                    </select>
+                </label>
+                <p class="helper-text">Raw value is prefilled from the latest card price snapshot when available. PSA 8/9/10 values are manual for this slice.</p>
+
+                <div class="filter-grid">
+                    <label>Raw value SGD
+                        <input type="number" step="0.01" min="0" th:field="*{rawValueSgd}" placeholder="120.00" required>
+                    </label>
+                    <label>PSA 8 value SGD
+                        <input type="number" step="0.01" min="0" th:field="*{psa8ValueSgd}" placeholder="110.00" required>
+                    </label>
+                    <label>PSA 9 value SGD
+                        <input type="number" step="0.01" min="0" th:field="*{psa9ValueSgd}" placeholder="180.00" required>
+                    </label>
+                    <label>PSA 10 value SGD
+                        <input type="number" step="0.01" min="0" th:field="*{psa10ValueSgd}" placeholder="300.00" required>
+                    </label>
+                </div>
+
+                <div class="filter-grid">
+                    <label>PSA service level
+                        <select th:field="*{gradingFeeId}" required>
+                            <option th:each="fee : ${feeOptions}"
+                                    th:value="${fee.id}"
+                                    th:text="${fee.displayLabel}">
+                                PSA service
+                            </option>
+                        </select>
+                    </label>
+                    <label>Turnaround days
+                        <input type="number" step="1" min="1" th:field="*{estimatedTurnaroundDays}" required>
+                    </label>
+                    <label>Opportunity cost SGD
+                        <input type="number" step="0.01" min="0" th:field="*{opportunityCostSgd}">
+                    </label>
+                </div>
+
+                <label>Notes
+                    <textarea rows="4" th:field="*{notes}" placeholder="Surface risk, centering, current market context"></textarea>
+                </label>
+
+                <div class="actions">
+                    <button class="primary" type="submit">Run Analysis</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="card" style="margin-top: 16px;">
+            <div class="table-toolbar">
+                <div>
+                    <h1 class="section-title">Eligible Cards</h1>
+                    <p class="subtle">Latest raw value appears when a price snapshot exists.</p>
+                </div>
+            </div>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Card</th>
+                    <th>Cost Basis</th>
+                    <th>Latest Raw</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${eligibleItems.isEmpty()}">
+                    <td colspan="4" class="subtle">No active ungraded cards are eligible.</td>
+                </tr>
+                <tr th:each="item : ${eligibleItems}">
+                    <td class="catalog-card-cell">
+                        <div class="card-cell-content">
+                            <img class="card-thumb" th:if="${item.imageSmallUrl != null}" th:src="${item.imageSmallUrl}" th:alt="${item.displayLabel}">
+                            <span class="image-placeholder" th:if="${item.imageSmallUrl == null}">Image not available</span>
+                            <span th:text="${item.displayLabel}">Card</span>
+                        </div>
+                    </td>
+                    <td th:text="|SGD ${#numbers.formatDecimal(item.purchasePriceSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
+                    <td th:if="${item.latestRawValueSgd != null}"
+                        th:text="|SGD ${#numbers.formatDecimal(item.latestRawValueSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
+                    <td th:if="${item.latestRawValueSgd == null}" class="subtle">No snapshot</td>
+                    <td><a class="button" th:href="@{/grading(ownedItemId=${item.ownedItemId})}">Analyze</a></td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="card" style="margin-top: 16px;">
+            <div class="table-toolbar">
+                <div>
+                    <h1 class="section-title">Latest Analyses</h1>
+                    <p class="subtle">Saved grading decisions are retained for auditability.</p>
+                </div>
+            </div>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Recommendation</th>
+                    <th>Created</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${latestAnalyses.isEmpty()}">
+                    <td colspan="4" class="subtle">No grading analyses yet.</td>
+                </tr>
+                <tr th:each="analysis : ${latestAnalyses}">
+                    <td th:text="${analysis.itemDisplayName}">Item</td>
+                    <td><span class="badge" th:text="${analysis.recommendationLabel}">Hold Raw</span></td>
+                    <td th:text="${#temporals.format(analysis.createdAt, 'yyyy-MM-dd HH:mm')}">2026-06-04</td>
+                    <td><a class="button" th:href="@{/grading/{analysisId}(analysisId=${analysis.id})}">View</a></td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</div>
+</body>
+</html>
