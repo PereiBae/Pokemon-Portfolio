@@ -4,9 +4,11 @@ import com.pokemonportfolio.catalog.entity.Card;
 import com.pokemonportfolio.config.domain.ConfidenceRating;
 import com.pokemonportfolio.pricing.service.MoneyCalculationSupport;
 import java.math.BigDecimal;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 @Component
+@Order(100)
 public class MockPricingProviderAdapter implements PricingProviderAdapter {
 
     private final PricingProviderProperties properties;
@@ -39,4 +41,3 @@ public class MockPricingProviderAdapter implements PricingProviderAdapter {
                 "SGD-only mock price generated for local Vertical Slice 1 valuation.");
     }
 }
-

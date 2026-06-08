@@ -370,7 +370,7 @@
   - Related: FR-016, DR-018, PR-007
   - Status: MVP-critical
 
-- [ ] T052 [US4] Define exchange rate provider adapter in `src/main/java/com/pokemonportfolio/pricing/provider/ExchangeRateProviderAdapter.java`
+- [X] T052 [US4] Define exchange rate provider adapter in `src/main/java/com/pokemonportfolio/pricing/provider/ExchangeRateProviderAdapter.java`
   - Dependencies: T051
   - Verification: Contract test confirms provider output includes rate, source/provenance, effective timestamp, fetched timestamp, and confidence
   - Related: DR-018, NFR-007
@@ -686,7 +686,7 @@
   - Related: FR-021, PA-009, NFR-018
   - Status: Later-v1
 
-- [ ] T088 Implement exchange rate refresh job in `src/main/java/com/pokemonportfolio/pricing/scheduler/ExchangeRateRefreshJob.java`
+- [X] T088 Implement exchange rate refresh job in `src/main/java/com/pokemonportfolio/pricing/scheduler/ExchangeRateRefreshJob.java`
   - Dependencies: T054, T084
   - Verification: Scheduled job test stores exchange-rate snapshots, is safe to rerun, and requires no live external API when mock exchange rates are enabled
   - Related: FR-022, DR-018, NFR-008, NFR-018

@@ -3,7 +3,9 @@ package com.pokemonportfolio.pricing.entity;
 import com.pokemonportfolio.catalog.entity.Card;
 import com.pokemonportfolio.catalog.entity.SealedProduct;
 import com.pokemonportfolio.config.domain.AssetType;
+import com.pokemonportfolio.config.domain.CardVariant;
 import com.pokemonportfolio.config.domain.ConfidenceRating;
+import com.pokemonportfolio.config.domain.PricingMatchClassification;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -17,6 +19,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.Optional;
 
 @Entity
 @Table(name = "price_snapshot")
@@ -38,8 +41,15 @@ public class PriceSnapshot {
     @JoinColumn(name = "sealed_product_id")
     private SealedProduct sealedProduct;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "card_variant")
+    private CardVariant cardVariant;
+
     @Column(name = "provider_name", nullable = false)
     private String providerName;
+
+    @Column(name = "source_market", length = 120)
+    private String sourceMarket;
 
     @Column(name = "source_price", nullable = false, precision = 19, scale = 2)
     private BigDecimal sourcePrice;
@@ -63,6 +73,15 @@ public class PriceSnapshot {
     @Column(name = "calculated_at", nullable = false)
     private OffsetDateTime calculatedAt;
 
+    @Column(name = "source_url", length = 1000)
+    private String sourceUrl;
+
+    @Column(name = "source_updated_at")
+    private OffsetDateTime sourceUpdatedAt;
+
+    @Column(name = "provider_metadata", length = 2000)
+    private String providerMetadata;
+
     protected PriceSnapshot() {
     }
 
@@ -76,9 +95,43 @@ public class PriceSnapshot {
             ConfidenceRating confidenceRating,
             String explanation,
             OffsetDateTime calculatedAt) {
+        this(
+                card,
+                null,
+                providerName,
+                null,
+                sourcePrice,
+                sourceCurrency,
+                exchangeRateUsed,
+                marketPriceSgd,
+                confidenceRating,
+                explanation,
+                calculatedAt,
+                null,
+                null,
+                null);
+    }
+
+    public PriceSnapshot(
+            Card card,
+            CardVariant cardVariant,
+            String providerName,
+            String sourceMarket,
+            BigDecimal sourcePrice,
+            String sourceCurrency,
+            BigDecimal exchangeRateUsed,
+            BigDecimal marketPriceSgd,
+            ConfidenceRating confidenceRating,
+            String explanation,
+            OffsetDateTime calculatedAt,
+            String sourceUrl,
+            OffsetDateTime sourceUpdatedAt,
+            String providerMetadata) {
         this.card = card;
         this.assetType = AssetType.CARD;
+        this.cardVariant = cardVariant;
         this.providerName = providerName;
+        this.sourceMarket = sourceMarket;
         this.sourcePrice = sourcePrice;
         this.sourceCurrency = sourceCurrency;
         this.exchangeRateUsed = exchangeRateUsed;
@@ -86,6 +139,9 @@ public class PriceSnapshot {
         this.confidenceRating = confidenceRating;
         this.explanation = explanation;
         this.calculatedAt = calculatedAt;
+        this.sourceUrl = sourceUrl;
+        this.sourceUpdatedAt = sourceUpdatedAt;
+        this.providerMetadata = providerMetadata;
     }
 
     public PriceSnapshot(
@@ -126,8 +182,16 @@ public class PriceSnapshot {
         return sealedProduct;
     }
 
+    public CardVariant getCardVariant() {
+        return cardVariant;
+    }
+
     public String getProviderName() {
         return providerName;
+    }
+
+    public String getSourceMarket() {
+        return sourceMarket;
     }
 
     public BigDecimal getSourcePrice() {
@@ -156,5 +220,21 @@ public class PriceSnapshot {
 
     public OffsetDateTime getCalculatedAt() {
         return calculatedAt;
+    }
+
+    public String getSourceUrl() {
+        return sourceUrl;
+    }
+
+    public OffsetDateTime getSourceUpdatedAt() {
+        return sourceUpdatedAt;
+    }
+
+    public String getProviderMetadata() {
+        return providerMetadata;
+    }
+
+    public Optional<PricingMatchClassification> pricingMatchClassification() {
+        return PricingMatchClassification.fromMetadata(providerMetadata);
     }
 }

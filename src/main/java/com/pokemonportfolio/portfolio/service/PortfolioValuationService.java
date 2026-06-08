@@ -2,6 +2,7 @@ package com.pokemonportfolio.portfolio.service;
 
 import com.pokemonportfolio.auth.entity.AppUser;
 import com.pokemonportfolio.config.domain.ConfidenceRating;
+import com.pokemonportfolio.config.domain.PricingMatchClassification;
 import com.pokemonportfolio.portfolio.entity.OwnedItem;
 import com.pokemonportfolio.portfolio.entity.PortfolioValuationSnapshot;
 import com.pokemonportfolio.portfolio.repository.PortfolioValuationSnapshotRepository;
@@ -39,15 +40,20 @@ public class PortfolioValuationService {
     public PortfolioDashboardView calculateCurrentValue(AppUser owner) {
         List<OwnedItem> items = ownedItemService.listActiveItems(owner);
         List<PortfolioItemView> itemViews = items.stream().map(this::toItemView).toList();
+        List<PortfolioItemView> pricedItemViews = itemViews.stream()
+                .filter(PortfolioItemView::hasMarketValue)
+                .toList();
 
-        BigDecimal totalValue = itemViews.stream()
+        BigDecimal totalValue = pricedItemViews.stream()
                 .map(PortfolioItemView::marketValueSgd)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal totalCost = itemViews.stream()
+        BigDecimal totalCost = pricedItemViews.stream()
                 .map(PortfolioItemView::purchasePriceSgd)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal gainLoss = totalValue.subtract(totalCost);
-        int lowConfidenceCount = (int) itemViews.stream()
+        BigDecimal gainLoss = pricedItemViews.stream()
+                .map(PortfolioItemView::gainLossSgd)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        int lowConfidenceCount = (int) pricedItemViews.stream()
                 .filter(item -> item.confidenceRating() == ConfidenceRating.LOW)
                 .count();
         PortfolioDisposalSummary realized = disposalService.realizedSummary(owner);
@@ -90,9 +96,17 @@ public class PortfolioValuationService {
 
     private PortfolioItemView toItemView(OwnedItem ownedItem) {
         Optional<PriceSnapshot> latest = latestPrice(ownedItem);
-        BigDecimal marketValue = latest.map(PriceSnapshot::getMarketPriceSgd).orElse(BigDecimal.ZERO);
-        ConfidenceRating confidence = latest.map(PriceSnapshot::getConfidenceRating).orElse(ConfidenceRating.LOW);
-        BigDecimal gainLoss = marketValue.subtract(ownedItem.getPurchasePriceSgd());
+        BigDecimal marketValue = latest
+                .map(PriceSnapshot::getMarketPriceSgd)
+                .map(MoneyCalculationSupport::money)
+                .orElse(null);
+        ConfidenceRating confidence = latest.map(PriceSnapshot::getConfidenceRating).orElse(null);
+        PricingMatchClassification matchClassification = latest
+                .flatMap(PriceSnapshot::pricingMatchClassification)
+                .orElse(null);
+        BigDecimal gainLoss = marketValue == null
+                ? null
+                : marketValue.subtract(ownedItem.getPurchasePriceSgd());
         return new PortfolioItemView(
                 ownedItem.getId(),
                 ownedItem.getAssetType().getLabel(),
@@ -105,9 +119,14 @@ public class PortfolioValuationService {
                 ownedItem.imageSmallUrl(),
                 ownedItem.conditionLabel(),
                 ownedItem.getPurchasePriceSgd(),
-                MoneyCalculationSupport.money(marketValue),
-                MoneyCalculationSupport.money(gainLoss),
-                confidence);
+                marketValue,
+                gainLoss == null ? null : MoneyCalculationSupport.money(gainLoss),
+                confidence,
+                latest.map(PriceSnapshot::getProviderName).orElse(""),
+                latest.map(PriceSnapshot::getSourceMarket).orElse(""),
+                latest.map(PriceSnapshot::getSourceCurrency).orElse(""),
+                matchClassification == null ? "" : matchClassification.getLabel(),
+                matchClassification == PricingMatchClassification.GENERIC_RAW_FALLBACK);
     }
 
     private Optional<PriceSnapshot> latestPrice(OwnedItem ownedItem) {
@@ -115,6 +134,12 @@ public class PortfolioValuationService {
             return priceSnapshotRepository
                     .findTopBySealedProductIdOrderByCalculatedAtDescIdDesc(ownedItem.getSealedProduct().getId());
         }
-        return priceSnapshotRepository.findTopByCardIdOrderByCalculatedAtDescIdDesc(ownedItem.getCard().getId());
+        return priceSnapshotRepository
+                .findTopByCardIdAndCardVariantOrderByCalculatedAtDescIdDesc(
+                        ownedItem.getCard().getId(),
+                        ownedItem.getOwnedVariant())
+                .or(() -> priceSnapshotRepository
+                        .findTopByCardIdAndCardVariantIsNullOrderByCalculatedAtDescIdDesc(
+                                ownedItem.getCard().getId()));
     }
 }

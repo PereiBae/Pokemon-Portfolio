@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Real Price Refresh')}"></head>
+<body>
+<div class="app-shell">
+    <header th:replace="~{fragments/layout :: topbar}"></header>
+    <main class="page">
+        <div class="page-header">
+            <div>
+                <h1>Real Price Refresh</h1>
+                <p class="subtle">pokemon-api.com production snapshot run. Existing price history is preserved.</p>
+            </div>
+            <div class="actions compact-actions">
+                <a class="button" th:href="@{/dashboard}">Dashboard</a>
+                <a class="button" th:href="@{/portfolio}">Portfolio</a>
+            </div>
+        </div>
+
+        <section class="card message-card" th:if="${!summary.providerEnabled}">
+            <p class="error" th:text="${summary.providerMessage}">Provider disabled.</p>
+        </section>
+        <section class="card message-card" th:if="${summary.providerEnabled}">
+            <p class="positive" th:text="${summary.providerMessage}">Refresh complete.</p>
+        </section>
+        <section class="card message-card"
+                 th:if="${summary.providerEnabled and summary.snapshotsCreated == 0 and summary.skippedMissingExchangeRate > 0}">
+            <p class="warning">
+                No real price snapshots were created because one or more exchange rates are missing. The dashboard will keep
+                showing the latest existing mock, manual, or historical prices until Refresh Prices can store a converted SGD snapshot.
+            </p>
+            <div class="actions compact-actions">
+                <a class="button"
+                   th:if="${summary.skippedMissingEurExchangeRate > 0}"
+                   th:href="@{/settings/exchange-rates(sourceCurrency='EUR')}">Add EUR to SGD Rate</a>
+                <a class="button"
+                   th:if="${summary.skippedMissingUsdExchangeRate > 0}"
+                   th:href="@{/settings/exchange-rates(sourceCurrency='USD')}">Add USD to SGD Rate</a>
+            </div>
+        </section>
+
+        <section class="grid summary-grid" style="margin-top: 16px;">
+            <div class="card">
+                <div class="metric-label">Active Cards Checked</div>
+                <div class="metric-value" th:text="${summary.totalActiveCardsChecked}">0</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">Snapshots Created</div>
+                <div class="metric-value positive" th:text="${summary.snapshotsCreated}">0</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">Exact Variant Created</div>
+                <div class="metric-value positive" th:text="${summary.exactVariantSnapshotsCreated}">0</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">Created Using Generic Raw Fallback</div>
+                <div class="metric-value warning" th:text="${summary.genericFallbackSnapshotsCreated}">0</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">TCGPlayer USD Created</div>
+                <div class="metric-value positive" th:text="${summary.tcgPlayerUsdSnapshotsCreated}">0</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">Cardmarket EUR Created</div>
+                <div class="metric-value positive" th:text="${summary.cardmarketEurSnapshotsCreated}">0</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">Manual / Custom Skipped</div>
+                <div class="metric-value" th:text="${summary.skippedManualCustomCards}">0</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">Disposed Skipped</div>
+                <div class="metric-value" th:text="${summary.skippedDisposedItems}">0</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">Sealed Skipped</div>
+                <div class="metric-value" th:text="${summary.skippedSealedProducts}">0</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">No Provider Match</div>
+                <div class="metric-value" th:text="${summary.skippedNoProviderMatch}">0</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">No Variant Price</div>
+                <div class="metric-value" th:text="${summary.skippedNoMatchingVariantPrice}">0</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">Unsafe Variant Skipped</div>
+                <div class="metric-value" th:text="${summary.skippedUnsafeVariant}">0</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">No Supported Raw Price</div>
+                <div class="metric-value" th:text="${summary.skippedNoProviderPrice}">0</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">Missing FX</div>
+                <div class="metric-value" th:text="${summary.skippedMissingExchangeRate}">0</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">Missing USD to SGD</div>
+                <div class="metric-value" th:text="${summary.skippedMissingUsdExchangeRate}">0</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">Missing EUR to SGD</div>
+                <div class="metric-value" th:text="${summary.skippedMissingEurExchangeRate}">0</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">Provider Errors</div>
+                <div class="metric-value negative" th:text="${summary.providerErrors}">0</div>
+            </div>
+        </section>
+
+        <section class="card" style="margin-top: 16px;">
+            <div class="table-toolbar">
+                <div>
+                    <h1 class="section-title">Skipped Items</h1>
+                    <p class="subtle">Skipped items are retained unchanged. Use manual price entry when appropriate.</p>
+                </div>
+            </div>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Reason</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${summary.skippedItems.isEmpty()}">
+                    <td colspan="2" class="subtle">No skipped items.</td>
+                </tr>
+                <tr th:each="item : ${summary.skippedItems}">
+                    <td th:text="${item.itemName}">Item</td>
+                    <td th:text="${item.reason}">Reason</td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</div>
+</body>
+</html>

@@ -6,6 +6,7 @@ import com.pokemonportfolio.config.domain.GradedStatus;
 import com.pokemonportfolio.config.domain.GradingRecommendation;
 import com.pokemonportfolio.config.domain.GradingScenarioType;
 import com.pokemonportfolio.config.domain.OwnedItemStatus;
+import com.pokemonportfolio.config.domain.PricingResultType;
 import com.pokemonportfolio.config.domain.PsaGrade;
 import com.pokemonportfolio.grading.entity.GradingAnalysis;
 import com.pokemonportfolio.grading.entity.GradingFee;
@@ -15,7 +16,9 @@ import com.pokemonportfolio.grading.repository.GradingScenarioRepository;
 import com.pokemonportfolio.portfolio.entity.OwnedItem;
 import com.pokemonportfolio.portfolio.repository.OwnedItemRepository;
 import com.pokemonportfolio.pricing.entity.PriceSnapshot;
+import com.pokemonportfolio.pricing.entity.PricingProviderResult;
 import com.pokemonportfolio.pricing.repository.PriceSnapshotRepository;
+import com.pokemonportfolio.pricing.service.PricingProviderResultService;
 import com.pokemonportfolio.pricing.service.MoneyCalculationSupport;
 import java.math.BigDecimal;
 import java.util.Comparator;
@@ -34,18 +37,21 @@ public class GradingAnalyzerService {
     private final GradingFeeService gradingFeeService;
     private final GradingAnalysisRepository gradingAnalysisRepository;
     private final GradingScenarioRepository gradingScenarioRepository;
+    private final PricingProviderResultService pricingProviderResultService;
 
     public GradingAnalyzerService(
             OwnedItemRepository ownedItemRepository,
             PriceSnapshotRepository priceSnapshotRepository,
             GradingFeeService gradingFeeService,
             GradingAnalysisRepository gradingAnalysisRepository,
-            GradingScenarioRepository gradingScenarioRepository) {
+            GradingScenarioRepository gradingScenarioRepository,
+            PricingProviderResultService pricingProviderResultService) {
         this.ownedItemRepository = ownedItemRepository;
         this.priceSnapshotRepository = priceSnapshotRepository;
         this.gradingFeeService = gradingFeeService;
         this.gradingAnalysisRepository = gradingAnalysisRepository;
         this.gradingScenarioRepository = gradingScenarioRepository;
+        this.pricingProviderResultService = pricingProviderResultService;
     }
 
     @Transactional(readOnly = true)
@@ -63,6 +69,15 @@ public class GradingAnalyzerService {
             OwnedItem item = requireActiveCardForAnalysis(owner, ownedItemId);
             form.setOwnedItemId(item.getId());
             latestRawValue(item).ifPresent(form::setRawValueSgd);
+            latestProviderResult(item, PricingResultType.PSA_8)
+                    .map(PricingProviderResult::getPriceSgd)
+                    .ifPresent(form::setPsa8ValueSgd);
+            latestProviderResult(item, PricingResultType.PSA_9)
+                    .map(PricingProviderResult::getPriceSgd)
+                    .ifPresent(form::setPsa9ValueSgd);
+            latestProviderResult(item, PricingResultType.PSA_10)
+                    .map(PricingProviderResult::getPriceSgd)
+                    .ifPresent(form::setPsa10ValueSgd);
         }
         GradingFee fee = gradingFeeService.defaultPsaFee();
         form.setGradingFeeId(fee.getId());
@@ -204,7 +219,19 @@ public class GradingAnalyzerService {
     }
 
     private Optional<PriceSnapshot> latestSnapshot(OwnedItem item) {
-        return priceSnapshotRepository.findTopByCardIdOrderByCalculatedAtDescIdDesc(item.getCard().getId());
+        return priceSnapshotRepository
+                .findTopByCardIdAndCardVariantOrderByCalculatedAtDescIdDesc(
+                        item.getCard().getId(),
+                        item.getOwnedVariant())
+                .or(() -> priceSnapshotRepository
+                        .findTopByCardIdAndCardVariantIsNullOrderByCalculatedAtDescIdDesc(item.getCard().getId()));
+    }
+
+    private Optional<PricingProviderResult> latestProviderResult(OwnedItem item, PricingResultType resultType) {
+        return pricingProviderResultService.latestCardResult(
+                item.getCard().getId(),
+                item.getOwnedVariant(),
+                resultType);
     }
 
     private BigDecimal moneyOrLatestRawValue(OwnedItem item, BigDecimal formValue) {

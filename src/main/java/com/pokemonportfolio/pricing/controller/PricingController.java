@@ -8,6 +8,8 @@ import com.pokemonportfolio.config.domain.ConfidenceRating;
 import com.pokemonportfolio.portfolio.service.OwnedItemService;
 import com.pokemonportfolio.pricing.service.ManualPriceEntryForm;
 import com.pokemonportfolio.pricing.service.ManualPriceEntryService;
+import com.pokemonportfolio.pricing.service.MarketValuationService;
+import com.pokemonportfolio.pricing.service.PriceRefreshSummaryView;
 import jakarta.validation.Valid;
 import java.math.BigDecimal;
 import java.util.List;
@@ -28,18 +30,21 @@ public class PricingController {
     private final SealedProductService sealedProductService;
     private final OwnedItemService ownedItemService;
     private final ManualPriceEntryService manualPriceEntryService;
+    private final MarketValuationService marketValuationService;
 
     public PricingController(
             CurrentUserService currentUserService,
             CardService cardService,
             SealedProductService sealedProductService,
             OwnedItemService ownedItemService,
-            ManualPriceEntryService manualPriceEntryService) {
+            ManualPriceEntryService manualPriceEntryService,
+            MarketValuationService marketValuationService) {
         this.currentUserService = currentUserService;
         this.cardService = cardService;
         this.sealedProductService = sealedProductService;
         this.ownedItemService = ownedItemService;
         this.manualPriceEntryService = manualPriceEntryService;
+        this.marketValuationService = marketValuationService;
     }
 
     @GetMapping("/pricing/manual-entry")
@@ -54,6 +59,14 @@ public class PricingController {
         form.setExchangeRateUsed(BigDecimal.ONE.setScale(8));
         prepareManualEntryModel(authentication, model, form);
         return "pricing/manual-entry";
+    }
+
+    @PostMapping("/pricing/refresh-real-prices")
+    String refreshRealPrices(Authentication authentication, Model model) {
+        AppUser owner = currentUserService.requireCurrentUser(authentication);
+        PriceRefreshSummaryView summary = marketValuationService.refreshRealPrices(owner);
+        model.addAttribute("summary", summary);
+        return "pricing/refresh-result";
     }
 
     @PostMapping("/pricing/manual-entry")
@@ -82,6 +95,6 @@ public class PricingController {
         model.addAttribute("sealedProductOptions", sealedProductService.listActiveOptions());
         model.addAttribute("ownedItemOptions", ownedItemService.listActiveItemOptions(owner));
         model.addAttribute("confidenceRatings", ConfidenceRating.values());
-        model.addAttribute("currencies", List.of("SGD", "USD", "JPY", "CNY"));
+        model.addAttribute("currencies", List.of("SGD", "USD", "EUR", "JPY", "CNY"));
     }
 }

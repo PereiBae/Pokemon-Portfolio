@@ -32,3 +32,12 @@ app:
         enabled: false
         base-url: https://example.test/pokemon-api
         rapid-api-key:
+  exchange-rates:
+    providers:
+      frankfurter:
+        enabled: false
+        base-url: https://example.test/frankfurter
+  jobs:
+    price-refresh-cron: "0 0 2 * * *"
+    portfolio-valuation-cron: "0 15 2 * * *"
+    exchange-rate-refresh-cron: "0 30 1 * * *"

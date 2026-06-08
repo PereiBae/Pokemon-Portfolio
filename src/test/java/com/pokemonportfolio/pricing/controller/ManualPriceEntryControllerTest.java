@@ -2,6 +2,7 @@ package com.pokemonportfolio.pricing.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -78,6 +79,18 @@ class ManualPriceEntryControllerTest {
         assertThat(snapshots.getFirst().getSourceCurrency()).isEqualTo("USD");
         assertThat(snapshots.getFirst().getExchangeRateUsed()).isEqualByComparingTo("1.35000000");
         assertThat(snapshots.getFirst().getMarketPriceSgd()).isEqualByComparingTo("13.50");
+    }
+
+    @Test
+    @WithUserDetails("owner@example.com")
+    void postRealPriceRefreshRendersSummaryWithoutApiKey() throws Exception {
+        mockMvc.perform(post("/pricing/refresh-real-prices").with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Real Price Refresh")))
+                .andExpect(content().string(containsString("Pokemon API provider is disabled")))
+                .andExpect(content().string(containsString("Snapshots Created")))
+                .andExpect(content().string(not(containsString("test-key"))))
+                .andExpect(content().string(not(containsString("1997pwner"))));
     }
 
     private Card createCard() {

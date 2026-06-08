@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Exchange Rates')}"></head>
+<body>
+<div class="app-shell">
+    <header th:replace="~{fragments/layout :: topbar}"></header>
+    <main class="page">
+        <div class="page-header">
+            <div>
+                <h1>Exchange Rates</h1>
+                <p class="subtle">Automatic and manual rates for converting provider prices into SGD. Latest snapshot per pair is active.</p>
+            </div>
+            <div class="actions compact-actions">
+                <form th:action="@{/settings/exchange-rates/refresh-defaults}" method="post">
+                    <button class="primary" type="submit">Refresh USD/EUR to SGD</button>
+                </form>
+                <a class="button" th:href="@{/settings/providers}">Provider Settings</a>
+            </div>
+        </div>
+
+        <section class="card message-card" th:if="${refreshSummary != null}">
+            <p th:class="${refreshSummary.hasFailures()} ? 'warning' : 'positive'"
+               th:text="|Exchange-rate refresh complete: ${refreshSummary.storedCount} stored, ${refreshSummary.reusedCount} already current, ${refreshSummary.failedCount} failed.|">
+                Exchange-rate refresh complete.
+            </p>
+            <ul class="subtle">
+                <li th:each="message : ${refreshSummary.messages}" th:text="${message}">USD to SGD stored from FRANKFURTER.</li>
+            </ul>
+        </section>
+
+        <section class="card">
+            <p th:if="${param.success}" class="positive">Exchange-rate snapshot stored.</p>
+            <form th:action="@{/settings/exchange-rates}" th:object="${exchangeRateForm}" method="post" class="form-grid">
+                <p th:if="${#fields.hasGlobalErrors()}" class="error" th:each="err : ${#fields.globalErrors()}" th:text="${err}">Error</p>
+                <label>
+                    Source Currency
+                    <select th:field="*{sourceCurrency}">
+                        <option th:each="currency : ${sourceCurrencies}" th:value="${currency}" th:text="${currency}">USD</option>
+                    </select>
+                </label>
+                <label>
+                    Target Currency
+                    <input th:field="*{targetCurrency}" maxlength="3" value="SGD">
+                </label>
+                <label>
+                    Exchange Rate To SGD
+                    <input th:field="*{exchangeRate}" type="number" min="0.00000001" step="0.00000001" required>
+                </label>
+                <label>
+                    Effective Date
+                    <input th:field="*{effectiveDate}" type="date" required>
+                </label>
+                <label class="checkbox-row">
+                    <input th:field="*{active}" type="checkbox">
+                    Active latest rate
+                </label>
+                <div class="actions">
+                    <button class="primary" type="submit">Store Rate</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="card" style="margin-top: 16px;">
+            <div class="table-toolbar">
+                <div>
+                    <h1 class="section-title">Rate Snapshots</h1>
+                    <p class="subtle">Refresh Prices uses the active latest snapshot for each source currency to SGD pair. Sources include MANUAL_STATIC and FRANKFURTER.</p>
+                </div>
+            </div>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Source</th>
+                    <th>Target</th>
+                    <th>Rate</th>
+                    <th>Provider</th>
+                    <th>Effective</th>
+                    <th>Fetched</th>
+                    <th>Confidence</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${rates.isEmpty()}">
+                    <td colspan="8" class="subtle">No exchange-rate snapshots yet.</td>
+                </tr>
+                <tr th:each="rate : ${rates}">
+                    <td th:text="${rate.sourceCurrency}">USD</td>
+                    <td th:text="${rate.targetCurrency}">SGD</td>
+                    <td th:text="${#numbers.formatDecimal(rate.exchangeRate, 1, 'COMMA', 8, 'POINT')}">1.35000000</td>
+                    <td th:text="${rate.rateSource}">FRANKFURTER</td>
+                    <td th:text="${#temporals.format(rate.effectiveAt, 'yyyy-MM-dd')}">2026-06-08</td>
+                    <td th:text="${#temporals.format(rate.fetchedAt, 'yyyy-MM-dd HH:mm')}">2026-06-08 09:00</td>
+                    <td><span class="badge muted-badge" th:text="${rate.confidenceRating}">LOW</span></td>
+                    <td>
+                        <span class="badge positive-badge" th:if="${rate.active}">Active</span>
+                        <span class="badge muted-badge" th:if="${!rate.active}">Historical</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</div>
+</body>
+</html>

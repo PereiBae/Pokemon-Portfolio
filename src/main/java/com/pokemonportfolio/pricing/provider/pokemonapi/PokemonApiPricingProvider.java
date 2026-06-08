@@ -1,10 +1,13 @@
 package com.pokemonportfolio.pricing.provider.pokemonapi;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.pokemonportfolio.config.domain.CardVariant;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.time.Duration;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -147,6 +150,7 @@ public class PokemonApiPricingProvider {
     private PokemonApiPricingCardView toCardView(PokemonApiCard card) {
         PokemonApiPrices prices = card.prices();
         PokemonApiTcgPlayerPrices tcgPlayer = prices == null ? null : prices.tcgPlayer();
+        PokemonApiCardmarketCardPrices cardmarket = prices == null ? null : prices.cardmarket();
         PokemonApiEbayPrices ebay = prices == null ? null : prices.ebay();
         String ebayCurrency = ebay == null ? null : blankToNull(ebay.currency());
         return new PokemonApiPricingCardView(
@@ -158,9 +162,40 @@ public class PokemonApiPricingProvider {
                 tcgPlayer == null ? null : blankToNull(tcgPlayer.currency()),
                 tcgPlayer == null ? null : tcgPlayer.marketPrice(),
                 tcgPlayer == null ? null : tcgPlayer.midPrice(),
+                cardmarket == null ? null : blankToNull(cardmarket.currency()),
+                cardmarket == null ? null : cardmarket.averagePrice(),
+                cardmarket == null ? null : cardmarket.trendPrice(),
+                cardmarket == null ? null : cardmarket.lowPrice(),
+                cardmarket == null ? null : cardmarket.averageSellPrice(),
+                tcgPlayer == null ? Map.of() : variantPrices(tcgPlayer),
                 psaPrice(ebay, "8", ebayCurrency),
                 psaPrice(ebay, "9", ebayCurrency),
                 psaPrice(ebay, "10", ebayCurrency));
+    }
+
+    private Map<CardVariant, PokemonApiRawPriceView> variantPrices(PokemonApiTcgPlayerPrices tcgPlayer) {
+        Map<CardVariant, PokemonApiRawPriceView> values = new EnumMap<>(CardVariant.class);
+        putVariant(values, CardVariant.STANDARD, "normal", tcgPlayer.currency(), tcgPlayer.normal());
+        putVariant(values, CardVariant.HOLO, "holofoil", tcgPlayer.currency(), tcgPlayer.holofoil());
+        putVariant(values, CardVariant.REVERSE_HOLO, "reverseHolofoil", tcgPlayer.currency(), tcgPlayer.reverseHolofoil());
+        putVariant(values, CardVariant.FIRST_EDITION_HOLO, "1stEditionHolofoil", tcgPlayer.currency(), tcgPlayer.firstEditionHolofoil());
+        putVariant(values, CardVariant.FIRST_EDITION_NORMAL, "1stEditionNormal", tcgPlayer.currency(), tcgPlayer.firstEditionNormal());
+        putVariant(values, CardVariant.UNLIMITED_HOLO, "unlimitedHolofoil", tcgPlayer.currency(), tcgPlayer.unlimitedHolofoil());
+        putVariant(values, CardVariant.UNLIMITED_NORMAL, "unlimitedNormal", tcgPlayer.currency(), tcgPlayer.unlimitedNormal());
+        return values;
+    }
+
+    private void putVariant(
+            Map<CardVariant, PokemonApiRawPriceView> values,
+            CardVariant variant,
+            String sourceKey,
+            String defaultCurrency,
+            PokemonApiVariantTcgPlayerPrice price) {
+        if (price == null || (price.marketPrice() == null && price.midPrice() == null)) {
+            return;
+        }
+        String currency = blankToNull(price.currency()) == null ? blankToNull(defaultCurrency) : blankToNull(price.currency());
+        values.put(variant, new PokemonApiRawPriceView(sourceKey, currency, price.marketPrice(), price.midPrice()));
     }
 
     private PokemonApiPsaPriceView psaPrice(PokemonApiEbayPrices ebay, String grade, String currency) {
@@ -238,6 +273,7 @@ public class PokemonApiPricingProvider {
     @JsonIgnoreProperties(ignoreUnknown = true)
     record PokemonApiPrices(
             @JsonProperty("tcg_player") PokemonApiTcgPlayerPrices tcgPlayer,
+            PokemonApiCardmarketCardPrices cardmarket,
             PokemonApiEbayPrices ebay) {}
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -247,6 +283,19 @@ public class PokemonApiPricingProvider {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     record PokemonApiTcgPlayerPrices(
+            String currency,
+            @JsonProperty("market_price") BigDecimal marketPrice,
+            @JsonProperty("mid_price") BigDecimal midPrice,
+            PokemonApiVariantTcgPlayerPrice normal,
+            PokemonApiVariantTcgPlayerPrice holofoil,
+            PokemonApiVariantTcgPlayerPrice reverseHolofoil,
+            @JsonProperty("1stEditionHolofoil") PokemonApiVariantTcgPlayerPrice firstEditionHolofoil,
+            @JsonProperty("1stEditionNormal") PokemonApiVariantTcgPlayerPrice firstEditionNormal,
+            PokemonApiVariantTcgPlayerPrice unlimitedHolofoil,
+            PokemonApiVariantTcgPlayerPrice unlimitedNormal) {}
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    record PokemonApiVariantTcgPlayerPrice(
             String currency,
             @JsonProperty("market_price") BigDecimal marketPrice,
             @JsonProperty("mid_price") BigDecimal midPrice) {}
@@ -260,6 +309,14 @@ public class PokemonApiPricingProvider {
     record PokemonApiGradedPricePayload(
             @JsonProperty("median_price") BigDecimal medianPrice,
             @JsonProperty("sample_size") Integer sampleSize) {}
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    record PokemonApiCardmarketCardPrices(
+            String currency,
+            @JsonProperty("average_price") @JsonAlias({"avg_price", "average"}) BigDecimal averagePrice,
+            @JsonProperty("trend_price") @JsonAlias({"trend"}) BigDecimal trendPrice,
+            @JsonProperty("low_price") @JsonAlias({"lowest", "low"}) BigDecimal lowPrice,
+            @JsonProperty("average_sell_price") @JsonAlias({"avg_sell_price", "avg_sell", "average_sell"}) BigDecimal averageSellPrice) {}
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     record PokemonApiCardmarketProductPrices(

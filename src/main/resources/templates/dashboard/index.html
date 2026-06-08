@@ -14,27 +14,46 @@
                 <a class="button primary" th:href="@{/cards/new}">Add Card</a>
                 <a class="button" th:href="@{/sealed-products/new}">Create Sealed Product</a>
                 <a class="button" th:href="@{/grading}">Run Grading Analyzer</a>
+                <form th:action="@{/pricing/refresh-real-prices}" method="post">
+                    <button class="button" type="submit">Refresh Real Prices</button>
+                </form>
             </div>
         </div>
 
         <section class="grid summary-grid">
             <div class="card">
                 <div class="metric-label">Active Portfolio Value</div>
-                <div class="metric-value" th:text="|SGD ${#numbers.formatDecimal(summary.totalValueSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</div>
+                <div class="metric-value"
+                     th:if="${!summary.activeValueUnavailable()}"
+                     th:text="|SGD ${#numbers.formatDecimal(summary.totalValueSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</div>
+                <div class="metric-value subtle"
+                     th:if="${summary.activeValueUnavailable()}">No price available</div>
             </div>
             <div class="card">
                 <div class="metric-label">Active Cost Basis</div>
-                <div class="metric-value" th:text="|SGD ${#numbers.formatDecimal(summary.totalCostBasisSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</div>
+                <div class="metric-value"
+                     th:if="${!summary.activeValueUnavailable()}"
+                     th:text="|SGD ${#numbers.formatDecimal(summary.totalCostBasisSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</div>
+                <div class="metric-value subtle"
+                     th:if="${summary.activeValueUnavailable()}">No price available</div>
             </div>
             <div class="card">
                 <div class="metric-label">Unrealised Gain/Loss</div>
-                <div class="metric-value" th:classappend="${summary.gainIsNonNegative()} ? ' positive' : ' negative'"
+                <div class="metric-value"
+                     th:if="${!summary.activeValueUnavailable()}"
+                     th:classappend="${summary.gainIsNonNegative()} ? ' positive' : ' negative'"
                      th:text="|SGD ${#numbers.formatDecimal(summary.unrealizedGainLossSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</div>
+                <div class="metric-value subtle"
+                     th:if="${summary.activeValueUnavailable()}">No price available</div>
             </div>
             <div class="card">
                 <div class="metric-label">Gain/Loss Percent</div>
-                <div class="metric-value" th:classappend="${summary.gainIsNonNegative()} ? ' positive' : ' negative'"
+                <div class="metric-value"
+                     th:if="${!summary.activeValueUnavailable()}"
+                     th:classappend="${summary.gainIsNonNegative()} ? ' positive' : ' negative'"
                      th:text="|${#numbers.formatDecimal(summary.unrealizedGainLossPercent, 1, 'COMMA', 2, 'POINT')}%|">0.00%</div>
+                <div class="metric-value subtle"
+                     th:if="${summary.activeValueUnavailable()}">No price available</div>
             </div>
             <div class="card">
                 <div class="metric-label">Realised Gain/Loss</div>
@@ -130,10 +149,33 @@
                     <td th:text="${item.setName}">Set</td>
                     <td th:text="${item.condition}">Condition</td>
                     <td th:text="|SGD ${#numbers.formatDecimal(item.purchasePriceSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
-                    <td th:text="|SGD ${#numbers.formatDecimal(item.marketValueSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
-                    <td th:classappend="${item.gainIsNonNegative()} ? ' positive' : ' negative'"
-                        th:text="|SGD ${#numbers.formatDecimal(item.gainLossSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
-                    <td th:text="${item.confidenceRating}">MEDIUM</td>
+                    <td>
+                        <span th:if="${item.hasMarketValue()}"
+                              th:text="|SGD ${#numbers.formatDecimal(item.marketValueSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</span>
+                        <span th:if="${!item.hasMarketValue()}" class="subtle">No price available</span>
+                    </td>
+                    <td>
+                        <span th:if="${item.hasGainLoss()}"
+                              th:class="${item.gainIsNonNegative()} ? 'positive' : 'negative'"
+                              th:text="|SGD ${#numbers.formatDecimal(item.gainLossSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</span>
+                        <span th:if="${!item.hasGainLoss()}" class="subtle">No price available</span>
+                    </td>
+                    <td>
+                        <div class="badge-row">
+                            <span class="badge"
+                                  th:if="${item.hasMarketValue()}"
+                                  th:classappend="${item.lowConfidencePricing()} ? ' warning-badge' : ' muted-badge'"
+                                  th:text="${item.confidenceRating}">MEDIUM</span>
+                            <span class="badge warning-badge"
+                                  th:if="${!item.hasMarketValue()}">No price available</span>
+                            <span class="badge muted-badge"
+                                  th:if="${item.hasSourceMarket()}"
+                                  th:text="${item.pricingSourceLabel()}">POKEMON_API / TCGPLAYER / USD</span>
+                            <span class="badge warning-badge"
+                                  th:if="${item.hasPricingWarning()}"
+                                  th:text="${item.pricingWarningLabel()}">Generic raw fallback</span>
+                        </div>
+                    </td>
                 </tr>
                 </tbody>
             </table>

@@ -28,6 +28,7 @@ class FlywayMigrationTest {
                 "sealed_product",
                 "owned_item",
                 "price_snapshot",
+                "pricing_provider_result",
                 "exchange_rate_snapshot",
                 "portfolio_valuation_snapshot",
                 "alert",

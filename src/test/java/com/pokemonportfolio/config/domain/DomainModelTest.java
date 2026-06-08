@@ -49,6 +49,26 @@ class DomainModelTest {
     }
 
     @Test
+    void pricingProviderResultsTrackRawAndPsaOutputs() {
+        assertThat(PricingResultType.values()).containsExactly(
+                PricingResultType.RAW_CARD,
+                PricingResultType.PSA_8,
+                PricingResultType.PSA_9,
+                PricingResultType.PSA_10);
+    }
+
+    @Test
+    void pricingResultsTrackVariantMatchClassification() {
+        assertThat(PricingMatchClassification.values()).containsExactly(
+                PricingMatchClassification.EXACT_VARIANT_MATCH,
+                PricingMatchClassification.GENERIC_RAW_FALLBACK,
+                PricingMatchClassification.UNSAFE_VARIANT_MISMATCH,
+                PricingMatchClassification.NO_PRICE_AVAILABLE);
+        assertThat(PricingMatchClassification.fromMetadata("source_field=x;match=GENERIC_RAW_FALLBACK"))
+                .contains(PricingMatchClassification.GENERIC_RAW_FALLBACK);
+    }
+
+    @Test
     void ownedItemsTrackDisposalLifecycleStatus() {
         assertThat(OwnedItemStatus.values()).containsExactly(
                 OwnedItemStatus.ACTIVE,

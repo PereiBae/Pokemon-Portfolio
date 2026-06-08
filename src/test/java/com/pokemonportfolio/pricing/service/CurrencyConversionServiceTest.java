@@ -46,4 +46,20 @@ class CurrencyConversionServiceTest {
         assertThat(snapshot.getRateSource()).isEqualTo("MANUAL_STATIC");
         assertThat(exchangeRateSnapshotRepository.findById(snapshot.getId())).isPresent();
     }
+
+    @Test
+    void recordsAndUsesEurToSgdExchangeRateSnapshot() {
+        currencyConversionService.recordManualRate(
+                "eur",
+                new BigDecimal("1.46000000"),
+                ConfidenceRating.LOW);
+
+        assertThat(currencyConversionService.latestRateToSgd("EUR"))
+                .hasValueSatisfying(rate -> assertThat(rate).isEqualByComparingTo("1.46000000"));
+        assertThat(currencyConversionService.convertToSgd(
+                new BigDecimal("120.00"),
+                "EUR",
+                currencyConversionService.latestRateToSgd("EUR").orElseThrow()))
+                .isEqualByComparingTo("175.20");
+    }
 }

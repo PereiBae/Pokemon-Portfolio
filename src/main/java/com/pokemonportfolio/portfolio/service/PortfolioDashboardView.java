@@ -49,6 +49,14 @@ public record PortfolioDashboardView(
         return unrealizedGainLossSgd.compareTo(BigDecimal.ZERO) >= 0;
     }
 
+    public boolean hasPricedItems() {
+        return items.stream().anyMatch(PortfolioItemView::hasMarketValue);
+    }
+
+    public boolean activeValueUnavailable() {
+        return itemCount > 0 && !hasPricedItems();
+    }
+
     public PortfolioDashboardView withAlerts(int activeAlertCount, List<AlertView> latestAlerts) {
         return new PortfolioDashboardView(
                 totalValueSgd,

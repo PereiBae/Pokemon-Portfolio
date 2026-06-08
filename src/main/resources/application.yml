@@ -36,6 +36,12 @@ app:
         enabled: ${POKEMON_API_PRICING_ENABLED:false}
         base-url: ${POKEMON_API_PRICING_BASE_URL:https://pokemon-tcg-api.p.rapidapi.com}
         rapid-api-key: ${POKEMON_API_RAPIDAPI_KEY:}
+  exchange-rates:
+    providers:
+      frankfurter:
+        enabled: ${FRANKFURTER_EXCHANGE_RATE_ENABLED:true}
+        base-url: ${FRANKFURTER_EXCHANGE_RATE_BASE_URL:https://api.frankfurter.dev}
   jobs:
     price-refresh-cron: "0 0 2 * * *"
     portfolio-valuation-cron: "0 15 2 * * *"
+    exchange-rate-refresh-cron: "0 30 1 * * *"

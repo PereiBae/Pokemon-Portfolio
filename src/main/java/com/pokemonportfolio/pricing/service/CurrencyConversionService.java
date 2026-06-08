@@ -6,6 +6,7 @@ import com.pokemonportfolio.pricing.repository.ExchangeRateSnapshotRepository;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.OffsetDateTime;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +26,17 @@ public class CurrencyConversionService {
         BigDecimal normalizedPrice = MoneyCalculationSupport.money(sourcePrice);
         BigDecimal normalizedRate = normalizeRate(normalizeCurrency(sourceCurrency), exchangeRateUsed);
         return MoneyCalculationSupport.money(normalizedPrice.multiply(normalizedRate));
+    }
+
+    public Optional<BigDecimal> latestRateToSgd(String sourceCurrency) {
+        String normalizedCurrency = normalizeCurrency(sourceCurrency);
+        if (SGD.equals(normalizedCurrency)) {
+            return Optional.of(ONE_TO_ONE_RATE);
+        }
+        return exchangeRateSnapshotRepository
+                .findTopBySourceCurrencyAndTargetCurrencyOrderByEffectiveAtDescIdDesc(normalizedCurrency, SGD)
+                .map(ExchangeRateSnapshot::getExchangeRate)
+                .map(rate -> normalizeRate(normalizedCurrency, rate));
     }
 
     public String normalizeCurrency(String currency) {
@@ -56,13 +68,61 @@ public class CurrencyConversionService {
         String normalizedCurrency = normalizeCurrency(sourceCurrency);
         BigDecimal normalizedRate = normalizeRate(normalizedCurrency, exchangeRateUsed);
         OffsetDateTime now = OffsetDateTime.now();
+        return recordManualRate(normalizedCurrency, SGD, normalizedRate, confidenceRating, now);
+    }
+
+    @Transactional
+    public ExchangeRateSnapshot recordManualRate(
+            String sourceCurrency,
+            String targetCurrency,
+            BigDecimal exchangeRateUsed,
+            ConfidenceRating confidenceRating,
+            OffsetDateTime effectiveAt) {
+        String normalizedSourceCurrency = normalizeCurrency(sourceCurrency);
+        String normalizedTargetCurrency = normalizeCurrency(targetCurrency);
+        if (!SGD.equals(normalizedTargetCurrency)) {
+            throw new IllegalArgumentException("Only SGD target exchange rates are supported for v1");
+        }
+        BigDecimal normalizedRate = normalizeRate(normalizedSourceCurrency, exchangeRateUsed);
+        OffsetDateTime effectiveTimestamp = effectiveAt == null ? OffsetDateTime.now() : effectiveAt;
+        OffsetDateTime now = OffsetDateTime.now();
         return exchangeRateSnapshotRepository.save(new ExchangeRateSnapshot(
-                normalizedCurrency,
-                SGD,
+                normalizedSourceCurrency,
+                normalizedTargetCurrency,
                 normalizedRate,
                 "MANUAL_STATIC",
                 confidenceRating == null ? ConfidenceRating.LOW : confidenceRating,
-                now,
+                effectiveTimestamp,
                 now));
+    }
+
+    @Transactional
+    public ExchangeRateSnapshot recordProviderRate(
+            String sourceCurrency,
+            String targetCurrency,
+            BigDecimal exchangeRateUsed,
+            String rateSource,
+            ConfidenceRating confidenceRating,
+            OffsetDateTime effectiveAt,
+            OffsetDateTime fetchedAt) {
+        String normalizedSourceCurrency = normalizeCurrency(sourceCurrency);
+        String normalizedTargetCurrency = normalizeCurrency(targetCurrency);
+        if (!SGD.equals(normalizedTargetCurrency)) {
+            throw new IllegalArgumentException("Only SGD target exchange rates are supported for v1");
+        }
+        if (rateSource == null || rateSource.isBlank()) {
+            throw new IllegalArgumentException("Exchange-rate source is required");
+        }
+        BigDecimal normalizedRate = normalizeRate(normalizedSourceCurrency, exchangeRateUsed);
+        OffsetDateTime effectiveTimestamp = effectiveAt == null ? OffsetDateTime.now() : effectiveAt;
+        OffsetDateTime fetchedTimestamp = fetchedAt == null ? OffsetDateTime.now() : fetchedAt;
+        return exchangeRateSnapshotRepository.save(new ExchangeRateSnapshot(
+                normalizedSourceCurrency,
+                normalizedTargetCurrency,
+                normalizedRate,
+                rateSource.trim().toUpperCase(),
+                confidenceRating == null ? ConfidenceRating.MEDIUM : confidenceRating,
+                effectiveTimestamp,
+                fetchedTimestamp));
     }
 }

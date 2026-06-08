@@ -83,6 +83,32 @@ class PortfolioValuationServiceTest {
     }
 
     @Test
+    void missingLatestPriceIsNotTreatedAsZeroInUnrealizedGainLoss() {
+        var owner = appUserRepository.findByUsername("owner@example.com").orElseThrow();
+        Card pricedCard = createCard("Priced Dashboard Card");
+        Card unpricedCard = createCard("Unpriced Dashboard Card");
+        ownedItemService.addCardToPortfolio(owner, ownedItemForm(pricedCard.getId(), "50.00"));
+        OwnedItem unpricedItem = ownedItemService.addCardToPortfolio(owner, ownedItemForm(unpricedCard.getId(), "125.00"));
+        PriceSnapshot pricedSnapshot = marketValuationService.refreshCardPrice(pricedCard);
+
+        var view = portfolioValuationService.calculateCurrentValue(owner);
+        var unpricedView = view.items().stream()
+                .filter(item -> item.ownedItemId().equals(unpricedItem.getId()))
+                .findFirst()
+                .orElseThrow();
+
+        assertThat(view.itemCount()).isEqualTo(2);
+        assertThat(view.totalValueSgd()).isEqualByComparingTo(pricedSnapshot.getMarketPriceSgd());
+        assertThat(view.totalCostBasisSgd()).isEqualByComparingTo("50.00");
+        assertThat(view.unrealizedGainLossSgd())
+                .isEqualByComparingTo(pricedSnapshot.getMarketPriceSgd().subtract(new BigDecimal("50.00")));
+        assertThat(unpricedView.hasMarketValue()).isFalse();
+        assertThat(unpricedView.marketValueSgd()).isNull();
+        assertThat(unpricedView.gainLossSgd()).isNull();
+        assertThat(unpricedView.confidenceRating()).isNull();
+    }
+
+    @Test
     void executedTradeKeepsDashboardRealizedAndUnrealizedGainLossAccurate() {
         var owner = appUserRepository.findByUsername("owner@example.com").orElseThrow();
         Card outgoingCard = createCard("Dashboard Trade Outgoing");

@@ -3,6 +3,7 @@ package com.pokemonportfolio.pricing.provider.pokemonapi;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.pokemonportfolio.config.domain.CardVariant;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
@@ -67,7 +68,22 @@ class PokemonApiPricingProviderTest {
                       "tcg_player": {
                         "currency": "USD",
                         "market_price": 146.69,
-                        "mid_price": 163.71
+                        "mid_price": 163.71,
+                        "holofoil": {
+                          "currency": "USD",
+                          "market_price": 151.25,
+                          "mid_price": 155.00
+                        },
+                        "reverseHolofoil": {
+                          "market_price": 97.50
+                        }
+                      },
+                      "cardmarket": {
+                        "currency": "EUR",
+                        "average_price": 128.12,
+                        "trend_price": 131.45,
+                        "low_price": 119.50,
+                        "average_sell_price": 124.25
                       },
                       "ebay": {
                         "currency": "USD",
@@ -94,6 +110,21 @@ class PokemonApiPricingProviderTest {
         assertThat(card.tcgPlayerCurrency()).isEqualTo("USD");
         assertThat(card.tcgPlayerMarketPrice()).isEqualByComparingTo("146.69");
         assertThat(card.tcgPlayerMidPrice()).isEqualByComparingTo("163.71");
+        assertThat(card.cardmarketCurrency()).isEqualTo("EUR");
+        assertThat(card.cardmarketAveragePrice()).isEqualByComparingTo("128.12");
+        assertThat(card.cardmarketTrendPrice()).isEqualByComparingTo("131.45");
+        assertThat(card.cardmarketLowPrice()).isEqualByComparingTo("119.50");
+        assertThat(card.cardmarketAverageSellPrice()).isEqualByComparingTo("124.25");
+        assertThat(card.variantPrice(CardVariant.HOLO)).hasValueSatisfying(price -> {
+            assertThat(price.sourceKey()).isEqualTo("holofoil");
+            assertThat(price.currency()).isEqualTo("USD");
+            assertThat(price.marketPrice()).isEqualByComparingTo("151.25");
+        });
+        assertThat(card.variantPrice(CardVariant.REVERSE_HOLO)).hasValueSatisfying(price -> {
+            assertThat(price.sourceKey()).isEqualTo("reverseHolofoil");
+            assertThat(price.currency()).isEqualTo("USD");
+            assertThat(price.marketPrice()).isEqualByComparingTo("97.50");
+        });
         assertThat(card.psa8Price().medianPrice()).isEqualByComparingTo("600.00");
         assertThat(card.psa8Price().sampleSize()).isEqualTo(3);
         assertThat(card.psa9Price().medianPrice()).isEqualByComparingTo("1200.00");

@@ -14,6 +14,9 @@
                 <a class="button" th:href="@{/portfolio/disposals}">Disposal History</a>
                 <a class="button primary" th:href="@{/catalog/search}">Add Verified Card</a>
                 <a class="button" th:href="@{/portfolio/add-sealed}">Add Sealed Product</a>
+                <form th:action="@{/pricing/refresh-real-prices}" method="post">
+                    <button class="button" type="submit">Refresh Real Prices</button>
+                </form>
             </div>
         </div>
         <section class="card message-card">
@@ -58,10 +61,36 @@
                     <td th:text="${item.variant}">Standard</td>
                     <td th:text="${item.condition}">Condition</td>
                     <td th:text="|SGD ${#numbers.formatDecimal(item.purchasePriceSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
-                    <td th:text="|SGD ${#numbers.formatDecimal(item.marketValueSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
-                    <td th:classappend="${item.gainIsNonNegative()} ? ' positive' : ' negative'"
-                        th:text="|SGD ${#numbers.formatDecimal(item.gainLossSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
-                    <td th:text="${item.confidenceRating}">MEDIUM</td>
+                    <td>
+                        <span th:if="${item.hasMarketValue()}"
+                              th:text="|SGD ${#numbers.formatDecimal(item.marketValueSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</span>
+                        <span th:if="${!item.hasMarketValue()}" class="subtle">No price available</span>
+                    </td>
+                    <td>
+                        <span th:if="${item.hasGainLoss()}"
+                              th:class="${item.gainIsNonNegative()} ? 'positive' : 'negative'"
+                              th:text="|SGD ${#numbers.formatDecimal(item.gainLossSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</span>
+                        <span th:if="${!item.hasGainLoss()}" class="subtle">No price available</span>
+                    </td>
+                    <td>
+                        <div class="badge-row">
+                            <span class="badge"
+                                  th:if="${item.hasMarketValue()}"
+                                  th:classappend="${item.lowConfidencePricing()} ? ' warning-badge' : ' muted-badge'"
+                                  th:text="${item.confidenceRating}">MEDIUM</span>
+                            <span class="badge warning-badge"
+                                  th:if="${!item.hasMarketValue()}">No price available</span>
+                            <span class="badge muted-badge"
+                                  th:if="${item.hasSourceMarket()}"
+                                  th:text="${item.pricingSourceLabel()}">POKEMON_API / TCGPLAYER / USD</span>
+                            <span class="badge warning-badge"
+                                  th:if="${item.hasPricingWarning()}"
+                                  th:text="${item.pricingWarningLabel()}">Generic raw fallback</span>
+                            <span class="badge muted-badge"
+                                  th:if="${item.hasPricingWarning()}"
+                                  th:text="${item.pricingWarningDetail()}">Not variant-specific</span>
+                        </div>
+                    </td>
                     <td>
                         <div class="table-actions">
                             <a class="button" th:href="@{/portfolio/items/{id}/sell(id=${item.ownedItemId})}">Sell</a>

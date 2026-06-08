@@ -95,6 +95,11 @@ public class OwnedItemService {
     }
 
     @Transactional(readOnly = true)
+    public List<OwnedItem> listItems(AppUser owner) {
+        return ownedItemRepository.findByOwnerOrderByCreatedAtDesc(owner);
+    }
+
+    @Transactional(readOnly = true)
     public List<OwnedItemOptionView> listActiveItemOptions(AppUser owner) {
         return listActiveItems(owner).stream()
                 .map(OwnedItemOptionView::from)

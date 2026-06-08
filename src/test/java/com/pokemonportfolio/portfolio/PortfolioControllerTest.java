@@ -15,13 +15,17 @@ import com.pokemonportfolio.catalog.service.CardForm;
 import com.pokemonportfolio.catalog.service.CardService;
 import com.pokemonportfolio.config.domain.CardCondition;
 import com.pokemonportfolio.config.domain.CardVariant;
+import com.pokemonportfolio.config.domain.ConfidenceRating;
 import com.pokemonportfolio.config.domain.GradedStatus;
 import com.pokemonportfolio.config.domain.LanguageMarket;
 import com.pokemonportfolio.portfolio.entity.OwnedItem;
 import com.pokemonportfolio.portfolio.service.OwnedItemForm;
 import com.pokemonportfolio.portfolio.service.OwnedItemService;
+import com.pokemonportfolio.pricing.entity.PriceSnapshot;
+import com.pokemonportfolio.pricing.repository.PriceSnapshotRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -51,6 +55,9 @@ class PortfolioControllerTest {
 
     @Autowired
     private OwnedItemService ownedItemService;
+
+    @Autowired
+    private PriceSnapshotRepository priceSnapshotRepository;
 
     @Test
     @WithUserDetails("owner@example.com")
@@ -119,6 +126,55 @@ class PortfolioControllerTest {
                 .andExpect(content().string(containsString("Realised Gain/Loss")))
                 .andExpect(content().string(containsString("Total Performance")))
                 .andExpect(content().string(containsString("SGD 25.00")));
+    }
+
+    @Test
+    @WithUserDetails("owner@example.com")
+    void portfolioRendersGenericFallbackLowConfidenceBadge() throws Exception {
+        AppUser owner = owner();
+        OwnedItem item = ownedItem(owner, "Controller Generic Fallback Card", "100.00");
+        priceSnapshotRepository.save(new PriceSnapshot(
+                item.getCard(),
+                item.getOwnedVariant(),
+                "POKEMON_API",
+                "TCGPLAYER",
+                new BigDecimal("120.00"),
+                "USD",
+                new BigDecimal("1.35000000"),
+                new BigDecimal("162.00"),
+                ConfidenceRating.LOW,
+                "Generic raw price used; provider did not supply variant-specific pricing.",
+                OffsetDateTime.now(),
+                "https://example.test/pokemon-api/cards/1",
+                null,
+                "source_field=tcg_player.market_price;match=GENERIC_RAW_FALLBACK;variant=STANDARD;single_provider=true"));
+
+        mockMvc.perform(get("/portfolio"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Controller Generic Fallback Card")))
+                .andExpect(content().string(containsString("LOW")))
+                .andExpect(content().string(containsString("POKEMON_API / TCGPLAYER / USD")))
+                .andExpect(content().string(containsString("Generic raw fallback")))
+                .andExpect(content().string(containsString("Not variant-specific")));
+    }
+
+    @Test
+    @WithUserDetails("owner@example.com")
+    void portfolioAndDashboardRenderMissingLatestPriceAsUnavailable() throws Exception {
+        AppUser owner = owner();
+        ownedItem(owner, "Controller Unpriced Card", "123.45");
+
+        mockMvc.perform(get("/portfolio"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Controller Unpriced Card")))
+                .andExpect(content().string(containsString("No price available")))
+                .andExpect(content().string(not(containsString("SGD -123.45"))));
+
+        mockMvc.perform(get("/dashboard"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Controller Unpriced Card")))
+                .andExpect(content().string(containsString("No price available")))
+                .andExpect(content().string(not(containsString("SGD -123.45"))));
     }
 
     @Test

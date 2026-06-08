@@ -92,6 +92,12 @@ public class PriceAlertService {
             return priceSnapshotRepository
                     .findTopBySealedProductIdOrderByCalculatedAtDescIdDesc(ownedItem.getSealedProduct().getId());
         }
-        return priceSnapshotRepository.findTopByCardIdOrderByCalculatedAtDescIdDesc(ownedItem.getCard().getId());
+        return priceSnapshotRepository
+                .findTopByCardIdAndCardVariantOrderByCalculatedAtDescIdDesc(
+                        ownedItem.getCard().getId(),
+                        ownedItem.getOwnedVariant())
+                .or(() -> priceSnapshotRepository
+                        .findTopByCardIdAndCardVariantIsNullOrderByCalculatedAtDescIdDesc(
+                                ownedItem.getCard().getId()));
     }
 }

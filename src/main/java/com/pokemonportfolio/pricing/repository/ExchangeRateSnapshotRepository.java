@@ -9,4 +9,9 @@ public interface ExchangeRateSnapshotRepository extends JpaRepository<ExchangeRa
     Optional<ExchangeRateSnapshot> findTopBySourceCurrencyAndTargetCurrencyOrderByEffectiveAtDescIdDesc(
             String sourceCurrency,
             String targetCurrency);
+
+    Optional<ExchangeRateSnapshot> findTopBySourceCurrencyAndTargetCurrencyAndRateSourceOrderByEffectiveAtDescIdDesc(
+            String sourceCurrency,
+            String targetCurrency,
+            String rateSource);
 }

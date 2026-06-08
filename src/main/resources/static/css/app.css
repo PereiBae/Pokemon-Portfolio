@@ -176,6 +176,16 @@ h1 {
   max-width: 720px;
 }
 
+.checkbox-row {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.checkbox-row input {
+  width: auto;
+}
+
 .search-row {
   align-items: end;
   display: grid;
@@ -256,6 +266,12 @@ h1 {
 .muted-badge {
   background: rgba(146, 164, 181, 0.12);
   color: var(--muted);
+}
+
+.warning-badge {
+  background: rgba(243, 198, 91, 0.12);
+  border-color: rgba(243, 198, 91, 0.35);
+  color: #f3c65b;
 }
 
 .catalog-card-cell {

@@ -5,6 +5,7 @@ import com.pokemonportfolio.catalog.entity.Card;
 import com.pokemonportfolio.catalog.entity.SealedProduct;
 import com.pokemonportfolio.catalog.service.CardService;
 import com.pokemonportfolio.catalog.service.SealedProductService;
+import com.pokemonportfolio.config.domain.CardVariant;
 import com.pokemonportfolio.config.domain.ConfidenceRating;
 import com.pokemonportfolio.portfolio.entity.OwnedItem;
 import com.pokemonportfolio.portfolio.service.OwnedItemService;
@@ -71,6 +72,9 @@ public class ManualPriceEntryService {
                 confidenceRating,
                 explanation(form.getNotes()));
         if (asset.card() != null) {
+            if (asset.cardVariant() != null) {
+                return priceSnapshotService.createSnapshot(asset.card(), asset.cardVariant(), providerPrice);
+            }
             return priceSnapshotService.createSnapshot(asset.card(), providerPrice);
         }
         return priceSnapshotService.createSnapshot(asset.sealedProduct(), providerPrice);
@@ -79,13 +83,13 @@ public class ManualPriceEntryService {
     private ManualPriceAsset resolveAsset(AppUser owner, ManualPriceEntryForm form) {
         if (form.getOwnedItemId() != null) {
             OwnedItem ownedItem = ownedItemService.requireActiveItemForOwner(owner, form.getOwnedItemId());
-            return new ManualPriceAsset(ownedItem.getCard(), ownedItem.getSealedProduct());
+            return new ManualPriceAsset(ownedItem.getCard(), ownedItem.getOwnedVariant(), ownedItem.getSealedProduct());
         }
         if (form.getCardId() != null) {
-            return new ManualPriceAsset(cardService.requireCard(form.getCardId()), null);
+            return new ManualPriceAsset(cardService.requireCard(form.getCardId()), null, null);
         }
         if (form.getSealedProductId() != null) {
-            return new ManualPriceAsset(null, sealedProductService.requireSealedProduct(form.getSealedProductId()));
+            return new ManualPriceAsset(null, null, sealedProductService.requireSealedProduct(form.getSealedProductId()));
         }
         throw new IllegalArgumentException("Select a card, sealed product, or portfolio item");
     }
@@ -104,6 +108,6 @@ public class ManualPriceEntryService {
         return "Manual price entry fallback. Notes: " + notes.trim();
     }
 
-    private record ManualPriceAsset(Card card, SealedProduct sealedProduct) {
+    private record ManualPriceAsset(Card card, CardVariant cardVariant, SealedProduct sealedProduct) {
     }
 }

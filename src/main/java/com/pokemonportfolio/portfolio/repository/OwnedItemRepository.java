@@ -14,6 +14,9 @@ public interface OwnedItemRepository extends JpaRepository<OwnedItem, Long> {
     List<OwnedItem> findByOwnerAndStatusOrderByCreatedAtDesc(AppUser owner, OwnedItemStatus status);
 
     @EntityGraph(attributePaths = {"card", "card.pokemonSet", "sealedProduct"})
+    List<OwnedItem> findByOwnerOrderByCreatedAtDesc(AppUser owner);
+
+    @EntityGraph(attributePaths = {"card", "card.pokemonSet", "sealedProduct"})
     Optional<OwnedItem> findByIdAndOwnerAndStatus(Long id, AppUser owner, OwnedItemStatus status);
 
     @EntityGraph(attributePaths = {"card", "card.pokemonSet", "sealedProduct"})

@@ -1,6 +1,7 @@
 package com.pokemonportfolio.trade.service;
 
 import com.pokemonportfolio.auth.entity.AppUser;
+import com.pokemonportfolio.config.domain.CardVariant;
 import com.pokemonportfolio.config.domain.ConfidenceRating;
 import com.pokemonportfolio.config.domain.TradeFairnessResult;
 import com.pokemonportfolio.config.domain.TradeSideType;
@@ -125,7 +126,19 @@ public class TradeAnalyzerService {
             return priceSnapshotRepository.findTopBySealedProductIdOrderByCalculatedAtDescIdDesc(
                     item.getSealedProduct().getId());
         }
-        return priceSnapshotRepository.findTopByCardIdOrderByCalculatedAtDescIdDesc(item.getCard().getId());
+        return priceSnapshotRepository
+                .findTopByCardIdAndCardVariantOrderByCalculatedAtDescIdDesc(
+                        item.getCard().getId(),
+                        tradeItemVariant(item))
+                .or(() -> priceSnapshotRepository
+                        .findTopByCardIdAndCardVariantIsNullOrderByCalculatedAtDescIdDesc(item.getCard().getId()));
+    }
+
+    private CardVariant tradeItemVariant(TradeTransactionItem item) {
+        if (item.getOutgoingOwnedItem() != null) {
+            return item.getOutgoingOwnedItem().getOwnedVariant();
+        }
+        return item.getIncomingVariant();
     }
 
     private BigDecimal baseValue(TradeTransactionItem item, PricePoint pricePoint) {
