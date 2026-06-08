@@ -128,8 +128,8 @@ class GradingControllerTest {
     void dashboardLinksToGradingAnalyzer() throws Exception {
         mockMvc.perform(get("/dashboard"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Run Grading Analyzer")))
-                .andExpect(content().string(containsString("PSA Grading Analyzer")));
+                .andExpect(content().string(containsString("href=\"/grading\"")))
+                .andExpect(content().string(containsString(">Grading</a>")));
     }
 
     private AppUser owner() {

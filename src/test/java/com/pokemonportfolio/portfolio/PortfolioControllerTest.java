@@ -123,7 +123,7 @@ class PortfolioControllerTest {
 
         mockMvc.perform(get("/dashboard"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Realised Gain/Loss")))
+                .andExpect(content().string(containsString("Realised P/L")))
                 .andExpect(content().string(containsString("Total Performance")))
                 .andExpect(content().string(containsString("SGD 25.00")));
     }

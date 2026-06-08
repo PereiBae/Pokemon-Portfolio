@@ -134,9 +134,9 @@ class AlertControllerTest {
 
         mockMvc.perform(get("/dashboard"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("1 active alert(s)")))
+                .andExpect(content().string(containsString("1 active signal(s)")))
                 .andExpect(content().string(containsString("Dashboard Alert Card")))
-                .andExpect(content().string(containsString("View Alerts")));
+                .andExpect(content().string(containsString("href=\"/alerts\"")));
     }
 
     private AppUser owner() {

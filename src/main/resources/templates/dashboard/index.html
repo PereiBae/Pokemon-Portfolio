@@ -1,184 +1,316 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head('Dashboard')}"></head>
-<body>
-<div class="app-shell">
-    <header th:replace="~{fragments/layout :: topbar}"></header>
-    <main class="page">
-        <div class="page-header">
+<body class="dashboard-body">
+<div class="terminal-shell">
+    <aside class="terminal-sidebar">
+        <div class="terminal-brand">
+            <span class="brand-mark">PX</span>
             <div>
-                <h1>Portfolio Dashboard</h1>
-                <p class="subtle">Active holdings plus realised performance from disposal history.</p>
-            </div>
-            <div class="actions compact-actions">
-                <a class="button primary" th:href="@{/cards/new}">Add Card</a>
-                <a class="button" th:href="@{/sealed-products/new}">Create Sealed Product</a>
-                <a class="button" th:href="@{/grading}">Run Grading Analyzer</a>
-                <form th:action="@{/pricing/refresh-real-prices}" method="post">
-                    <button class="button" type="submit">Refresh Real Prices</button>
-                </form>
+                <strong>Portfolio Exchange</strong>
+                <span>Collectibles Desk</span>
             </div>
         </div>
+        <nav class="sidebar-nav" aria-label="Primary navigation">
+            <a class="active" th:href="@{/dashboard}"><span>01</span>Dashboard</a>
+            <a th:href="@{/portfolio}"><span>02</span>Portfolio</a>
+            <a th:href="@{/catalog/search}"><span>03</span>Add Card</a>
+            <a th:href="@{/sealed-products}"><span>04</span>Sealed Products</a>
+            <a th:href="@{/pricing/manual-entry}"><span>05</span>Pricing</a>
+            <a th:href="@{/trades}"><span>06</span>Trades</a>
+            <a th:href="@{/grading}"><span>07</span>Grading</a>
+            <a th:href="@{/alerts}"><span>08</span>Alerts</a>
+            <a th:href="@{/settings/providers}"><span>09</span>Settings</a>
+        </nav>
+        <form class="sidebar-logout" th:action="@{/logout}" method="post">
+            <button type="submit">Logout</button>
+        </form>
+    </aside>
 
-        <section class="grid summary-grid">
-            <div class="card">
-                <div class="metric-label">Active Portfolio Value</div>
-                <div class="metric-value"
+    <main class="terminal-main">
+        <section class="ticker-tape" aria-label="Portfolio ticker">
+            <div class="ticker-track" th:if="${summary.hasTickerItems()}">
+                <div class="ticker-group">
+                    <article class="ticker-item" th:each="item : ${summary.tickerItems()}">
+                        <img th:if="${item.hasImage()}" th:src="${item.imageSmallUrl}" th:alt="${item.assetName}">
+                        <span class="ticker-thumb-missing" th:if="${!item.hasImage()}">IMG</span>
+                        <div>
+                            <strong th:text="${item.displayNameWithNumber()}">Card Name</strong>
+                            <small th:if="${item.hasMarketValue()}"
+                                   th:text="|SGD ${#numbers.formatDecimal(item.marketValueSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</small>
+                            <small th:if="${!item.hasMarketValue()}">No price available</small>
+                        </div>
+                        <span class="ticker-move positive"
+                              th:if="${item.gainIsPositive()}"
+                              th:text="|&#9650; ${#numbers.formatDecimal(item.gainLossPercent(), 1, 'COMMA', 2, 'POINT')}%|">UP 0.00%</span>
+                        <span class="ticker-move negative"
+                              th:if="${item.gainIsNegative()}"
+                              th:text="|&#9660; ${#numbers.formatDecimal(item.gainLossPercent(), 1, 'COMMA', 2, 'POINT')}%|">DOWN 0.00%</span>
+                        <span class="ticker-move neutral"
+                              th:if="${!item.hasGainLoss() || item.gainIsFlat()}">--</span>
+                    </article>
+                </div>
+                <div class="ticker-group" aria-hidden="true">
+                    <article class="ticker-item" th:each="item : ${summary.tickerItems()}">
+                        <img th:if="${item.hasImage()}" th:src="${item.imageSmallUrl}" th:alt="${item.assetName}">
+                        <span class="ticker-thumb-missing" th:if="${!item.hasImage()}">IMG</span>
+                        <div>
+                            <strong th:text="${item.displayNameWithNumber()}">Card Name</strong>
+                            <small th:if="${item.hasMarketValue()}"
+                                   th:text="|SGD ${#numbers.formatDecimal(item.marketValueSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</small>
+                            <small th:if="${!item.hasMarketValue()}">No price available</small>
+                        </div>
+                        <span class="ticker-move positive"
+                              th:if="${item.gainIsPositive()}"
+                              th:text="|&#9650; ${#numbers.formatDecimal(item.gainLossPercent(), 1, 'COMMA', 2, 'POINT')}%|">UP 0.00%</span>
+                        <span class="ticker-move negative"
+                              th:if="${item.gainIsNegative()}"
+                              th:text="|&#9660; ${#numbers.formatDecimal(item.gainLossPercent(), 1, 'COMMA', 2, 'POINT')}%|">DOWN 0.00%</span>
+                        <span class="ticker-move neutral"
+                              th:if="${!item.hasGainLoss() || item.gainIsFlat()}">--</span>
+                    </article>
+                </div>
+            </div>
+            <div class="ticker-empty" th:if="${!summary.hasTickerItems()}">No holdings on the desk yet.</div>
+        </section>
+
+        <header class="dashboard-command-bar">
+            <div>
+                <p class="terminal-kicker">Personal Portfolio Terminal</p>
+                <h1>Dashboard</h1>
+            </div>
+            <div class="terminal-actions">
+                <a class="button primary" th:href="@{/catalog/search}">Add Card</a>
+                <form th:action="@{/pricing/refresh-real-prices}" method="post">
+                    <button class="button" type="submit">Refresh Prices</button>
+                </form>
+                <form th:action="@{/alerts/check}" method="post">
+                    <button class="button" type="submit">Run Alert Check</button>
+                </form>
+            </div>
+        </header>
+
+        <section class="portfolio-hero">
+            <div class="hero-value-card holo-panel">
+                <div class="metric-label">Total Portfolio Value</div>
+                <div class="hero-value"
                      th:if="${!summary.activeValueUnavailable()}"
                      th:text="|SGD ${#numbers.formatDecimal(summary.totalValueSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</div>
-                <div class="metric-value subtle"
-                     th:if="${summary.activeValueUnavailable()}">No price available</div>
+                <div class="hero-value unavailable" th:if="${summary.activeValueUnavailable()}">No price available</div>
+                <div class="hero-performance">
+                    <span th:classappend="${summary.totalPerformanceIsNonNegative()} ? ' positive' : ' negative'"
+                          th:text="|SGD ${#numbers.formatDecimal(summary.totalPerformanceSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</span>
+                    <span th:classappend="${summary.totalPerformanceIsNonNegative()} ? ' positive' : ' negative'"
+                          th:text="|Total Performance ${#numbers.formatDecimal(summary.totalPerformancePercent, 1, 'COMMA', 2, 'POINT')}%|">Total Performance 0.00%</span>
+                </div>
             </div>
-            <div class="card">
-                <div class="metric-label">Active Cost Basis</div>
-                <div class="metric-value"
-                     th:if="${!summary.activeValueUnavailable()}"
-                     th:text="|SGD ${#numbers.formatDecimal(summary.totalCostBasisSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</div>
-                <div class="metric-value subtle"
-                     th:if="${summary.activeValueUnavailable()}">No price available</div>
-            </div>
-            <div class="card">
-                <div class="metric-label">Unrealised Gain/Loss</div>
-                <div class="metric-value"
-                     th:if="${!summary.activeValueUnavailable()}"
-                     th:classappend="${summary.gainIsNonNegative()} ? ' positive' : ' negative'"
-                     th:text="|SGD ${#numbers.formatDecimal(summary.unrealizedGainLossSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</div>
-                <div class="metric-value subtle"
-                     th:if="${summary.activeValueUnavailable()}">No price available</div>
-            </div>
-            <div class="card">
-                <div class="metric-label">Gain/Loss Percent</div>
-                <div class="metric-value"
-                     th:if="${!summary.activeValueUnavailable()}"
-                     th:classappend="${summary.gainIsNonNegative()} ? ' positive' : ' negative'"
-                     th:text="|${#numbers.formatDecimal(summary.unrealizedGainLossPercent, 1, 'COMMA', 2, 'POINT')}%|">0.00%</div>
-                <div class="metric-value subtle"
-                     th:if="${summary.activeValueUnavailable()}">No price available</div>
-            </div>
-            <div class="card">
-                <div class="metric-label">Realised Gain/Loss</div>
-                <div class="metric-value" th:classappend="${summary.realizedGainIsNonNegative()} ? ' positive' : ' negative'"
-                     th:text="|SGD ${#numbers.formatDecimal(summary.realizedGainLossSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</div>
-            </div>
-            <div class="card">
-                <div class="metric-label">Realised Percent</div>
-                <div class="metric-value" th:classappend="${summary.realizedGainIsNonNegative()} ? ' positive' : ' negative'"
-                     th:text="|${#numbers.formatDecimal(summary.realizedGainLossPercent, 1, 'COMMA', 2, 'POINT')}%|">0.00%</div>
-            </div>
-            <div class="card">
-                <div class="metric-label">Total Performance</div>
-                <div class="metric-value" th:classappend="${summary.totalPerformanceIsNonNegative()} ? ' positive' : ' negative'"
-                     th:text="|SGD ${#numbers.formatDecimal(summary.totalPerformanceSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</div>
-            </div>
-            <div class="card">
-                <div class="metric-label">Total Performance Percent</div>
-                <div class="metric-value" th:classappend="${summary.totalPerformanceIsNonNegative()} ? ' positive' : ' negative'"
-                     th:text="|${#numbers.formatDecimal(summary.totalPerformancePercent, 1, 'COMMA', 2, 'POINT')}%|">0.00%</div>
+            <div class="hero-metrics">
+                <article class="glass-metric">
+                    <span>Cost Basis</span>
+                    <strong th:if="${!summary.activeValueUnavailable()}"
+                            th:text="|SGD ${#numbers.formatDecimal(summary.totalCostBasisSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</strong>
+                    <strong class="subtle" th:if="${summary.activeValueUnavailable()}">No price available</strong>
+                </article>
+                <article class="glass-metric">
+                    <span>Unrealised P/L</span>
+                    <strong th:if="${!summary.activeValueUnavailable()}"
+                            th:classappend="${summary.gainIsNonNegative()} ? ' positive' : ' negative'"
+                            th:text="|SGD ${#numbers.formatDecimal(summary.unrealizedGainLossSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</strong>
+                    <strong class="subtle" th:if="${summary.activeValueUnavailable()}">No price available</strong>
+                </article>
+                <article class="glass-metric">
+                    <span>Realised P/L</span>
+                    <strong th:classappend="${summary.realizedGainIsNonNegative()} ? ' positive' : ' negative'"
+                            th:text="|SGD ${#numbers.formatDecimal(summary.realizedGainLossSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</strong>
+                </article>
+                <article class="glass-metric">
+                    <span>Active Holdings</span>
+                    <strong th:text="${summary.itemCount}">0</strong>
+                    <small th:text="|${summary.pricedItemCount()} priced|">0 priced</small>
+                </article>
             </div>
         </section>
 
-        <section class="card" style="margin-top: 16px;">
-            <div class="page-header">
-                <div>
-                    <h1 class="section-title">PSA Grading Analyzer</h1>
-                    <p class="subtle">Manually compare raw value against PSA 8, PSA 9, and PSA 10 scenarios.</p>
+        <section class="dashboard-grid">
+            <article class="terminal-panel trend-panel">
+                <div class="panel-heading">
+                    <div>
+                        <h2>Portfolio Trend</h2>
+                        <p class="subtle">Current valuation snapshot</p>
+                    </div>
+                    <span class="badge muted-badge">SGD</span>
                 </div>
-                <a class="button" th:href="@{/grading}">Run Grading Analyzer</a>
-            </div>
-        </section>
+                <div class="chart-placeholder" aria-label="Portfolio valuation trend">
+                    <div class="chart-gridline"></div>
+                    <div class="chart-gridline"></div>
+                    <div class="chart-gridline"></div>
+                    <div class="trend-pulse"></div>
+                </div>
+                <div class="trend-summary">
+                    <span th:text="|${summary.itemCount} active records|">0 active records</span>
+                    <span th:text="|${summary.lowConfidenceCount} low confidence|">0 low confidence</span>
+                    <span th:if="${summary.activeValueUnavailable()}">No price available</span>
+                    <span th:if="${!summary.activeValueUnavailable()}"
+                          th:text="|${#numbers.formatDecimal(summary.unrealizedGainLossPercent, 1, 'COMMA', 2, 'POINT')}% unrealised|">0.00% unrealised</span>
+                </div>
+            </article>
 
-        <section class="card" style="margin-top: 16px;">
-            <div class="page-header">
-                <div>
-                    <h1 class="section-title">Price Alerts</h1>
-                    <p class="subtle" th:text="|${summary.activeAlertCount} active alert(s)|">0 active alert(s)</p>
+            <article class="terminal-panel alerts-panel">
+                <div class="panel-heading">
+                    <div>
+                        <h2>Alerts</h2>
+                        <p class="subtle" th:text="|${summary.activeAlertCount} active signal(s)|">0 active signal(s)</p>
+                    </div>
+                    <a class="panel-link" th:href="@{/alerts}">Open</a>
                 </div>
-                <a class="button" th:href="@{/alerts}">View Alerts</a>
-            </div>
-            <table class="table">
-                <thead>
-                <tr>
-                    <th>Item</th>
-                    <th>Gain</th>
-                    <th>Confidence</th>
-                    <th>Triggered</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:if="${summary.latestAlerts.isEmpty()}">
-                    <td colspan="4" class="subtle">No active alerts.</td>
-                </tr>
-                <tr th:each="alert : ${summary.latestAlerts}">
-                    <td th:text="${alert.itemDisplayName}">Item</td>
-                    <td class="positive" th:text="|SGD ${#numbers.formatDecimal(alert.gainAmountSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
-                    <td th:text="${alert.confidenceRating}">MEDIUM</td>
-                    <td th:text="${#temporals.format(alert.triggeredAt, 'yyyy-MM-dd HH:mm')}">2026-06-03</td>
-                </tr>
-                </tbody>
-            </table>
-        </section>
-
-        <section class="card" style="margin-top: 16px;">
-            <div class="page-header">
-                <div>
-                    <h1 style="font-size: 20px;">Holdings</h1>
-                    <p class="subtle" th:text="|${summary.itemCount} active owned item records|">0 active owned item records</p>
-                </div>
-                <a class="button" th:href="@{/portfolio/disposals}">Disposal History</a>
-            </div>
-            <table class="table">
-                <thead>
-                <tr>
-                    <th>Type</th>
-                    <th>Item</th>
-                    <th>Set</th>
-                    <th>Condition</th>
-                    <th>Cost</th>
-                    <th>Market</th>
-                    <th>Gain/Loss</th>
-                    <th>Confidence</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:if="${summary.items.isEmpty()}">
-                    <td colspan="8" class="subtle">No holdings yet.</td>
-                </tr>
-                <tr th:each="item : ${summary.items}">
-                    <td><span class="badge muted-badge" th:text="${item.assetTypeLabel}">Card</span></td>
-                    <td th:text="${#strings.isEmpty(item.cardNumber) ? item.assetName : item.assetName + ' #' + item.cardNumber}">Item</td>
-                    <td th:text="${item.setName}">Set</td>
-                    <td th:text="${item.condition}">Condition</td>
-                    <td th:text="|SGD ${#numbers.formatDecimal(item.purchasePriceSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
-                    <td>
-                        <span th:if="${item.hasMarketValue()}"
-                              th:text="|SGD ${#numbers.formatDecimal(item.marketValueSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</span>
-                        <span th:if="${!item.hasMarketValue()}" class="subtle">No price available</span>
-                    </td>
-                    <td>
-                        <span th:if="${item.hasGainLoss()}"
-                              th:class="${item.gainIsNonNegative()} ? 'positive' : 'negative'"
-                              th:text="|SGD ${#numbers.formatDecimal(item.gainLossSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</span>
-                        <span th:if="${!item.hasGainLoss()}" class="subtle">No price available</span>
-                    </td>
-                    <td>
-                        <div class="badge-row">
-                            <span class="badge"
-                                  th:if="${item.hasMarketValue()}"
-                                  th:classappend="${item.lowConfidencePricing()} ? ' warning-badge' : ' muted-badge'"
-                                  th:text="${item.confidenceRating}">MEDIUM</span>
-                            <span class="badge warning-badge"
-                                  th:if="${!item.hasMarketValue()}">No price available</span>
-                            <span class="badge muted-badge"
-                                  th:if="${item.hasSourceMarket()}"
-                                  th:text="${item.pricingSourceLabel()}">POKEMON_API / TCGPLAYER / USD</span>
-                            <span class="badge warning-badge"
-                                  th:if="${item.hasPricingWarning()}"
-                                  th:text="${item.pricingWarningLabel()}">Generic raw fallback</span>
+                <div class="alert-stack">
+                    <div class="activity-row" th:if="${summary.latestAlerts.isEmpty()}">
+                        <span class="activity-dot muted-dot"></span>
+                        <div>
+                            <strong>No active alerts</strong>
+                            <small>Run an alert check after prices refresh.</small>
                         </div>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+                    </div>
+                    <div class="activity-row" th:each="alert : ${summary.latestAlerts}">
+                        <img th:if="${alert.imageSmallUrl != null}" th:src="${alert.imageSmallUrl}" th:alt="${alert.itemDisplayName}">
+                        <span class="activity-dot positive-dot" th:if="${alert.imageSmallUrl == null}"></span>
+                        <div>
+                            <strong th:text="${alert.itemDisplayName}">Item</strong>
+                            <small class="positive"
+                                   th:text="|+SGD ${#numbers.formatDecimal(alert.gainAmountSgd, 1, 'COMMA', 2, 'POINT')} / ${#numbers.formatDecimal(alert.gainPercentage, 1, 'COMMA', 2, 'POINT')}%|">+SGD 0.00</small>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </section>
+
+        <section class="leaderboard-grid">
+            <article class="terminal-panel">
+                <div class="panel-heading">
+                    <h2>Top Gainers</h2>
+                    <span class="badge positive-badge">UP</span>
+                </div>
+                <div class="leaderboard-list">
+                    <div class="leader-row" th:if="${!summary.hasTopGainers()}">
+                        <span class="image-placeholder compact-placeholder">Image not available</span>
+                        <div>
+                            <strong>No gainers yet</strong>
+                            <small>No price available</small>
+                        </div>
+                    </div>
+                    <div class="leader-row" th:each="item : ${summary.topGainers()}">
+                        <img th:if="${item.hasImage()}" th:src="${item.imageSmallUrl}" th:alt="${item.assetName}">
+                        <span class="image-placeholder compact-placeholder" th:if="${!item.hasImage()}">Image not available</span>
+                        <div class="leader-main">
+                            <strong th:text="${item.displayNameWithNumber()}">Card</strong>
+                            <small th:text="${item.setName}">Set</small>
+                        </div>
+                        <div class="leader-price">
+                            <strong th:text="|SGD ${#numbers.formatDecimal(item.marketValueSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</strong>
+                            <small class="positive"
+                                   th:text="|+SGD ${#numbers.formatDecimal(item.gainLossSgd, 1, 'COMMA', 2, 'POINT')} / ${#numbers.formatDecimal(item.gainLossPercent(), 1, 'COMMA', 2, 'POINT')}%|">+SGD 0.00</small>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <article class="terminal-panel">
+                <div class="panel-heading">
+                    <h2>Top Losers</h2>
+                    <span class="badge danger-badge">DOWN</span>
+                </div>
+                <div class="leaderboard-list">
+                    <div class="leader-row" th:if="${!summary.hasTopLosers()}">
+                        <span class="image-placeholder compact-placeholder">Image not available</span>
+                        <div>
+                            <strong>No losers yet</strong>
+                            <small>No negative priced positions.</small>
+                        </div>
+                    </div>
+                    <div class="leader-row" th:each="item : ${summary.topLosers()}">
+                        <img th:if="${item.hasImage()}" th:src="${item.imageSmallUrl}" th:alt="${item.assetName}">
+                        <span class="image-placeholder compact-placeholder" th:if="${!item.hasImage()}">Image not available</span>
+                        <div class="leader-main">
+                            <strong th:text="${item.displayNameWithNumber()}">Card</strong>
+                            <small th:text="${item.setName}">Set</small>
+                        </div>
+                        <div class="leader-price">
+                            <strong th:text="|SGD ${#numbers.formatDecimal(item.marketValueSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</strong>
+                            <small class="negative"
+                                   th:text="|SGD ${#numbers.formatDecimal(item.gainLossSgd, 1, 'COMMA', 2, 'POINT')} / ${#numbers.formatDecimal(item.gainLossPercent(), 1, 'COMMA', 2, 'POINT')}%|">SGD 0.00</small>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </section>
+
+        <section class="dashboard-grid lower-grid">
+            <article class="terminal-panel">
+                <div class="panel-heading">
+                    <h2>Recent Activity</h2>
+                    <span class="badge muted-badge">Internal</span>
+                </div>
+                <div class="activity-list">
+                    <div class="activity-row" th:each="alert : ${summary.latestAlerts}">
+                        <span class="activity-dot positive-dot"></span>
+                        <div>
+                            <strong th:text="|Alert triggered: ${alert.itemDisplayName}|">Alert triggered</strong>
+                            <small th:text="${#temporals.format(alert.triggeredAt, 'yyyy-MM-dd HH:mm')}">2026-06-08</small>
+                        </div>
+                    </div>
+                    <div class="activity-row" th:each="item : ${summary.tickerItems()}" th:if="${item.hasMarketValue()}">
+                        <span class="activity-dot blue-dot"></span>
+                        <div>
+                            <strong th:text="|Price snapshot: ${item.displayNameWithNumber()}|">Price snapshot</strong>
+                            <small th:text="${item.pricingSourceLabel()}">Provider / Market / Currency</small>
+                        </div>
+                    </div>
+                    <div class="activity-row" th:if="${summary.latestAlerts.isEmpty() && summary.pricedItemCount() == 0}">
+                        <span class="activity-dot muted-dot"></span>
+                        <div>
+                            <strong>No recent internal activity yet</strong>
+                            <small>Refresh prices or add manual entries to populate this feed.</small>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <article class="terminal-panel">
+                <div class="panel-heading">
+                    <div>
+                        <h2>Holdings Preview</h2>
+                        <p class="subtle" th:text="|${summary.itemCount} active holding(s)|">0 active holding(s)</p>
+                    </div>
+                    <a class="panel-link" th:href="@{/portfolio}">View Portfolio</a>
+                </div>
+                <div class="holding-preview-list">
+                    <div class="holding-preview-row" th:if="${summary.items.isEmpty()}">
+                        <span class="image-placeholder compact-placeholder">Image not available</span>
+                        <div>
+                            <strong>No active holdings</strong>
+                            <small>Add your first verified or custom card.</small>
+                        </div>
+                    </div>
+                    <div class="holding-preview-row" th:each="item : ${summary.holdingsPreview()}">
+                        <img th:if="${item.hasImage()}" th:src="${item.imageSmallUrl}" th:alt="${item.assetName}">
+                        <span class="image-placeholder compact-placeholder" th:if="${!item.hasImage()}">Image not available</span>
+                        <div class="holding-copy">
+                            <strong th:text="${item.displayNameWithNumber()}">Item</strong>
+                            <small th:text="|${item.setName} / ${item.variant}|">Set / Variant</small>
+                        </div>
+                        <div class="holding-market">
+                            <strong th:if="${item.hasMarketValue()}"
+                                    th:text="|SGD ${#numbers.formatDecimal(item.marketValueSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</strong>
+                            <strong class="subtle" th:if="${!item.hasMarketValue()}">No price available</strong>
+                            <small th:if="${item.hasGainLoss()}"
+                                   th:class="${item.gainIsNonNegative()} ? 'positive' : 'negative'"
+                                   th:text="|${#numbers.formatDecimal(item.gainLossPercent(), 1, 'COMMA', 2, 'POINT')}%|">0.00%</small>
+                        </div>
+                    </div>
+                    <a class="preview-overflow" th:if="${summary.remainingHoldingsCount() > 0}" th:href="@{/portfolio}"
+                       th:text="|+ ${summary.remainingHoldingsCount()} more holdings|">+ 0 more holdings</a>
+                </div>
+            </article>
         </section>
     </main>
 </div>

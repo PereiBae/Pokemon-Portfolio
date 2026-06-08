@@ -2,6 +2,7 @@ package com.pokemonportfolio.portfolio.service;
 
 import com.pokemonportfolio.alerts.service.AlertView;
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.List;
 
 public record PortfolioDashboardView(
@@ -89,5 +90,61 @@ public record PortfolioDashboardView(
 
     public BigDecimal activeCostBasisSgd() {
         return totalCostBasisSgd;
+    }
+
+    public int pricedItemCount() {
+        return (int) items.stream().filter(PortfolioItemView::hasMarketValue).count();
+    }
+
+    public List<PortfolioItemView> tickerItems() {
+        List<PortfolioItemView> pricedMovers = items.stream()
+                .filter(PortfolioItemView::hasMarketValue)
+                .sorted(Comparator
+                        .comparing((PortfolioItemView item) -> item.gainLossSgd().abs())
+                        .reversed())
+                .limit(8)
+                .toList();
+        if (!pricedMovers.isEmpty()) {
+            return pricedMovers;
+        }
+        return holdingsPreview();
+    }
+
+    public List<PortfolioItemView> topGainers() {
+        return items.stream()
+                .filter(PortfolioItemView::hasGainLoss)
+                .filter(item -> item.gainLossSgd().compareTo(BigDecimal.ZERO) >= 0)
+                .sorted(Comparator.comparing(PortfolioItemView::gainLossSgd).reversed())
+                .limit(5)
+                .toList();
+    }
+
+    public List<PortfolioItemView> topLosers() {
+        return items.stream()
+                .filter(PortfolioItemView::hasGainLoss)
+                .filter(item -> item.gainLossSgd().compareTo(BigDecimal.ZERO) < 0)
+                .sorted(Comparator.comparing(PortfolioItemView::gainLossSgd))
+                .limit(5)
+                .toList();
+    }
+
+    public List<PortfolioItemView> holdingsPreview() {
+        return items.stream().limit(6).toList();
+    }
+
+    public int remainingHoldingsCount() {
+        return Math.max(0, itemCount - holdingsPreview().size());
+    }
+
+    public boolean hasTickerItems() {
+        return !tickerItems().isEmpty();
+    }
+
+    public boolean hasTopGainers() {
+        return !topGainers().isEmpty();
+    }
+
+    public boolean hasTopLosers() {
+        return !topLosers().isEmpty();
     }
 }

@@ -1,6 +1,7 @@
 package com.pokemonportfolio.portfolio.service;
 
 import com.pokemonportfolio.config.domain.ConfidenceRating;
+import com.pokemonportfolio.pricing.service.MoneyCalculationSupport;
 import java.math.BigDecimal;
 
 public record PortfolioItemView(
@@ -29,6 +30,18 @@ public record PortfolioItemView(
             return true;
         }
         return gainLossSgd.compareTo(BigDecimal.ZERO) >= 0;
+    }
+
+    public boolean gainIsPositive() {
+        return gainLossSgd != null && gainLossSgd.compareTo(BigDecimal.ZERO) > 0;
+    }
+
+    public boolean gainIsNegative() {
+        return gainLossSgd != null && gainLossSgd.compareTo(BigDecimal.ZERO) < 0;
+    }
+
+    public boolean gainIsFlat() {
+        return gainLossSgd != null && gainLossSgd.compareTo(BigDecimal.ZERO) == 0;
     }
 
     public boolean hasMarketValue() {
@@ -66,5 +79,23 @@ public record PortfolioItemView(
         String market = sourceMarket == null || sourceMarket.isBlank() ? "Unknown market" : sourceMarket;
         String currency = sourceCurrency == null || sourceCurrency.isBlank() ? "Unknown currency" : sourceCurrency;
         return sourceProvider + " / " + market + " / " + currency;
+    }
+
+    public boolean hasImage() {
+        return imageSmallUrl != null && !imageSmallUrl.isBlank();
+    }
+
+    public String displayNameWithNumber() {
+        if (cardNumber == null || cardNumber.isBlank()) {
+            return assetName;
+        }
+        return assetName + " #" + cardNumber;
+    }
+
+    public BigDecimal gainLossPercent() {
+        if (!hasGainLoss()) {
+            return null;
+        }
+        return MoneyCalculationSupport.percent(gainLossSgd, purchasePriceSgd);
     }
 }
