@@ -1,33 +1,10 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head('Dashboard')}"></head>
-<body class="dashboard-body">
-<div class="terminal-shell">
-    <aside class="terminal-sidebar">
-        <div class="terminal-brand">
-            <span class="brand-mark">PX</span>
-            <div>
-                <strong>Portfolio Exchange</strong>
-                <span>Collectibles Desk</span>
-            </div>
-        </div>
-        <nav class="sidebar-nav" aria-label="Primary navigation">
-            <a class="active" th:href="@{/dashboard}"><span>01</span>Dashboard</a>
-            <a th:href="@{/portfolio}"><span>02</span>Portfolio</a>
-            <a th:href="@{/catalog/search}"><span>03</span>Add Card</a>
-            <a th:href="@{/sealed-products}"><span>04</span>Sealed Products</a>
-            <a th:href="@{/pricing/manual-entry}"><span>05</span>Pricing</a>
-            <a th:href="@{/trades}"><span>06</span>Trades</a>
-            <a th:href="@{/grading}"><span>07</span>Grading</a>
-            <a th:href="@{/alerts}"><span>08</span>Alerts</a>
-            <a th:href="@{/settings/providers}"><span>09</span>Settings</a>
-        </nav>
-        <form class="sidebar-logout" th:action="@{/logout}" method="post">
-            <button type="submit">Logout</button>
-        </form>
-    </aside>
-
-    <main class="terminal-main">
+<body class="dashboard-body app-body section-dashboard">
+<div class="app-shell">
+    <header th:replace="~{fragments/layout :: topbar}"></header>
+    <main class="page dashboard-page">
         <section class="ticker-tape" aria-label="Portfolio ticker">
             <div class="ticker-track" th:if="${summary.hasTickerItems()}">
                 <div class="ticker-group">

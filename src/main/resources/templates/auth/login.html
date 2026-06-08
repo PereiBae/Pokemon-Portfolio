@@ -1,9 +1,16 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head('Login')}"></head>
-<body>
+<body class="login-body">
 <main class="login-page">
     <section class="card login-panel">
+        <div class="terminal-brand login-brand">
+            <span class="brand-mark">PX</span>
+            <div>
+                <strong>Portfolio Exchange</strong>
+                <span>Owner Terminal</span>
+            </div>
+        </div>
         <p class="metric-label">Secure owner access</p>
         <h1>Portfolio Login</h1>
         <p class="subtle">Dark financial dashboard for personal card valuation.</p>
@@ -23,4 +30,3 @@
 </main>
 </body>
 </html>
-

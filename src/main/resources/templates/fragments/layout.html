@@ -7,28 +7,30 @@
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
-<header th:fragment="topbar" class="topbar">
-    <div class="brand">Pokemon Portfolio Analytics</div>
-    <nav class="nav">
-        <a th:href="@{/dashboard}">Dashboard</a>
-        <a th:href="@{/catalog/search}">Official Catalogue</a>
-        <a th:href="@{/cards/new}">Custom Card</a>
-        <a th:href="@{/sealed-products}">Sealed Products</a>
-        <a th:href="@{/portfolio}">Portfolio</a>
-        <a th:href="@{/portfolio/disposals}">Disposals</a>
-        <a th:href="@{/alerts}">Alerts</a>
-        <a th:href="@{/trades}">Trades</a>
-        <a th:href="@{/grading}">Grading</a>
-        <a th:href="@{/pricing/manual-entry}">Manual Price</a>
-        <form th:action="@{/pricing/refresh-real-prices}" method="post">
-            <button type="submit">Refresh Prices</button>
-        </form>
-        <a th:href="@{/settings/exchange-rates}">FX Rates</a>
-        <a th:href="@{/settings/providers}">Providers</a>
-        <form th:action="@{/logout}" method="post">
-            <button type="submit">Logout</button>
-        </form>
+<header th:fragment="topbar" class="terminal-sidebar app-sidebar">
+    <div class="terminal-brand">
+        <span class="brand-mark">PX</span>
+        <div>
+            <strong>Portfolio Exchange</strong>
+            <span>Collectibles Desk</span>
+        </div>
+    </div>
+    <nav class="sidebar-nav" aria-label="Primary navigation">
+        <a data-section="dashboard" th:href="@{/dashboard}"><span>01</span>Dashboard</a>
+        <a data-section="portfolio" th:href="@{/portfolio}"><span>02</span>Portfolio</a>
+        <a data-section="catalog" th:href="@{/catalog/search}"><span>03</span>Official Catalogue</a>
+        <a data-section="custom-card" th:href="@{/cards/new}"><span>04</span>Custom Card</a>
+        <a data-section="sealed" th:href="@{/sealed-products}"><span>05</span>Sealed Products</a>
+        <a data-section="pricing" th:href="@{/pricing/manual-entry}"><span>06</span>Pricing</a>
+        <a data-section="trades" th:href="@{/trades}"><span>07</span>Trades</a>
+        <a data-section="grading" th:href="@{/grading}"><span>08</span>Grading</a>
+        <a data-section="alerts" th:href="@{/alerts}"><span>09</span>Alerts</a>
+        <a data-section="exchange-rates" th:href="@{/settings/exchange-rates}"><span>10</span>Exchange Rates</a>
+        <a data-section="settings" th:href="@{/settings/providers}"><span>11</span>Settings</a>
     </nav>
+    <form class="sidebar-logout" th:action="@{/logout}" method="post">
+        <button type="submit">Logout</button>
+    </form>
 </header>
 </body>
 </html>
