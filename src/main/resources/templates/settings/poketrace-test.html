@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('PokeTrace Provider Test')}"></head>
+<body class="app-body section-settings">
+<div class="app-shell">
+    <header th:replace="~{fragments/layout :: topbar}"></header>
+    <main class="page">
+        <div class="page-header">
+            <div>
+                <h1>PokeTrace Provider Test</h1>
+                <p class="subtle">Read-only live provider probe. This page does not create price snapshots or update valuation.</p>
+            </div>
+            <a class="button" th:href="@{/settings/providers}">Provider Settings</a>
+        </div>
+
+        <section class="grid summary-grid">
+            <div class="card">
+                <div class="metric-label">Provider</div>
+                <div class="metric-value" th:text="${providerStatus.providerName}">PokeTracePricingProvider</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">Enabled</div>
+                <div class="metric-value" th:classappend="${providerStatus.enabled} ? ' positive' : ' negative'"
+                     th:text="${providerStatus.enabled ? 'Yes' : 'No'}">No</div>
+            </div>
+            <div class="card">
+                <div class="metric-label" th:text="${providerStatus.apiKeyLabel}">API Key</div>
+                <div class="metric-value" th:classappend="${providerStatus.apiKeyConfigured} ? ' positive' : ' negative'"
+                     th:text="${providerStatus.apiKeyConfigured ? 'Configured' : 'Missing'}">Missing</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">Base URL</div>
+                <div class="subtle" style="margin-top: 10px;" th:text="${providerStatus.baseUrl}">Base URL</div>
+            </div>
+        </section>
+
+        <section class="card message-card" style="margin-top: 16px;" th:if="${errorMessage != null}">
+            <p class="error" th:text="${errorMessage}">Provider error</p>
+        </section>
+
+        <section class="card" style="margin-top: 16px;">
+            <div class="table-toolbar">
+                <div>
+                    <h1 class="section-title">Run One Test Request</h1>
+                    <p class="subtle">Use a PokeTrace card id or search text. Verify identity and variant before considering production use.</p>
+                </div>
+            </div>
+            <form class="form-grid" th:action="@{/settings/providers/poketrace/test}" method="post" th:object="${testForm}">
+                <label>Card id or search text
+                    <input type="text" th:field="*{searchOrId}" placeholder="019bff77-befa-771d-bab0-f5909f0a78c9">
+                </label>
+                <p class="helper-text">Examples: <span>019bff77-befa-771d-bab0-f5909f0a78c9</span> or <span>Charizard ex Obsidian Flames 101</span>.</p>
+                <div class="actions">
+                    <button class="primary" type="submit">Run PokeTrace Test</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="card" style="margin-top: 16px;" th:if="${result != null}">
+            <div class="table-toolbar">
+                <div>
+                    <h1 class="section-title">Mapped Provider Response</h1>
+                    <p class="subtle" th:text="|Source provider: ${result.sourceProvider}|">Source provider</p>
+                </div>
+            </div>
+            <div class="selected-card-summary">
+                <img class="card-detail-thumb" th:if="${result.card.imageUrl != null}" th:src="${result.card.imageUrl}" th:alt="${result.card.cardName}">
+                <span class="image-placeholder" th:if="${result.card.imageUrl == null}">Image not available</span>
+                <div>
+                    <div class="selected-card-title" th:text="${result.card.cardName ?: 'Unknown card'}">Card name</div>
+                    <div class="badge-row">
+                        <span class="badge muted-badge" th:text="|ID ${result.card.providerCardId ?: 'Unknown'}|">ID</span>
+                        <span class="badge muted-badge" th:text="${result.card.expansionName ?: 'Unknown set'}">Set</span>
+                        <span class="badge muted-badge" th:text="|#${result.card.cardNumber ?: 'Unknown'}|">#</span>
+                        <span class="badge muted-badge" th:text="${result.card.printVariant ?: 'Variant unknown'}">Variant</span>
+                    </div>
+                </div>
+            </div>
+            <table class="table">
+                <tbody>
+                <tr><th>Source URL</th><td th:text="${result.sourceUrl}">Source URL</td></tr>
+                <tr><th>Language / Market</th><td th:text="${result.card.languageMarket ?: 'Not mapped'}">US</td></tr>
+                <tr><th>Source Market</th><td th:text="${result.card.sourceMarket ?: 'Not mapped'}">TCGPLAYER</td></tr>
+                <tr><th>Source Currency</th><td th:text="${result.card.sourceCurrency ?: 'Not mapped'}">USD</td></tr>
+                <tr><th>Near Mint Price</th><td th:text="${result.card.rawNearMintPrice != null ? result.card.rawNearMintPrice : 'Not mapped'}">0.00</td></tr>
+                <tr><th>Low / Average / High</th><td th:text="|${result.card.rawLowPrice ?: 'N/A'} / ${result.card.rawAveragePrice ?: 'N/A'} / ${result.card.rawHighPrice ?: 'N/A'}|">Range</td></tr>
+                <tr><th>Sales / Sample Count</th><td th:text="${result.card.saleCount != null ? result.card.saleCount : 'Not mapped'}">0</td></tr>
+                <tr><th>Last Updated</th><td th:text="${result.card.lastUpdatedAt != null ? result.card.lastUpdatedAt : 'Not mapped'}">Timestamp</td></tr>
+                <tr><th>Match Quality</th><td th:text="${result.card.matchQuality}">Match</td></tr>
+                <tr><th>Provider Confidence</th><td th:text="${result.card.providerConfidence}">LOW</td></tr>
+                <tr><th>Plan / Quota Limitation</th><td th:text="${result.card.planOrQuotaLimitation ?: 'None reported'}">None</td></tr>
+                <tr><th>Graded Status</th><td th:text="${result.card.gradedDataStatus}">Status</td></tr>
+                </tbody>
+            </table>
+            <table class="table" style="margin-top: 16px;">
+                <thead>
+                <tr><th>Grade</th><th>Display Price</th><th>Sample Size</th><th>Currency</th></tr>
+                </thead>
+                <tbody>
+                <tr th:if="${!result.card.hasPsaData()}"><td colspan="4" class="subtle">No PSA 8/9/10 prices mapped.</td></tr>
+                <tr th:if="${result.card.psa8Price != null}"><td>PSA 8</td><td th:text="${result.card.psa8Price.displayPrice()}">0.00</td><td th:text="${result.card.psa8Price.sampleSize}">0</td><td th:text="${result.card.psa8Price.currency}">USD</td></tr>
+                <tr th:if="${result.card.psa9Price != null}"><td>PSA 9</td><td th:text="${result.card.psa9Price.displayPrice()}">0.00</td><td th:text="${result.card.psa9Price.sampleSize}">0</td><td th:text="${result.card.psa9Price.currency}">USD</td></tr>
+                <tr th:if="${result.card.psa10Price != null}"><td>PSA 10</td><td th:text="${result.card.psa10Price.displayPrice()}">0.00</td><td th:text="${result.card.psa10Price.sampleSize}">0</td><td th:text="${result.card.psa10Price.currency}">USD</td></tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</div>
+</body>
+</html>

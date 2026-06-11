@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Item Price History')}"></head>
+<body class="app-body section-price-history">
+<div class="app-shell">
+    <header th:replace="~{fragments/layout :: topbar}"></header>
+    <main class="page">
+        <div class="page-header">
+            <div>
+                <h1 th:text="${history.itemName}">Item Price History</h1>
+                <p class="subtle" th:text="|${history.setOrProductType} / ${history.variant} / ${history.condition}|">Set / Variant / Condition</p>
+            </div>
+            <div class="actions compact-actions">
+                <a class="button" th:href="@{/pricing/history}">Price History</a>
+                <a class="button" th:href="@{/portfolio}">Portfolio</a>
+            </div>
+        </div>
+
+        <section class="portfolio-hero">
+            <div class="hero-value-card holo-panel item-history-hero">
+                <img class="history-feature-image" th:if="${history.hasImage()}" th:src="${history.imageUrl}" th:alt="${history.itemName}">
+                <span class="image-placeholder history-image-placeholder" th:if="${!history.hasImage()}">Image not available</span>
+                <div>
+                    <div class="metric-label" th:text="${history.assetTypeLabel}">Card</div>
+                    <div class="hero-value"
+                         th:if="${history.hasLatestMarketValue()}"
+                         th:text="|SGD ${#numbers.formatDecimal(history.latestMarketValueSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</div>
+                    <div class="hero-value unavailable" th:if="${!history.hasLatestMarketValue()}">No price available</div>
+                    <div class="hero-performance">
+                        <span th:text="|Purchase SGD ${#numbers.formatDecimal(history.purchasePriceSgd, 1, 'COMMA', 2, 'POINT')}|">Purchase SGD 0.00</span>
+                        <span th:if="${history.hasGainLoss()}"
+                              th:classappend="${history.gainIsNonNegative()} ? ' positive' : ' negative'"
+                              th:text="|P/L SGD ${#numbers.formatDecimal(history.gainLossSgd, 1, 'COMMA', 2, 'POINT')} / ${#numbers.formatDecimal(history.gainLossPercent, 1, 'COMMA', 2, 'POINT')}%|">P/L SGD 0.00</span>
+                        <span th:if="${!history.hasGainLoss()}">No price available</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-metrics">
+                <article class="glass-metric">
+                    <span>Confidence</span>
+                    <strong th:if="${history.hasLatestMarketValue()}" th:text="${history.latestConfidence}">MEDIUM</strong>
+                    <strong class="subtle" th:if="${!history.hasLatestMarketValue()}">No price available</strong>
+                </article>
+                <article class="glass-metric">
+                    <span>Source</span>
+                    <strong class="source-metric" th:text="${history.latestSourceLabel()}">Provider / Market / Currency</strong>
+                </article>
+                <article class="glass-metric">
+                    <span>Snapshots</span>
+                    <strong th:text="${history.snapshots.size()}">0</strong>
+                </article>
+                <article class="glass-metric">
+                    <span>Range</span>
+                    <strong th:text="${history.selectedRange.label}">All</strong>
+                </article>
+            </div>
+        </section>
+
+        <section class="terminal-panel history-panel">
+            <div class="panel-heading">
+                <div>
+                    <h2>Price History Graph</h2>
+                    <p class="subtle">Actual stored price snapshots only</p>
+                </div>
+                <nav class="range-nav" aria-label="Price history range">
+                    <a th:each="range : ${history.rangeOptions}"
+                       th:href="@{/portfolio/items/{id}/history(id=${history.ownedItemId}, range=${range.code})}"
+                       th:classappend="${range == history.selectedRange} ? ' active' : ''"
+                       th:text="${range.label}">All</a>
+                </nav>
+            </div>
+            <div class="line-chart" th:if="${history.chart.hasEnoughData()}">
+                <svg viewBox="0 0 1000 260" role="img" aria-label="Item price history graph">
+                    <polyline class="chart-line" fill="none" th:attr="points=${history.chart.polylinePoints}"></polyline>
+                </svg>
+            </div>
+            <div class="chart-empty-state" th:if="${!history.chart.hasEnoughData()}">
+                <strong>Not enough price history yet.</strong>
+                <p th:text="${history.chart.emptyMessage}">Refresh prices or add manual price snapshots over time to build this chart.</p>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 class="section-title">Price Snapshot Table</h2>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Snapshot Time</th>
+                    <th>Provider</th>
+                    <th>Source Market</th>
+                    <th>Source Currency</th>
+                    <th>Source Price</th>
+                    <th>FX Used</th>
+                    <th>SGD Price</th>
+                    <th>Confidence</th>
+                    <th>Match</th>
+                    <th>Notes</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${history.snapshots.isEmpty()}">
+                    <td colspan="10" class="subtle">No price snapshots in this range.</td>
+                </tr>
+                <tr th:each="snapshot : ${history.snapshots}">
+                    <td th:text="${#temporals.format(snapshot.calculatedAt, 'yyyy-MM-dd HH:mm')}">2026-06-08 12:00</td>
+                    <td th:text="${snapshot.sourceProvider}">MANUAL</td>
+                    <td th:text="${snapshot.sourceMarket}">LOCAL</td>
+                    <td th:text="${snapshot.sourceCurrency}">SGD</td>
+                    <td th:text="${#numbers.formatDecimal(snapshot.sourcePrice, 1, 'COMMA', 2, 'POINT')}">0.00</td>
+                    <td th:text="${#numbers.formatDecimal(snapshot.exchangeRateUsed, 1, 'COMMA', 8, 'POINT')}">1.00000000</td>
+                    <td th:text="|SGD ${#numbers.formatDecimal(snapshot.marketPriceSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${snapshot.lowConfidence()} ? ' warning-badge' : ' muted-badge'"
+                              th:text="${snapshot.confidenceRating}">MEDIUM</span>
+                    </td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${snapshot.genericFallback()} ? ' warning-badge' : ' muted-badge'"
+                              th:text="${snapshot.matchClassification}">Unclassified</span>
+                    </td>
+                    <td>
+                        <span th:text="${snapshot.notes}">Notes</span>
+                        <a class="panel-link" th:if="${snapshot.hasSourceUrl()}" th:href="${snapshot.sourceUrl}" target="_blank" rel="noreferrer">Source</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</div>
+</body>
+</html>

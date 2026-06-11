@@ -54,6 +54,11 @@ class SettingsControllerTest {
                 .andExpect(content().string(containsString("Manual Price Entry")))
                 .andExpect(content().string(containsString("TCGPlayer")))
                 .andExpect(content().string(containsString("Test Pokemon API")))
+                .andExpect(content().string(containsString("Test PokeTrace")))
+                .andExpect(content().string(containsString("Test PriceTracker")))
+                .andExpect(content().string(containsString("Compare Providers")))
+                .andExpect(content().string(containsString("PokeTrace")))
+                .andExpect(content().string(containsString("PokemonPriceTracker")))
                 .andExpect(content().string(containsString("Disabled by default")));
     }
 

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Pricing Provider Comparison')}"></head>
+<body class="app-body section-settings">
+<div class="app-shell">
+    <header th:replace="~{fragments/layout :: topbar}"></header>
+    <main class="page">
+        <div class="page-header">
+            <div>
+                <h1>Pricing Provider Comparison</h1>
+                <p class="subtle">Compare one exact card across pokemon-api.com, PokeTrace, and PokemonPriceTracker. No snapshots are created.</p>
+            </div>
+            <a class="button" th:href="@{/settings/providers}">Provider Settings</a>
+        </div>
+
+        <section class="card message-card" th:if="${errorMessage != null}">
+            <p class="error" th:text="${errorMessage}">Comparison error</p>
+        </section>
+
+        <section class="card" style="margin-top: 16px;">
+            <form class="form-grid" th:action="@{/settings/providers/comparison/test}" method="post" th:object="${comparisonForm}">
+                <label>Exact card id or search text
+                    <input type="text" th:field="*{searchOrId}" placeholder="Charizard ex Obsidian Flames 101">
+                </label>
+                <p class="helper-text">For production promotion decisions, use exact identifiers whenever the provider supports them.</p>
+                <div class="actions">
+                    <button class="primary" type="submit">Compare Providers</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="card" style="margin-top: 16px;" th:if="${comparison != null}">
+            <div class="table-toolbar">
+                <div>
+                    <h1 class="section-title" th:text="|Comparison: ${comparison.searchOrId}|">Comparison</h1>
+                    <p class="subtle">Converted SGD is a preview using the latest stored exchange rate only.</p>
+                </div>
+            </div>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Provider</th>
+                    <th>Identity</th>
+                    <th>Variant</th>
+                    <th>Raw NM</th>
+                    <th>SGD Preview</th>
+                    <th>PSA 8 / 9 / 10</th>
+                    <th>Sample</th>
+                    <th>Freshness</th>
+                    <th>Match / Confidence</th>
+                    <th>Diagnostics</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="row : ${comparison.rows}">
+                    <td th:text="${row.providerName}">Provider</td>
+                    <td>
+                        <div th:if="${row.hasResult()}">
+                            <strong th:text="${row.card.cardName ?: 'Unknown card'}">Card</strong>
+                            <div class="subtle" th:text="|${row.card.expansionName ?: 'Unknown set'} #${row.card.cardNumber ?: 'Unknown'}|">Set #</div>
+                            <div class="subtle" th:text="${row.card.languageMarket ?: 'Language not mapped'}">Language</div>
+                        </div>
+                        <span th:if="${!row.hasResult()}" class="subtle">No mapped result</span>
+                    </td>
+                    <td th:text="${row.hasResult() ? (row.card.printVariant ?: 'Not mapped') : 'N/A'}">Variant</td>
+                    <td>
+                        <span th:if="${row.hasResult()}" th:text="${row.card.displayRawPrice() != null ? row.card.displayRawPrice() : 'Not mapped'}">0.00</span>
+                        <div th:if="${row.hasResult()}" class="subtle" th:text="|${row.card.sourceMarket ?: 'Unknown market'} / ${row.card.sourceCurrency ?: 'Unknown currency'}|">Source</div>
+                    </td>
+                    <td>
+                        <span th:text="${row.convertedSgdPreview != null ? 'SGD ' + row.convertedSgdPreview : 'Not available'}">SGD</span>
+                        <div class="subtle" th:text="${row.exchangeRateNote ?: ''}">FX note</div>
+                    </td>
+                    <td>
+                        <span th:if="${row.hasResult()}" th:text="|${row.card.psa8Price != null ? row.card.psa8Price.displayPrice() : 'N/A'} / ${row.card.psa9Price != null ? row.card.psa9Price.displayPrice() : 'N/A'} / ${row.card.psa10Price != null ? row.card.psa10Price.displayPrice() : 'N/A'}|">PSA</span>
+                    </td>
+                    <td th:text="${row.hasResult() ? (row.card.saleCount ?: 'Not mapped') : 'N/A'}">Sample</td>
+                    <td th:text="${row.hasResult() ? (row.card.lastUpdatedAt ?: 'Not mapped') : 'N/A'}">Updated</td>
+                    <td>
+                        <span th:if="${row.hasResult()}" th:text="${row.card.matchQuality}">Match</span>
+                        <div th:if="${row.hasResult()}" class="subtle" th:text="${row.card.providerConfidence}">LOW</div>
+                    </td>
+                    <td>
+                        <span class="error" th:if="${row.providerError != null}" th:text="${row.providerError}">Error</span>
+                        <span class="subtle" th:if="${row.providerError == null and row.hasResult()}" th:text="${row.card.planOrQuotaLimitation ?: row.card.gradedDataStatus}">Diagnostics</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</div>
+</body>
+</html>

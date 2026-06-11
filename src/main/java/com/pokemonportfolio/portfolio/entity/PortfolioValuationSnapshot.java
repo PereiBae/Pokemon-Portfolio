@@ -38,6 +38,21 @@ public class PortfolioValuationSnapshot {
     @Column(name = "unrealized_gain_loss_percent", nullable = false, precision = 9, scale = 4)
     private BigDecimal unrealizedGainLossPercent;
 
+    @Column(name = "realized_gain_loss_sgd", nullable = false, precision = 19, scale = 2)
+    private BigDecimal realizedGainLossSgd;
+
+    @Column(name = "realized_gain_loss_percent", nullable = false, precision = 9, scale = 4)
+    private BigDecimal realizedGainLossPercent;
+
+    @Column(name = "realized_cost_basis_sgd", nullable = false, precision = 19, scale = 2)
+    private BigDecimal realizedCostBasisSgd;
+
+    @Column(name = "total_performance_sgd", nullable = false, precision = 19, scale = 2)
+    private BigDecimal totalPerformanceSgd;
+
+    @Column(name = "total_performance_percent", nullable = false, precision = 9, scale = 4)
+    private BigDecimal totalPerformancePercent;
+
     @Column(name = "item_count", nullable = false)
     private int itemCount;
 
@@ -62,6 +77,11 @@ public class PortfolioValuationSnapshot {
             BigDecimal totalCostBasisSgd,
             BigDecimal unrealizedGainLossSgd,
             BigDecimal unrealizedGainLossPercent,
+            BigDecimal realizedGainLossSgd,
+            BigDecimal realizedGainLossPercent,
+            BigDecimal realizedCostBasisSgd,
+            BigDecimal totalPerformanceSgd,
+            BigDecimal totalPerformancePercent,
             int itemCount,
             int lowConfidenceCount,
             LocalDate snapshotDate,
@@ -72,6 +92,11 @@ public class PortfolioValuationSnapshot {
         this.totalCostBasisSgd = totalCostBasisSgd;
         this.unrealizedGainLossSgd = unrealizedGainLossSgd;
         this.unrealizedGainLossPercent = unrealizedGainLossPercent;
+        this.realizedGainLossSgd = realizedGainLossSgd;
+        this.realizedGainLossPercent = realizedGainLossPercent;
+        this.realizedCostBasisSgd = realizedCostBasisSgd;
+        this.totalPerformanceSgd = totalPerformanceSgd;
+        this.totalPerformancePercent = totalPerformancePercent;
         this.itemCount = itemCount;
         this.lowConfidenceCount = lowConfidenceCount;
         this.snapshotDate = snapshotDate;
@@ -99,6 +124,26 @@ public class PortfolioValuationSnapshot {
         return unrealizedGainLossPercent;
     }
 
+    public BigDecimal getRealizedGainLossSgd() {
+        return realizedGainLossSgd;
+    }
+
+    public BigDecimal getRealizedGainLossPercent() {
+        return realizedGainLossPercent;
+    }
+
+    public BigDecimal getRealizedCostBasisSgd() {
+        return realizedCostBasisSgd;
+    }
+
+    public BigDecimal getTotalPerformanceSgd() {
+        return totalPerformanceSgd;
+    }
+
+    public BigDecimal getTotalPerformancePercent() {
+        return totalPerformancePercent;
+    }
+
     public int getItemCount() {
         return itemCount;
     }
@@ -119,4 +164,3 @@ public class PortfolioValuationSnapshot {
         return explanation;
     }
 }
-

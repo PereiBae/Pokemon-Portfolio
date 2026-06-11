@@ -10,7 +10,12 @@
                 <h1>Provider Settings</h1>
                 <p class="subtle">Local provider controls for mock and manual pricing. Real providers remain disabled by default.</p>
             </div>
-            <a class="button" th:href="@{/settings/providers/pokemon-api/test}">Test Pokemon API</a>
+            <div class="actions">
+                <a class="button" th:href="@{/settings/providers/pokemon-api/test}">Test Pokemon API</a>
+                <a class="button" th:href="@{/settings/providers/poketrace/test}">Test PokeTrace</a>
+                <a class="button" th:href="@{/settings/providers/pokemon-price-tracker/test}">Test PriceTracker</a>
+                <a class="button" th:href="@{/settings/providers/comparison/test}">Compare Providers</a>
+            </div>
         </div>
         <section class="card">
             <table class="table">

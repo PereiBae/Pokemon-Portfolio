@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Portfolio History')}"></head>
+<body class="app-body section-portfolio-history">
+<div class="app-shell">
+    <header th:replace="~{fragments/layout :: topbar}"></header>
+    <main class="page">
+        <div class="page-header">
+            <div>
+                <h1>Portfolio History</h1>
+                <p class="subtle">Stored valuation snapshots in SGD. Historical records are not recalculated destructively.</p>
+            </div>
+            <div class="actions compact-actions">
+                <form th:action="@{/portfolio/history/snapshot}" method="post">
+                    <button class="button primary" type="submit">Create Valuation Snapshot</button>
+                </form>
+                <a class="button" th:href="@{/dashboard}">Dashboard</a>
+            </div>
+        </div>
+
+        <section class="card message-card" th:if="${param.snapshotCreated}">
+            <p class="positive">Portfolio valuation snapshot created.</p>
+        </section>
+
+        <section class="portfolio-hero">
+            <div class="hero-value-card holo-panel">
+                <div class="metric-label">Current Active Portfolio Value</div>
+                <div class="hero-value"
+                     th:if="${!history.currentValuation.activeValueUnavailable()}"
+                     th:text="|SGD ${#numbers.formatDecimal(history.currentValuation.totalValueSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</div>
+                <div class="hero-value unavailable" th:if="${history.currentValuation.activeValueUnavailable()}">No price available</div>
+                <div class="hero-performance">
+                    <span th:classappend="${history.currentValuation.totalPerformanceIsNonNegative()} ? ' positive' : ' negative'"
+                          th:text="|SGD ${#numbers.formatDecimal(history.currentValuation.totalPerformanceSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</span>
+                    <span th:classappend="${history.currentValuation.totalPerformanceIsNonNegative()} ? ' positive' : ' negative'"
+                          th:text="|Total Performance ${#numbers.formatDecimal(history.currentValuation.totalPerformancePercent, 1, 'COMMA', 2, 'POINT')}%|">Total Performance 0.00%</span>
+                </div>
+            </div>
+            <div class="hero-metrics">
+                <article class="glass-metric">
+                    <span>Active Cost Basis</span>
+                    <strong th:text="|SGD ${#numbers.formatDecimal(history.currentValuation.totalCostBasisSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</strong>
+                </article>
+                <article class="glass-metric">
+                    <span>Unrealised P/L</span>
+                    <strong th:classappend="${history.currentValuation.gainIsNonNegative()} ? ' positive' : ' negative'"
+                            th:text="|SGD ${#numbers.formatDecimal(history.currentValuation.unrealizedGainLossSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</strong>
+                </article>
+                <article class="glass-metric">
+                    <span>Realised P/L</span>
+                    <strong th:classappend="${history.currentValuation.realizedGainIsNonNegative()} ? ' positive' : ' negative'"
+                            th:text="|SGD ${#numbers.formatDecimal(history.currentValuation.realizedGainLossSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</strong>
+                </article>
+                <article class="glass-metric">
+                    <span>Active Holdings</span>
+                    <strong th:text="${history.currentValuation.itemCount}">0</strong>
+                    <small th:text="|${history.currentValuation.pricedItemCount()} priced|">0 priced</small>
+                </article>
+            </div>
+        </section>
+
+        <section class="terminal-panel history-panel">
+            <div class="panel-heading">
+                <div>
+                    <h2>Portfolio Value Graph</h2>
+                    <p class="subtle">Actual stored snapshots only</p>
+                </div>
+                <nav class="range-nav" aria-label="History range">
+                    <a th:each="range : ${history.rangeOptions}"
+                       th:href="@{/portfolio/history(range=${range.code})}"
+                       th:classappend="${range == history.selectedRange} ? ' active' : ''"
+                       th:text="${range.label}">All</a>
+                </nav>
+            </div>
+            <div class="line-chart" th:if="${history.chart.hasEnoughData()}">
+                <svg viewBox="0 0 1000 260" role="img" aria-label="Portfolio value history graph">
+                    <polyline class="chart-line" fill="none" th:attr="points=${history.chart.polylinePoints}"></polyline>
+                </svg>
+            </div>
+            <div class="chart-empty-state" th:if="${!history.chart.hasEnoughData()}">
+                <strong>Not enough portfolio history yet.</strong>
+                <p th:text="${history.chart.emptyMessage}">Refresh prices and valuation snapshots over time to build this chart.</p>
+            </div>
+            <div class="trend-summary">
+                <span th:text="|${history.snapshots.size()} snapshot(s)|">0 snapshots</span>
+                <span th:text="|Range ${history.selectedRange.label}|">Range All</span>
+                <span th:if="${history.currentValuation.itemCount > history.currentValuation.pricedItemCount()}"
+                      th:text="|${history.currentValuation.itemCount - history.currentValuation.pricedItemCount()} active holding(s) excluded because no price is available|">0 excluded</span>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 class="section-title">Valuation Snapshots</h2>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Snapshot Date</th>
+                    <th>Total Active Value</th>
+                    <th>Active Cost Basis</th>
+                    <th>Unrealised P/L</th>
+                    <th>Realised P/L</th>
+                    <th>Total Performance</th>
+                    <th>Active Items</th>
+                    <th>Low Confidence</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${history.snapshots.isEmpty()}">
+                    <td colspan="8" class="subtle">Not enough portfolio history yet. Refresh prices and valuation snapshots over time to build this chart.</td>
+                </tr>
+                <tr th:each="snapshot : ${history.snapshots}">
+                    <td th:text="${#temporals.format(snapshot.calculatedAt, 'yyyy-MM-dd HH:mm')}">2026-06-08 12:00</td>
+                    <td th:text="|SGD ${#numbers.formatDecimal(snapshot.totalValueSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
+                    <td th:text="|SGD ${#numbers.formatDecimal(snapshot.totalCostBasisSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</td>
+                    <td>
+                        <span th:class="${snapshot.unrealizedGainIsNonNegative()} ? 'positive' : 'negative'"
+                              th:text="|SGD ${#numbers.formatDecimal(snapshot.unrealizedGainLossSgd, 1, 'COMMA', 2, 'POINT')} / ${#numbers.formatDecimal(snapshot.unrealizedGainLossPercent, 1, 'COMMA', 2, 'POINT')}%|">SGD 0.00</span>
+                    </td>
+                    <td>
+                        <span th:class="${snapshot.realizedGainIsNonNegative()} ? 'positive' : 'negative'"
+                              th:text="|SGD ${#numbers.formatDecimal(snapshot.realizedGainLossSgd, 1, 'COMMA', 2, 'POINT')} / ${#numbers.formatDecimal(snapshot.realizedGainLossPercent, 1, 'COMMA', 2, 'POINT')}%|">SGD 0.00</span>
+                    </td>
+                    <td>
+                        <span th:class="${snapshot.totalPerformanceIsNonNegative()} ? 'positive' : 'negative'"
+                              th:text="|SGD ${#numbers.formatDecimal(snapshot.totalPerformanceSgd, 1, 'COMMA', 2, 'POINT')} / ${#numbers.formatDecimal(snapshot.totalPerformancePercent, 1, 'COMMA', 2, 'POINT')}%|">SGD 0.00</span>
+                    </td>
+                    <td th:text="${snapshot.itemCount}">0</td>
+                    <td th:text="${snapshot.lowConfidenceCount}">0</td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</div>
+</body>
+</html>

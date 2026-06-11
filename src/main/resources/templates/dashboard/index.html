@@ -113,19 +113,23 @@
                 <div class="panel-heading">
                     <div>
                         <h2>Portfolio Trend</h2>
-                        <p class="subtle">Current valuation snapshot</p>
+                        <p class="subtle">Stored valuation snapshots only</p>
                     </div>
-                    <span class="badge muted-badge">SGD</span>
+                    <a class="panel-link" th:href="@{/portfolio/history}">Portfolio History</a>
                 </div>
-                <div class="chart-placeholder" aria-label="Portfolio valuation trend">
-                    <div class="chart-gridline"></div>
-                    <div class="chart-gridline"></div>
-                    <div class="chart-gridline"></div>
-                    <div class="trend-pulse"></div>
+                <div class="line-chart" aria-label="Portfolio valuation trend" th:if="${history.chart.hasEnoughData()}">
+                    <svg viewBox="0 0 1000 260" role="img" aria-label="Portfolio valuation history">
+                        <polyline class="chart-line" fill="none" th:attr="points=${history.chart.polylinePoints}"></polyline>
+                    </svg>
+                </div>
+                <div class="chart-empty-state" th:if="${!history.chart.hasEnoughData()}">
+                    <strong>Not enough portfolio history yet.</strong>
+                    <p>Refresh prices and valuation snapshots over time to build this chart.</p>
                 </div>
                 <div class="trend-summary">
                     <span th:text="|${summary.itemCount} active records|">0 active records</span>
                     <span th:text="|${summary.lowConfidenceCount} low confidence|">0 low confidence</span>
+                    <span th:text="|${history.snapshots.size()} stored snapshots|">0 stored snapshots</span>
                     <span th:if="${summary.activeValueUnavailable()}">No price available</span>
                     <span th:if="${!summary.activeValueUnavailable()}"
                           th:text="|${#numbers.formatDecimal(summary.unrealizedGainLossPercent, 1, 'COMMA', 2, 'POINT')}% unrealised|">0.00% unrealised</span>
@@ -282,6 +286,7 @@
                             <small th:if="${item.hasGainLoss()}"
                                    th:class="${item.gainIsNonNegative()} ? 'positive' : 'negative'"
                                    th:text="|${#numbers.formatDecimal(item.gainLossPercent(), 1, 'COMMA', 2, 'POINT')}%|">0.00%</small>
+                            <a class="history-link" th:href="@{/portfolio/items/{id}/history(id=${item.ownedItemId})}">View History</a>
                         </div>
                     </div>
                     <a class="preview-overflow" th:if="${summary.remainingHoldingsCount() > 0}" th:href="@{/portfolio}"

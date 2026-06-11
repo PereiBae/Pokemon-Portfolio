@@ -23,6 +23,8 @@ class ProviderSettingsServiceTest {
         assertThat(providerSettingsService.isEnabled(ProviderSettingsService.TCGPLAYER_PROVIDER)).isFalse();
         assertThat(providerSettingsService.isEnabled(ProviderSettingsService.EBAY_PROVIDER)).isFalse();
         assertThat(providerSettingsService.isEnabled(ProviderSettingsService.PRICECHARTING_PROVIDER)).isFalse();
+        assertThat(providerSettingsService.isEnabled(ProviderSettingsService.POKETRACE_PROVIDER)).isFalse();
+        assertThat(providerSettingsService.isEnabled(ProviderSettingsService.POKEMON_PRICE_TRACKER_PROVIDER)).isFalse();
     }
 
     @Test
@@ -34,5 +36,14 @@ class ProviderSettingsServiceTest {
         providerSettingsService.setEnabled(ProviderSettingsService.MOCK_PROVIDER, true);
 
         assertThat(providerSettingsService.isEnabled(ProviderSettingsService.MOCK_PROVIDER)).isTrue();
+    }
+
+    @Test
+    void togglesCandidateProviderEnablement() {
+        providerSettingsService.setEnabled(ProviderSettingsService.POKETRACE_PROVIDER, true);
+        providerSettingsService.setEnabled(ProviderSettingsService.POKEMON_PRICE_TRACKER_PROVIDER, true);
+
+        assertThat(providerSettingsService.isEnabled(ProviderSettingsService.POKETRACE_PROVIDER)).isTrue();
+        assertThat(providerSettingsService.isEnabled(ProviderSettingsService.POKEMON_PRICE_TRACKER_PROVIDER)).isTrue();
     }
 }

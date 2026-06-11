@@ -11,5 +11,8 @@ public interface PortfolioValuationSnapshotRepository extends JpaRepository<Port
     Optional<PortfolioValuationSnapshot> findTopByOwnerOrderByCalculatedAtDescIdDesc(AppUser owner);
 
     List<PortfolioValuationSnapshot> findByOwnerOrderByCalculatedAtAscIdAsc(AppUser owner);
-}
 
+    List<PortfolioValuationSnapshot> findByOwnerAndCalculatedAtGreaterThanEqualOrderByCalculatedAtAscIdAsc(
+            AppUser owner,
+            java.time.OffsetDateTime calculatedAt);
+}

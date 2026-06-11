@@ -18,15 +18,17 @@
     <nav class="sidebar-nav" aria-label="Primary navigation">
         <a data-section="dashboard" th:href="@{/dashboard}"><span>01</span>Dashboard</a>
         <a data-section="portfolio" th:href="@{/portfolio}"><span>02</span>Portfolio</a>
-        <a data-section="catalog" th:href="@{/catalog/search}"><span>03</span>Official Catalogue</a>
-        <a data-section="custom-card" th:href="@{/cards/new}"><span>04</span>Custom Card</a>
-        <a data-section="sealed" th:href="@{/sealed-products}"><span>05</span>Sealed Products</a>
-        <a data-section="pricing" th:href="@{/pricing/manual-entry}"><span>06</span>Pricing</a>
-        <a data-section="trades" th:href="@{/trades}"><span>07</span>Trades</a>
-        <a data-section="grading" th:href="@{/grading}"><span>08</span>Grading</a>
-        <a data-section="alerts" th:href="@{/alerts}"><span>09</span>Alerts</a>
-        <a data-section="exchange-rates" th:href="@{/settings/exchange-rates}"><span>10</span>Exchange Rates</a>
-        <a data-section="settings" th:href="@{/settings/providers}"><span>11</span>Settings</a>
+        <a data-section="portfolio-history" th:href="@{/portfolio/history}"><span>03</span>Portfolio History</a>
+        <a data-section="price-history" th:href="@{/pricing/history}"><span>04</span>Price History</a>
+        <a data-section="catalog" th:href="@{/catalog/search}"><span>05</span>Official Catalogue</a>
+        <a data-section="custom-card" th:href="@{/cards/new}"><span>06</span>Custom Card</a>
+        <a data-section="sealed" th:href="@{/sealed-products}"><span>07</span>Sealed Products</a>
+        <a data-section="pricing" th:href="@{/pricing/manual-entry}"><span>08</span>Pricing</a>
+        <a data-section="trades" th:href="@{/trades}"><span>09</span>Trades</a>
+        <a data-section="grading" th:href="@{/grading}"><span>10</span>Grading</a>
+        <a data-section="alerts" th:href="@{/alerts}"><span>11</span>Alerts</a>
+        <a data-section="exchange-rates" th:href="@{/settings/exchange-rates}"><span>12</span>Exchange Rates</a>
+        <a data-section="settings" th:href="@{/settings/providers}"><span>13</span>Settings</a>
     </nav>
     <form class="sidebar-logout" th:action="@{/logout}" method="post">
         <button type="submit">Logout</button>

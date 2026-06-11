@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Price History')}"></head>
+<body class="app-body section-price-history">
+<div class="app-shell">
+    <header th:replace="~{fragments/layout :: topbar}"></header>
+    <main class="page">
+        <div class="page-header">
+            <div>
+                <h1>Price History</h1>
+                <p class="subtle">Choose an owned item to inspect stored append-only price snapshots.</p>
+            </div>
+            <a class="button" th:href="@{/pricing/manual-entry}">Manual Price Entry</a>
+        </div>
+        <section class="card">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Set / Product</th>
+                    <th>Variant / Type</th>
+                    <th>Latest Market</th>
+                    <th>Confidence</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${summary.items.isEmpty()}">
+                    <td colspan="6" class="subtle">No active holdings yet.</td>
+                </tr>
+                <tr th:each="item : ${summary.items}">
+                    <td class="catalog-card-cell">
+                        <div class="card-cell-content">
+                            <img class="card-thumb" th:if="${item.hasImage()}" th:src="${item.imageSmallUrl}" th:alt="${item.assetName}">
+                            <span class="image-placeholder" th:if="${!item.hasImage()}">Image not available</span>
+                            <span th:text="${item.displayNameWithNumber()}">Item</span>
+                        </div>
+                    </td>
+                    <td th:text="${item.setName}">Set</td>
+                    <td th:text="${item.variant}">Variant</td>
+                    <td>
+                        <span th:if="${item.hasMarketValue()}"
+                              th:text="|SGD ${#numbers.formatDecimal(item.marketValueSgd, 1, 'COMMA', 2, 'POINT')}|">SGD 0.00</span>
+                        <span th:if="${!item.hasMarketValue()}" class="subtle">No price available</span>
+                    </td>
+                    <td>
+                        <span class="badge muted-badge" th:if="${item.hasMarketValue()}" th:text="${item.confidenceRating}">MEDIUM</span>
+                        <span class="badge warning-badge" th:if="${!item.hasMarketValue()}">No price available</span>
+                    </td>
+                    <td><a class="button" th:href="@{/portfolio/items/{id}/history(id=${item.ownedItemId})}">View History</a></td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</div>
+</body>
+</html>

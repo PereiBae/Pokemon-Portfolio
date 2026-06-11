@@ -1,41 +1,30 @@
-package com.pokemonportfolio.portfolio.controller;
+package com.pokemonportfolio.pricing.controller;
 
 import com.pokemonportfolio.auth.entity.AppUser;
 import com.pokemonportfolio.auth.service.CurrentUserService;
 import com.pokemonportfolio.portfolio.service.PortfolioDashboardService;
-import com.pokemonportfolio.portfolio.service.PortfolioHistoryService;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
-public class DashboardController {
+public class PriceHistoryIndexController {
 
     private final CurrentUserService currentUserService;
     private final PortfolioDashboardService dashboardService;
-    private final PortfolioHistoryService portfolioHistoryService;
 
-    public DashboardController(
+    public PriceHistoryIndexController(
             CurrentUserService currentUserService,
-            PortfolioDashboardService dashboardService,
-            PortfolioHistoryService portfolioHistoryService) {
+            PortfolioDashboardService dashboardService) {
         this.currentUserService = currentUserService;
         this.dashboardService = dashboardService;
-        this.portfolioHistoryService = portfolioHistoryService;
     }
 
-    @GetMapping("/")
-    String home() {
-        return "redirect:/dashboard";
-    }
-
-    @GetMapping("/dashboard")
-    String dashboard(Authentication authentication, Model model) {
+    @GetMapping("/pricing/history")
+    String priceHistoryIndex(Authentication authentication, Model model) {
         AppUser owner = currentUserService.requireCurrentUser(authentication);
-        model.addAttribute("owner", owner);
         model.addAttribute("summary", dashboardService.dashboardFor(owner));
-        model.addAttribute("history", portfolioHistoryService.historyFor(owner, "ALL"));
-        return "dashboard/index";
+        return "pricing/history-index";
     }
 }

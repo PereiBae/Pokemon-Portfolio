@@ -86,11 +86,16 @@ public class PortfolioValuationService {
                 view.totalCostBasisSgd(),
                 view.unrealizedGainLossSgd(),
                 view.unrealizedGainLossPercent(),
+                view.realizedGainLossSgd(),
+                view.realizedGainLossPercent(),
+                view.realizedCostBasisSgd(),
+                view.totalPerformanceSgd(),
+                view.totalPerformancePercent(),
                 view.itemCount(),
                 view.lowConfidenceCount(),
                 LocalDate.now(),
                 OffsetDateTime.now(),
-                "Portfolio valuation calculated from latest append-only card price snapshots.");
+                "Portfolio valuation calculated from latest append-only price snapshots. Missing-price active holdings are excluded from value and gain/loss totals.");
         return snapshotRepository.save(snapshot);
     }
 

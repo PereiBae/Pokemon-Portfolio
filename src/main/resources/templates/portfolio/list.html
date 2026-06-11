@@ -12,6 +12,7 @@
             </div>
             <div class="actions compact-actions">
                 <a class="button" th:href="@{/portfolio/disposals}">Disposal History</a>
+                <a class="button" th:href="@{/portfolio/history}">Portfolio History</a>
                 <a class="button primary" th:href="@{/catalog/search}">Add Verified Card</a>
                 <a class="button" th:href="@{/portfolio/add-sealed}">Add Sealed Product</a>
                 <form th:action="@{/pricing/refresh-real-prices}" method="post">
@@ -93,6 +94,7 @@
                     </td>
                     <td>
                         <div class="table-actions">
+                            <a class="button" th:href="@{/portfolio/items/{id}/history(id=${item.ownedItemId})}">Price History</a>
                             <a class="button" th:href="@{/portfolio/items/{id}/sell(id=${item.ownedItemId})}">Sell</a>
                             <a class="button" th:href="@{/portfolio/items/{id}/trade-away(id=${item.ownedItemId})}">Trade Away</a>
                             <a class="button danger" th:href="@{/portfolio/items/{id}/delete-mistake(id=${item.ownedItemId})}">Delete Mistake</a>

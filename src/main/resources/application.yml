@@ -36,6 +36,14 @@ app:
         enabled: ${POKEMON_API_PRICING_ENABLED:false}
         base-url: ${POKEMON_API_PRICING_BASE_URL:https://pokemon-tcg-api.p.rapidapi.com}
         rapid-api-key: ${POKEMON_API_RAPIDAPI_KEY:}
+      poketrace:
+        enabled: ${POKETRACE_PRICING_ENABLED:false}
+        base-url: ${POKETRACE_PRICING_BASE_URL:https://api.poketrace.com/v1}
+        api-key: ${POKETRACE_API_KEY:}
+      pokemon-price-tracker:
+        enabled: ${POKEMON_PRICE_TRACKER_ENABLED:false}
+        base-url: ${POKEMON_PRICE_TRACKER_BASE_URL:https://www.pokemonpricetracker.com/api/v2}
+        api-key: ${POKEMON_PRICE_TRACKER_API_KEY:}
   exchange-rates:
     providers:
       frankfurter:
